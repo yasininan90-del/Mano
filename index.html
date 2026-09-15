@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<title>Mano Pizza Yönetim Paneli</title>
+<title>Mano Pizza | İşletme Paneli</title>
 
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -13,743 +13,69 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-*{
-  box-sizing:border-box;
+* {
+  box-sizing: border-box;
 }
 
-html,body,#root{
-  margin:0;
-  min-height:100%;
-  width:100%;
+body {
+  margin: 0;
+  background: #f7f6f2;
+  color: #1c1b19;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
 }
 
-body{
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-  background:#f7f6f2;
-  color:#1c1b19;
+button,
+input {
+  font-family: inherit;
 }
 
-button,input{
-  font:inherit;
+button {
+  -webkit-tap-highlight-color: transparent;
 }
 
-button{
-  -webkit-tap-highlight-color:transparent;
+input {
+  min-width: 0;
 }
 
-input{
-  min-width:0;
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
 }
 
-::-webkit-scrollbar{
-  width:5px;
-  height:5px;
+::-webkit-scrollbar-thumb {
+  background: #c9c5bb;
+  border-radius: 10px;
 }
 
-::-webkit-scrollbar-thumb{
-  background:#cfcac0;
-  border-radius:20px;
-}
+/* MOBİL */
+@media (max-width: 640px) {
 
-.app{
-  min-height:100vh;
-  background:#f7f6f2;
-}
-
-.topbar{
-  height:64px;
-  background:#fff;
-  border-bottom:1px solid #e4e1d8;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 14px;
-  position:sticky;
-  top:0;
-  z-index:50;
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.logo{
-  width:38px;
-  height:38px;
-  border-radius:11px;
-  background:#b4432e;
-  color:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.brand-title{
-  font-size:16px;
-  font-weight:800;
-}
-
-.brand-sub{
-  color:#77736b;
-  font-size:11px;
-  margin-top:2px;
-}
-
-.menu-btn{
-  width:40px;
-  height:40px;
-  border:1px solid #e4e1d8;
-  background:#fff;
-  border-radius:10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.page{
-  width:100%;
-  max-width:850px;
-  margin:auto;
-  padding:16px 14px 100px;
-}
-
-.drawer-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.35);
-  z-index:100;
-}
-
-.drawer{
-  position:fixed;
-  left:0;
-  top:0;
-  bottom:0;
-  width:min(300px,86vw);
-  background:#fff;
-  z-index:101;
-  box-shadow:12px 0 35px rgba(0,0,0,.18);
-  padding:18px 14px;
-  animation:slideIn .18s ease-out;
-}
-
-@keyframes slideIn{
-  from{transform:translateX(-100%)}
-  to{transform:translateX(0)}
-}
-
-.drawer-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:22px;
-}
-
-.drawer-brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.drawer-menu{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-
-.drawer-item{
-  width:100%;
-  border:0;
-  background:#fff;
-  color:#6b6862;
-  border-radius:12px;
-  padding:13px 12px;
-  display:flex;
-  align-items:center;
-  gap:11px;
-  text-align:left;
-  font-size:13px;
-  font-weight:700;
-}
-
-.drawer-item.active{
-  background:#1c1b19;
-  color:#fff;
-}
-
-.drawer-bottom{
-  position:absolute;
-  bottom:18px;
-  left:14px;
-  right:14px;
-}
-
-.card{
-  background:#fff;
-  border:1px solid #e4e1d8;
-  border-radius:15px;
-  padding:14px;
-  margin-bottom:12px;
-}
-
-.section-title{
-  font-size:15px;
-  font-weight:800;
-  margin:0 0 12px;
-}
-
-.date-card{
-  display:flex;
-  align-items:center;
-  gap:9px;
-  background:#fff;
-  border:1px solid #e4e1d8;
-  border-radius:13px;
-  padding:11px 12px;
-  margin-bottom:12px;
-}
-
-.date-card input{
-  border:0;
-  outline:0;
-  background:transparent;
-  flex:1;
-  font-size:13px;
-}
-
-.date-label{
-  color:#8b877f;
-  font-size:11px;
-  display:none;
-}
-
-@media(min-width:600px){
-  .date-label{
-    display:block;
+  .desktop-only {
+    display: none !important;
   }
-}
 
-.total-card{
-  background:#1c1b19;
-  color:#fff;
-  border-radius:15px;
-  padding:15px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:12px;
-}
-
-.total-label{
-  color:#c7c4bb;
-  font-size:11px;
-}
-
-.total-value{
-  font-size:17px;
-  font-weight:800;
-}
-
-.store-list{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-
-.store-button{
-  width:100%;
-  border:1px solid #e4e1d8;
-  background:#fff;
-  border-radius:14px;
-  padding:13px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  text-align:left;
-}
-
-.store-left{
-  display:flex;
-  align-items:center;
-  gap:11px;
-}
-
-.store-icon{
-  width:38px;
-  height:38px;
-  border-radius:11px;
-  background:#eaf3ee;
-  color:#1c6b4e;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.store-name{
-  font-size:13px;
-  font-weight:800;
-}
-
-.store-meta{
-  color:#77736b;
-  font-size:11px;
-  margin-top:3px;
-}
-
-.store-total{
-  font-size:12px;
-  font-weight:800;
-}
-
-.back-btn{
-  border:0;
-  background:transparent;
-  color:#6b6862;
-  display:flex;
-  align-items:center;
-  gap:3px;
-  font-size:12px;
-  padding:0;
-  margin-bottom:12px;
-}
-
-.form-grid{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:9px;
-}
-
-@media(min-width:600px){
-  .form-grid{
-    grid-template-columns:2fr 1fr 1fr;
+  .mobile-full {
+    width: 100% !important;
   }
-}
 
-.field label{
-  display:block;
-  color:#6b6862;
-  font-size:10px;
-  margin-bottom:5px;
-  font-weight:700;
-}
+  .mobile-grid-1 {
+    grid-template-columns: 1fr !important;
+  }
 
-.field input{
-  width:100%;
-  border:1px solid #e4e1d8;
-  background:#fcfcfa;
-  border-radius:9px;
-  padding:11px;
-  outline:none;
-  font-size:13px;
-}
+  .mobile-grid-2 {
+    grid-template-columns: 1fr 1fr !important;
+  }
 
-.field input:focus{
-  border-color:#9d988e;
-}
+  .mobile-padding {
+    padding: 12px !important;
+  }
 
-.primary-btn{
-  width:100%;
-  border:0;
-  border-radius:10px;
-  background:#1c1b19;
-  color:#fff;
-  padding:12px;
-  font-size:12px;
-  font-weight:800;
-  margin-top:10px;
-}
-
-.secondary-btn{
-  border:1px solid #e4e1d8;
-  background:#fff;
-  color:#1c1b19;
-  border-radius:10px;
-  padding:10px 12px;
-  font-size:12px;
-  font-weight:700;
-}
-
-.danger-btn{
-  border:0;
-  background:transparent;
-  color:#a8a49a;
-  padding:5px;
-}
-
-.entry-list{
-  display:flex;
-  flex-direction:column;
-  gap:7px;
-  margin-bottom:12px;
-}
-
-.entry{
-  background:#fff;
-  border:1px solid #e4e1d8;
-  border-radius:13px;
-  padding:12px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-}
-
-.entry-product{
-  font-size:12px;
-  font-weight:800;
-}
-
-.entry-meta{
-  color:#6b6862;
-  font-size:10px;
-  margin-top:3px;
-}
-
-.entry-price{
-  font-size:12px;
-  font-weight:800;
-  white-space:nowrap;
-}
-
-.confirm-box{
-  background:#fff9ec;
-  border:1px solid #e9ddb8;
-  border-radius:14px;
-  padding:13px;
-}
-
-.confirm-box label{
-  color:#7a6a2e;
-  font-size:11px;
-  display:flex;
-  align-items:flex-start;
-  gap:8px;
-  line-height:1.4;
-}
-
-.lock-info{
-  background:#f1efe9;
-  border:1px solid #e4e1d8;
-  border-radius:13px;
-  padding:12px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  color:#6b6862;
-  font-size:11px;
-  margin-bottom:12px;
-}
-
-.sale-list{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-
-.sale-card{
-  background:#fff;
-  border:1px solid #e4e1d8;
-  border-radius:13px;
-  padding:11px;
-}
-
-.sale-name{
-  font-size:12px;
-  font-weight:800;
-  margin-bottom:8px;
-}
-
-.sale-fields{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:7px;
-}
-
-.sale-field label{
-  color:#77736b;
-  font-size:9px;
-  display:block;
-  margin-bottom:4px;
-}
-
-.sale-field input{
-  width:100%;
-  padding:9px;
-  border:1px solid #e4e1d8;
-  border-radius:8px;
-  background:#fcfcfa;
-  text-align:right;
-  outline:none;
-  font-size:12px;
-}
-
-.sale-total{
-  text-align:right;
-  margin-top:8px;
-  font-size:12px;
-  font-weight:800;
-}
-
-.stat-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:9px;
-  margin-bottom:10px;
-}
-
-.stat{
-  background:#fff;
-  border:1px solid #e4e1d8;
-  border-radius:14px;
-  padding:13px;
-}
-
-.stat-label{
-  font-size:10px;
-  color:#6b6862;
-  margin-bottom:5px;
-}
-
-.stat-value{
-  font-size:15px;
-  font-weight:800;
-}
-
-.green{
-  color:#1c6b4e;
-}
-
-.red{
-  color:#b4432e;
-}
-
-.cost-list{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-
-.cost-card{
-  background:#fff;
-  border:1px solid #e4e1d8;
-  border-radius:13px;
-  padding:12px;
-}
-
-.cost-name{
-  font-size:12px;
-  font-weight:800;
-  margin-bottom:8px;
-}
-
-.cost-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:7px;
-}
-
-.cost-grid label{
-  font-size:9px;
-  color:#77736b;
-  display:block;
-  margin-bottom:4px;
-}
-
-.cost-grid input{
-  width:100%;
-  border:1px solid #e4e1d8;
-  border-radius:8px;
-  padding:9px;
-  font-size:12px;
-  text-align:right;
-  background:#fcfcfa;
-}
-
-.cost-result{
-  display:flex;
-  justify-content:space-between;
-  margin-top:9px;
-  padding-top:8px;
-  border-top:1px solid #efede6;
-  font-size:11px;
-  font-weight:800;
-}
-
-.user-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px;
-  border:1px solid #e4e1d8;
-  border-radius:13px;
-  background:#fff;
-  margin-bottom:7px;
-}
-
-.user-name{
-  font-size:12px;
-  font-weight:800;
-}
-
-.user-role{
-  font-size:10px;
-  color:#77736b;
-  margin-top:3px;
-}
-
-.status{
-  position:fixed;
-  right:12px;
-  bottom:12px;
-  z-index:80;
-  background:#1c1b19;
-  color:#fff;
-  border-radius:12px;
-  padding:9px 12px;
-  font-size:10px;
-  box-shadow:0 6px 20px rgba(0,0,0,.18);
-}
-
-.status.error{
-  background:#b4432e;
-}
-
-.status.ok{
-  background:#1c6b4e;
-}
-
-.login{
-  min-height:100vh;
-  background:#1c1b19;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:22px;
-}
-
-.login-box{
-  width:100%;
-  max-width:350px;
-}
-
-.login-logo{
-  width:68px;
-  height:68px;
-  background:#b4432e;
-  color:#fff;
-  border-radius:19px;
-  margin:auto auto 16px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.login h1{
-  color:#fff;
-  text-align:center;
-  margin:0;
-  font-size:24px;
-}
-
-.login-sub{
-  text-align:center;
-  color:#9c9890;
-  font-size:12px;
-  margin:5px 0 28px;
-}
-
-.login-field{
-  margin-bottom:12px;
-}
-
-.login-field span{
-  display:block;
-  color:#9c9890;
-  font-size:10px;
-  margin-bottom:5px;
-}
-
-.login-field input{
-  width:100%;
-  padding:12px;
-  border-radius:10px;
-  border:1px solid #3a3934;
-  background:#2a2926;
-  color:#fff;
-  outline:none;
-}
-
-.login-btn{
-  width:100%;
-  border:0;
-  background:#f7f6f2;
-  color:#1c1b19;
-  padding:13px;
-  border-radius:11px;
-  font-weight:800;
-  font-size:12px;
-  margin-top:8px;
-}
-
-.login-error{
-  color:#e08a75;
-  font-size:11px;
-  margin-top:6px;
-}
-
-.loading{
-  min-height:100vh;
-  background:#1c1b19;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  color:#fff;
-}
-
-.spinner{
-  width:30px;
-  height:30px;
-  border:3px solid #3b3934;
-  border-top-color:#fff;
-  border-radius:50%;
-  animation:spin .7s linear infinite;
-  margin-bottom:12px;
-}
-
-@keyframes spin{
-  to{transform:rotate(360deg)}
-}
-
-.empty{
-  text-align:center;
-  padding:25px 10px;
-  color:#77736b;
-  font-size:11px;
-}
-
-.add-store-row{
-  display:flex;
-  gap:7px;
-}
-
-.add-store-row input{
-  flex:1;
-  border:1px solid #e4e1d8;
-  background:#fff;
-  border-radius:10px;
-  padding:10px;
-  outline:none;
-  font-size:12px;
-}
-
-.toast-space{
-  height:2px;
+  .mobile-table {
+    min-width: 0 !important;
+  }
 }
 </style>
 </head>
@@ -784,122 +110,147 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 
-
-/* =========================================================
-   FIRESTORE COLLECTIONS
-========================================================= */
-
-const CONFIG_REF = db.collection("mano_pizza").doc("config");
-
-const PURCHASES = db.collection("mano_pizza_purchases");
-const SALES = db.collection("mano_pizza_sales");
-const COSTS = db.collection("mano_pizza_costs");
+const DATA_REF = db.collection("mano_pizza").doc("veri");
 
 
 /* =========================================================
    SABİTLER
 ========================================================= */
 
-const ADMIN_USERNAME = "mathrew";
-const ADMIN_PASSWORD = "01102022";
-
 const DEFAULT_STORES = [
   "Metro Market",
   "File Market"
 ];
 
+const ADMIN_USERNAME = "mathrew";
+const ADMIN_PASSWORD = "01102022";
+
 const SALE_PRODUCTS = [
   "Margarita Pizza",
   ...Array.from(
-    {length:20},
-    (_,i)=>`Pizza No:${i+1}`
+    { length: 20 },
+    (_, i) => `Pizza No:${i + 1}`
   )
 ];
+
+const EMPTY_DATA = {
+  stores: DEFAULT_STORES,
+
+  purchaseEntries: {},
+  purchaseLocks: {},
+
+  salesEntries: {},
+  salesLocks: {},
+
+  costs: {},
+
+  lastActiveStore: null,
+
+  users: {
+    [ADMIN_USERNAME]: {
+      password: ADMIN_PASSWORD,
+      role: "admin"
+    }
+  }
+};
 
 
 /* =========================================================
    YARDIMCI FONKSİYONLAR
 ========================================================= */
 
-function todayISO(){
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,"0");
-  const day = String(d.getDate()).padStart(2,"0");
-  return `${y}-${m}-${day}`;
+function todayISO() {
+  return new Date().toISOString().slice(0,10);
 }
 
-function monthISO(){
-  return todayISO().slice(0,7);
+function monthISO() {
+  return new Date().toISOString().slice(0,7);
 }
 
-function formatTL(n){
-  return new Intl.NumberFormat(
+function formatTL(value) {
+
+  return new Intl.NumberFormat("tr-TR", {
+    style: "currency",
+    currency: "TRY",
+    maximumFractionDigits: 2
+  }).format(Number(value) || 0);
+
+}
+
+function formatDate(date) {
+
+  if (!date) return "";
+
+  return new Date(
+    date + "T00:00:00"
+  ).toLocaleDateString(
     "tr-TR",
     {
-      style:"currency",
-      currency:"TRY",
-      maximumFractionDigits:2
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      weekday: "long"
     }
-  ).format(Number(n)||0);
+  );
+
 }
 
-function formatDateLabel(iso){
-  if(!iso) return "";
-  try{
-    return new Date(
-      iso+"T00:00:00"
-    ).toLocaleDateString(
-      "tr-TR",
-      {
-        day:"numeric",
-        month:"long",
-        year:"numeric",
-        weekday:"long"
-      }
-    );
-  }catch(e){
-    return iso;
-  }
-}
+function formatMonth(month) {
 
-function formatMonthLabel(iso){
-  if(!iso) return "";
-  try{
-    return new Date(
-      iso+"-01T00:00:00"
-    ).toLocaleDateString(
-      "tr-TR",
-      {
-        month:"long",
-        year:"numeric"
-      }
-    );
-  }catch(e){
-    return iso;
-  }
+  if (!month) return "";
+
+  return new Date(
+    month + "-01T00:00:00"
+  ).toLocaleDateString(
+    "tr-TR",
+    {
+      month: "long",
+      year: "numeric"
+    }
+  );
+
 }
 
 
 /* =========================================================
-   ICON
+   İKON
 ========================================================= */
 
-function Icon({name,size=18}){
-  useEffect(()=>{
-    try{
-      lucide.createIcons();
-    }catch(e){}
-  });
+function Icon({ children, size=20 }) {
+
+  const icons = {
+    menu: "☰",
+    close: "×",
+    pizza: "🍕",
+    store: "🏪",
+    shopping: "🛒",
+    sales: "📈",
+    cost: "💰",
+    profit: "📊",
+    users: "👥",
+    calendar: "📅",
+    logout: "↪",
+    plus: "+",
+    trash: "🗑",
+    lock: "🔒",
+    unlock: "🔓",
+    check: "✓",
+    back: "‹",
+    home: "⌂"
+  };
 
   return (
-    <i
-      data-lucide={name}
+    <span
       style={{
-        width:size,
-        height:size
+        fontSize: size,
+        lineHeight: 1,
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center"
       }}
-    />
+    >
+      {icons[children] || children}
+    </span>
   );
 }
 
@@ -908,679 +259,681 @@ function Icon({name,size=18}){
    ANA UYGULAMA
 ========================================================= */
 
-function App(){
+function ManoPizza() {
+
+  const [data,setData] = useState(EMPTY_DATA);
 
   const [loading,setLoading] = useState(true);
+
   const [error,setError] = useState("");
 
-  const [config,setConfig] = useState({
-    stores:DEFAULT_STORES,
-    users:{
-      [ADMIN_USERNAME]:{
-        password:ADMIN_PASSWORD,
-        role:"admin"
-      }
-    }
-  });
+  const [saved,setSaved] = useState(false);
 
-  const [currentUser,setCurrentUser] = useState(null);
+  const [user,setUser] = useState(null);
 
-  const [purchases,setPurchases] = useState({});
-  const [sales,setSales] = useState({});
-  const [costs,setCosts] = useState({});
+  const [tab,setTab] = useState("dashboard");
 
-  const [menu,setMenu] = useState(false);
-  const [tab,setTab] = useState("alis");
-  const [date,setDate] = useState(todayISO());
-
-  const [saveState,setSaveState] = useState("");
+  const [menuOpen,setMenuOpen] = useState(false);
 
 
-  /* =======================================================
+  /* -------------------------------------------
      FIREBASE ANLIK DİNLEME
-  ======================================================= */
+  ------------------------------------------- */
 
-  useEffect(()=>{
+  useEffect(() => {
 
-    let active = true;
+    const unsubscribe = DATA_REF.onSnapshot(
 
-    const unsubConfig = CONFIG_REF.onSnapshot(
-      async snap => {
+      snapshot => {
 
-        try{
+        if (snapshot.exists) {
 
-          if(!snap.exists){
+          const serverData = snapshot.data();
 
-            const initial = {
-              stores:DEFAULT_STORES,
-              users:{
-                [ADMIN_USERNAME]:{
-                  password:ADMIN_PASSWORD,
-                  role:"admin"
-                }
-              }
-            };
+          const merged = {
+            ...EMPTY_DATA,
+            ...serverData,
 
-            await CONFIG_REF.set(initial,{merge:true});
+            stores:
+              Array.isArray(serverData.stores)
+                ? serverData.stores
+                : DEFAULT_STORES,
 
-            if(active){
-              setConfig(initial);
+            purchaseEntries:
+              serverData.purchaseEntries || {},
+
+            purchaseLocks:
+              serverData.purchaseLocks || {},
+
+            salesEntries:
+              serverData.salesEntries || {},
+
+            salesLocks:
+              serverData.salesLocks || {},
+
+            costs:
+              serverData.costs || {},
+
+            users: {
+              ...EMPTY_DATA.users,
+              ...(serverData.users || {})
             }
+          };
 
-          }else{
+          setData(merged);
 
-            const d = snap.data() || {};
+        } else {
 
-            const safeUsers =
-              d.users &&
-              typeof d.users === "object"
-                ? d.users
-                : {};
-
-            const safeStores =
-              Array.isArray(d.stores)
-                ? d.stores
-                : DEFAULT_STORES;
-
-            if(active){
-
-              setConfig({
-                stores:safeStores,
-                users:{
-                  [ADMIN_USERNAME]:{
-                    password:ADMIN_PASSWORD,
-                    role:"admin"
-                  },
-                  ...safeUsers
-                }
-              });
-
-            }
-
-          }
-
-        }catch(err){
-
-          console.error(err);
-
-          if(active){
-            setError(
-              "Firebase bağlantısı kurulamadı."
-            );
-          }
+          DATA_REF
+            .set(EMPTY_DATA)
+            .then(() => {
+              setData(EMPTY_DATA);
+            })
+            .catch(err => {
+              console.error(err);
+              setError(
+                "Firebase ilk kayıt oluşturulamadı."
+              );
+            });
 
         }
 
-        if(active){
-          setLoading(false);
-        }
+        setLoading(false);
 
       },
-      err => {
 
-        console.error(err);
+      error => {
 
-        if(active){
+        console.error(error);
 
-          setError(
-            "Firebase bağlantı hatası."
-          );
+        setError(
+          "Firebase bağlantısı kurulamadı. Firestore kurallarını kontrol edin."
+        );
 
-          setLoading(false);
-
-        }
+        setLoading(false);
 
       }
+
     );
 
+    return () => unsubscribe();
 
-    return ()=>{
-      active=false;
-      unsubConfig();
-    };
-
-  },[]);
+  }, []);
 
 
-  /* =======================================================
-     TARİHE GÖRE ALIŞ DİNLE
-  ======================================================= */
+  /* -------------------------------------------
+     İKONLARI YENİLE
+  ------------------------------------------- */
 
-  useEffect(()=>{
+  useEffect(() => {
 
-    if(!date) return;
+    /*
+      React her render sonrası ikonları tekrar oluşturur.
+    */
 
-    const unsub = PURCHASES
-      .doc(date)
-      .onSnapshot(
-        snap=>{
+  }, [tab,menuOpen,user]);
 
-          if(snap.exists){
 
-            setPurchases(
-              snap.data() || {}
-            );
+  /* -------------------------------------------
+     GÜVENLİ KAYDETME
+  ------------------------------------------- */
 
-          }else{
+  async function persist(updater) {
 
-            setPurchases({});
+    setError("");
 
+    setSaved(false);
+
+    try {
+
+      /*
+        Önce Firebase'deki en güncel belgeyi alıyoruz.
+        Böylece iki cihaz aynı anda işlem yaptığında
+        eski state'in yeni veriyi ezme ihtimali azalıyor.
+      */
+
+      const snap = await DATA_REF.get();
+
+      const current = snap.exists
+        ? {
+            ...EMPTY_DATA,
+            ...snap.data()
           }
+        : EMPTY_DATA;
 
-        },
-        err=>{
-          console.error(err);
-          setError("Alış verileri alınamadı.");
+      const next =
+        typeof updater === "function"
+          ? updater(current)
+          : updater;
+
+      await DATA_REF.set(
+        next,
+        {
+          merge: true
         }
       );
 
-    return ()=>unsub();
+      setData(next);
 
-  },[date]);
+      setSaved(true);
 
+      setTimeout(() => {
+        setSaved(false);
+      }, 1800);
 
-  /* =======================================================
-     TARİHE GÖRE SATIŞ DİNLE
-  ======================================================= */
+    } catch (err) {
 
-  useEffect(()=>{
+      console.error(err);
 
-    if(!date) return;
-
-    const unsub = SALES
-      .doc(date)
-      .onSnapshot(
-        snap=>{
-
-          if(snap.exists){
-
-            setSales(
-              snap.data() || {}
-            );
-
-          }else{
-
-            setSales({});
-
-          }
-
-        },
-        err=>{
-          console.error(err);
-          setError("Satış verileri alınamadı.");
-        }
+      setError(
+        "Kaydedilemedi. Firebase bağlantısını veya Firestore kurallarını kontrol edin."
       );
 
-    return ()=>unsub();
-
-  },[date]);
-
-
-  /* =======================================================
-     MALİYET DİNLE
-  ======================================================= */
-
-  useEffect(()=>{
-
-    const unsub = COSTS
-      .doc("main")
-      .onSnapshot(
-        snap=>{
-
-          if(snap.exists){
-
-            setCosts(
-              snap.data() || {}
-            );
-
-          }else{
-
-            setCosts({});
-
-          }
-
-        },
-        err=>{
-          console.error(err);
-        }
-      );
-
-    return ()=>unsub();
-
-  },[]);
-
-
-  /* =======================================================
-     KAYDETME DURUMU
-  ======================================================= */
-
-  function saved(){
-
-    setSaveState("Kaydedildi");
-
-    setTimeout(()=>{
-      setSaveState("");
-    },1500);
+    }
 
   }
 
 
-  /* =======================================================
-     LOGIN
-  ======================================================= */
+  /* -------------------------------------------
+     LOADING
+  ------------------------------------------- */
 
-  function login(user){
+  if (loading) {
 
-    setCurrentUser(user);
+    return (
 
-  }
+      <div
+        style={{
+          minHeight:"100vh",
+          background:"#1c1b19",
+          color:"#f7f6f2",
+          display:"flex",
+          alignItems:"center",
+          justifyContent:"center",
+          flexDirection:"column",
+          gap:15
+        }}
+      >
 
-
-  if(loading){
-
-    return(
-      <div className="loading">
-
-        <div className="spinner"></div>
-
-        <div>
-          Mano Pizza hazırlanıyor...
+        <div style={{fontSize:48}}>
+          🍕
         </div>
 
         <div
           style={{
-            color:"#77736b",
-            fontSize:10,
-            marginTop:6
+            fontSize:18,
+            fontWeight:700
           }}
         >
-          Veriler güvenli şekilde yükleniyor
+          Mano Pizza
+        </div>
+
+        <div
+          style={{
+            color:"#aaa69c",
+            fontSize:13
+          }}
+        >
+          Panel hazırlanıyor...
         </div>
 
       </div>
+
     );
 
   }
 
 
-  if(!currentUser){
+  /* -------------------------------------------
+     LOGIN
+  ------------------------------------------- */
 
-    return(
+  if (!user) {
+
+    return (
       <Login
-        users={config.users}
-        onLogin={login}
+        users={data.users}
+        onLogin={setUser}
       />
     );
 
   }
 
 
-  const isAdmin =
-    currentUser.role === "admin";
+  const isAdmin = user.role === "admin";
 
 
-  return(
+  return (
 
-    <div className="app">
+    <div
+      style={{
+        minHeight:"100vh",
+        background:"#f7f6f2"
+      }}
+    >
 
-      <TopBar
-        user={currentUser}
-        onMenu={()=>setMenu(true)}
-        onLogout={()=>setCurrentUser(null)}
-      />
+      {/* SIDEBAR */}
 
+      {menuOpen && (
 
-      {menu && (
-
-        <>
-          <div
-            className="drawer-overlay"
-            onClick={()=>setMenu(false)}
-          />
-
-          <Drawer
-            tab={tab}
-            setTab={setTab}
-            isAdmin={isAdmin}
-            user={currentUser}
-            close={()=>setMenu(false)}
-            logout={()=>setCurrentUser(null)}
-          />
-        </>
+        <div
+          onClick={() => setMenuOpen(false)}
+          style={{
+            position:"fixed",
+            inset:0,
+            background:"rgba(0,0,0,.35)",
+            zIndex:90
+          }}
+        />
 
       )}
 
+      <aside
+        style={{
+          position:"fixed",
+          top:0,
+          bottom:0,
+          left:menuOpen ? 0 : -290,
+          width:270,
+          background:"#1c1b19",
+          color:"#fff",
+          zIndex:100,
+          transition:"left .25s ease",
+          padding:20,
+          boxShadow:"8px 0 30px rgba(0,0,0,.15)"
+        }}
+      >
 
-      <main className="page">
+        <div
+          style={{
+            display:"flex",
+            alignItems:"center",
+            justifyContent:"space-between",
+            marginBottom:28
+          }}
+        >
 
-        {(tab==="alis" || tab==="satis") && (
+          <div
+            style={{
+              display:"flex",
+              alignItems:"center",
+              gap:10
+            }}
+          >
 
-          <div className="date-card">
+            <div
+              style={{
+                width:42,
+                height:42,
+                borderRadius:12,
+                background:"#b4432e",
+                display:"flex",
+                alignItems:"center",
+                justifyContent:"center",
+                fontSize:22
+              }}
+            >
+              🍕
+            </div>
 
-            <Icon name="calendar" size={17}/>
+            <div>
 
-            <input
-              type="date"
-              value={date}
-              onChange={e=>setDate(e.target.value)}
+              <div
+                style={{
+                  fontWeight:800,
+                  fontSize:17
+                }}
+              >
+                Mano Pizza
+              </div>
+
+              <div
+                style={{
+                  color:"#aaa69c",
+                  fontSize:11
+                }}
+              >
+                İşletme Paneli
+              </div>
+
+            </div>
+
+          </div>
+
+          <button
+            onClick={() => setMenuOpen(false)}
+            style={sideClose}
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <div
+          style={{
+            color:"#8f8b82",
+            fontSize:10,
+            textTransform:"uppercase",
+            letterSpacing:1,
+            marginBottom:8
+          }}
+        >
+          Menü
+        </div>
+
+
+        <MenuButton
+          active={tab==="dashboard"}
+          icon="home"
+          label="Ana Sayfa"
+          onClick={() => {
+            setTab("dashboard");
+            setMenuOpen(false);
+          }}
+        />
+
+        <MenuButton
+          active={tab==="alis"}
+          icon="shopping"
+          label="Alışlar"
+          onClick={() => {
+            setTab("alis");
+            setMenuOpen(false);
+          }}
+        />
+
+        <MenuButton
+          active={tab==="satis"}
+          icon="sales"
+          label="Satışlar"
+          onClick={() => {
+            setTab("satis");
+            setMenuOpen(false);
+          }}
+        />
+
+        {isAdmin && (
+
+          <>
+
+            <MenuButton
+              active={tab==="maliyet"}
+              icon="cost"
+              label="Maliyetler"
+              onClick={() => {
+                setTab("maliyet");
+                setMenuOpen(false);
+              }}
             />
 
-            <span className="date-label">
-              {formatDateLabel(date)}
-            </span>
+            <MenuButton
+              active={tab==="karzarar"}
+              icon="profit"
+              label="Kâr / Zarar"
+              onClick={() => {
+                setTab("karzarar");
+                setMenuOpen(false);
+              }}
+            />
 
+            <div
+              style={{
+                marginTop:25,
+                color:"#8f8b82",
+                fontSize:10,
+                textTransform:"uppercase",
+                letterSpacing:1,
+                marginBottom:8
+              }}
+            >
+              Yönetim
+            </div>
+
+            <MenuButton
+              active={tab==="yonetici"}
+              icon="users"
+              label="Kullanıcılar"
+              onClick={() => {
+                setTab("yonetici");
+                setMenuOpen(false);
+              }}
+            />
+
+          </>
+
+        )}
+
+
+        <div
+          style={{
+            position:"absolute",
+            bottom:20,
+            left:20,
+            right:20
+          }}
+        >
+
+          <div
+            style={{
+              borderTop:"1px solid #35332f",
+              paddingTop:15,
+              marginBottom:12,
+              color:"#aaa69c",
+              fontSize:11
+            }}
+          >
+            {user.username}
+            <br/>
+            {isAdmin ? "Yönetici" : "Kullanıcı"}
+          </div>
+
+          <button
+            onClick={() => setUser(null)}
+            style={{
+              width:"100%",
+              border:"1px solid #3c3934",
+              background:"#282622",
+              color:"#eee",
+              padding:"11px",
+              borderRadius:10,
+              cursor:"pointer"
+            }}
+          >
+            ↪ Çıkış Yap
+          </button>
+
+        </div>
+
+      </aside>
+
+
+      {/* ANA ALAN */}
+
+      <main
+        style={{
+          maxWidth:900,
+          margin:"0 auto",
+          padding:"14px 14px 50px"
+        }}
+      >
+
+        {/* HEADER */}
+
+        <header
+          style={{
+            display:"flex",
+            alignItems:"center",
+            justifyContent:"space-between",
+            marginBottom:16
+          }}
+        >
+
+          <div
+            style={{
+              display:"flex",
+              alignItems:"center",
+              gap:10
+            }}
+          >
+
+            <button
+              onClick={() => setMenuOpen(true)}
+              style={{
+                width:42,
+                height:42,
+                borderRadius:11,
+                border:"1px solid #e4e1d8",
+                background:"#fff",
+                cursor:"pointer",
+                fontSize:20
+              }}
+            >
+              ☰
+            </button>
+
+            <div>
+
+              <div
+                style={{
+                  fontSize:19,
+                  fontWeight:800
+                }}
+              >
+                {tab === "dashboard" && "Ana Sayfa"}
+                {tab === "alis" && "Alışlar"}
+                {tab === "satis" && "Satışlar"}
+                {tab === "maliyet" && "Maliyetler"}
+                {tab === "karzarar" && "Kâr / Zarar"}
+                {tab === "yonetici" && "Kullanıcı Yönetimi"}
+              </div>
+
+              <div
+                style={{
+                  color:"#77736b",
+                  fontSize:11
+                }}
+              >
+                Mano Pizza İşletme Yönetimi
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div
+            style={{
+              display:"flex",
+              alignItems:"center",
+              gap:7
+            }}
+          >
+
+            {saved && (
+
+              <span
+                style={{
+                  background:"#eaf3ee",
+                  color:"#1c6b4e",
+                  padding:"6px 9px",
+                  borderRadius:8,
+                  fontSize:10,
+                  fontWeight:700
+                }}
+              >
+                ✓ Kaydedildi
+              </span>
+
+            )}
+
+            <div
+              style={{
+                width:38,
+                height:38,
+                borderRadius:"50%",
+                background:"#1c1b19",
+                color:"#fff",
+                display:"flex",
+                alignItems:"center",
+                justifyContent:"center",
+                fontWeight:800,
+                fontSize:12
+              }}
+            >
+              {user.username.slice(0,2).toUpperCase()}
+            </div>
+
+          </div>
+
+        </header>
+
+
+        {error && (
+
+          <div
+            style={{
+              background:"#fff0ed",
+              border:"1px solid #efc3b8",
+              color:"#9d3828",
+              padding:12,
+              borderRadius:11,
+              fontSize:12,
+              marginBottom:14
+            }}
+          >
+            ⚠️ {error}
           </div>
 
         )}
 
 
-        {tab==="alis" && (
+        {/* SAYFALAR */}
 
-          <Alis
-            config={config}
-            purchases={purchases}
-            date={date}
-            isAdmin={isAdmin}
-            save={saved}
-            setError={setError}
+        {tab==="dashboard" && (
+          <Dashboard
+            data={data}
+            setTab={setTab}
           />
-
         )}
 
+        {tab==="alis" && (
+          <Alis
+            data={data}
+            persist={persist}
+            isAdmin={isAdmin}
+          />
+        )}
 
         {tab==="satis" && (
-
           <Satis
-            sales={sales}
-            date={date}
+            data={data}
+            persist={persist}
             isAdmin={isAdmin}
-            save={saved}
-            setError={setError}
           />
-
         )}
-
 
         {tab==="maliyet" && isAdmin && (
-
-          <Maliyet
-            costs={costs}
-            save={saved}
-            setError={setError}
+          <Maliyetler
+            data={data}
+            persist={persist}
           />
-
         )}
-
 
         {tab==="karzarar" && isAdmin && (
-
-          <KarZarar
-            purchases={purchases}
-            sales={sales}
-            date={date}
-            setDate={setDate}
-          />
-
+          <KarZarar data={data}/>
         )}
 
-
         {tab==="yonetici" && isAdmin && (
-
           <Yonetici
-            config={config}
-            setError={setError}
-            save={saved}
+            data={data}
+            persist={persist}
           />
-
         )}
 
       </main>
 
-
-      {saveState && (
-
-        <div className="status ok">
-          ✓ {saveState}
-        </div>
-
-      )}
-
-
-      {error && (
-
-        <div className="status error">
-          {error}
-        </div>
-
-      )}
-
     </div>
-
-  );
-
-}
-
-
-/* =========================================================
-   TOPBAR
-========================================================= */
-
-function TopBar({
-  user,
-  onMenu,
-  onLogout
-}){
-
-  return(
-
-    <header className="topbar">
-
-      <div className="brand">
-
-        <div className="logo">
-          <Icon name="pizza" size={21}/>
-        </div>
-
-        <div>
-
-          <div className="brand-title">
-            Mano Pizza
-          </div>
-
-          <div className="brand-sub">
-            {user.username} · {user.role==="admin" ? "Yönetici":"Kullanıcı"}
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <button
-        className="menu-btn"
-        onClick={onMenu}
-      >
-        <Icon name="menu" size={20}/>
-      </button>
-
-    </header>
-
-  );
-
-}
-
-
-/* =========================================================
-   DRAWER
-========================================================= */
-
-function Drawer({
-  tab,
-  setTab,
-  isAdmin,
-  user,
-  close,
-  logout
-}){
-
-  const items = [
-
-    {
-      id:"alis",
-      label:"Alış",
-      icon:"shopping-bag"
-    },
-
-    {
-      id:"satis",
-      label:"Satış",
-      icon:"trending-up"
-    },
-
-    ...(isAdmin ? [
-
-      {
-        id:"maliyet",
-        label:"Maliyetler",
-        icon:"percent"
-      },
-
-      {
-        id:"karzarar",
-        label:"Kâr / Zarar",
-        icon:"bar-chart-3"
-      },
-
-      {
-        id:"yonetici",
-        label:"Yönetici",
-        icon:"shield-check"
-      }
-
-    ]:[])
-
-  ];
-
-
-  return(
-
-    <aside className="drawer">
-
-      <div className="drawer-head">
-
-        <div className="drawer-brand">
-
-          <div className="logo">
-            <Icon name="pizza" size={18}/>
-          </div>
-
-          <div>
-            <div className="brand-title">
-              Mano Pizza
-            </div>
-            <div className="brand-sub">
-              Yönetim Paneli
-            </div>
-          </div>
-
-        </div>
-
-        <button
-          className="secondary-btn"
-          style={{
-            padding:"7px"
-          }}
-          onClick={close}
-        >
-          <Icon name="x" size={16}/>
-        </button>
-
-      </div>
-
-
-      <div className="drawer-menu">
-
-        {items.map(item=>(
-
-          <button
-            key={item.id}
-            className={
-              "drawer-item "+
-              (tab===item.id ? "active":"")
-            }
-            onClick={()=>{
-
-              setTab(item.id);
-              close();
-
-            }}
-          >
-
-            <Icon
-              name={item.icon}
-              size={17}
-            />
-
-            {item.label}
-
-          </button>
-
-        ))}
-
-      </div>
-
-
-      <div className="drawer-bottom">
-
-        <div
-          className="card"
-          style={{
-            marginBottom:8,
-            background:"#f7f6f2"
-          }}
-        >
-
-          <div
-            style={{
-              fontSize:12,
-              fontWeight:800
-            }}
-          >
-            {user.username}
-          </div>
-
-          <div
-            style={{
-              fontSize:10,
-              color:"#77736b",
-              marginTop:3
-            }}
-          >
-            {user.role==="admin"
-              ? "Yönetici hesabı"
-              : "Kullanıcı hesabı"}
-          </div>
-
-        </div>
-
-
-        <button
-          className="drawer-item"
-          onClick={logout}
-        >
-
-          <Icon
-            name="log-out"
-            size={17}
-          />
-
-          Çıkış Yap
-
-        </button>
-
-      </div>
-
-    </aside>
 
   );
 
@@ -1591,117 +944,145 @@ function Drawer({
    LOGIN
 ========================================================= */
 
-function Login({
-  users,
-  onLogin
-}){
+function Login({users,onLogin}) {
 
   const [username,setUsername] = useState("");
+
   const [password,setPassword] = useState("");
+
   const [error,setError] = useState("");
 
-  function submit(e){
+  function submit(e) {
 
     e.preventDefault();
 
     const name = username.trim();
 
-    const user =
-      users &&
-      users[name];
+    const account = users[name];
 
-    if(
-      user &&
-      user.password === password
-    ){
+    if (
+      account &&
+      account.password === password
+    ) {
 
       onLogin({
         username:name,
-        role:user.role
+        role:account.role
       });
 
-      return;
+    } else {
+
+      setError(
+        "Kullanıcı adı veya şifre hatalı."
+      );
 
     }
-
-    setError(
-      "Kullanıcı adı veya şifre hatalı."
-    );
-
-    setPassword("");
 
   }
 
 
-  return(
+  return (
 
-    <div className="login">
+    <div
+      style={{
+        minHeight:"100vh",
+        background:"#1c1b19",
+        display:"flex",
+        alignItems:"center",
+        justifyContent:"center",
+        padding:20
+      }}
+    >
 
-      <div className="login-box">
+      <div
+        style={{
+          width:"100%",
+          maxWidth:360,
+          textAlign:"center"
+        }}
+      >
 
-        <div className="login-logo">
-          <Icon name="pizza" size={34}/>
+        <div
+          style={{
+            width:75,
+            height:75,
+            borderRadius:20,
+            background:"#b4432e",
+            margin:"0 auto 18px",
+            display:"flex",
+            alignItems:"center",
+            justifyContent:"center",
+            fontSize:38
+          }}
+        >
+          🍕
         </div>
 
-        <h1>
+        <h1
+          style={{
+            color:"#fff",
+            margin:"0 0 5px",
+            fontSize:26
+          }}
+        >
           Mano Pizza
         </h1>
 
-        <div className="login-sub">
-          Gelir · Gider · Satış Yönetimi
-        </div>
+        <p
+          style={{
+            color:"#aaa69c",
+            margin:"0 0 30px",
+            fontSize:13
+          }}
+        >
+          İşletme Yönetim Paneli
+        </p>
 
 
         <form onSubmit={submit}>
 
-          <div className="login-field">
+          <input
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            placeholder="Kullanıcı adı"
+            autoCapitalize="none"
+            style={loginInput}
+          />
 
-            <span>
-              Kullanıcı Adı
-            </span>
-
-            <input
-              autoFocus
-              type="text"
-              autoCapitalize="none"
-              value={username}
-              onChange={
-                e=>setUsername(e.target.value)
-              }
-            />
-
-          </div>
-
-
-          <div className="login-field">
-
-            <span>
-              Şifre
-            </span>
-
-            <input
-              type="password"
-              value={password}
-              onChange={
-                e=>setPassword(e.target.value)
-              }
-            />
-
-          </div>
-
+          <input
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder="Şifre"
+            style={loginInput}
+          />
 
           {error && (
 
-            <div className="login-error">
+            <div
+              style={{
+                color:"#e08a75",
+                fontSize:12,
+                marginBottom:12
+              }}
+            >
               {error}
             </div>
 
           )}
 
-
           <button
-            className="login-btn"
             type="submit"
+            style={{
+              width:"100%",
+              padding:14,
+              border:0,
+              borderRadius:12,
+              background:"#f7f6f2",
+              color:"#1c1b19",
+              fontWeight:800,
+              cursor:"pointer"
+            }}
           >
             Giriş Yap
           </button>
@@ -1718,314 +1099,602 @@ function Login({
 
 
 /* =========================================================
-   ALIŞ
+   DASHBOARD
 ========================================================= */
 
-function Alis({
-  config,
-  purchases,
-  date,
-  isAdmin,
-  save,
-  setError
-}){
+function Dashboard({data,setTab}) {
+
+  const today = todayISO();
+
+  const todayPurchases =
+    data.purchaseEntries[today] || {};
+
+  const todaySales =
+    data.salesEntries[today] || {};
+
+
+  let purchaseTotal = 0;
+
+  Object.values(todayPurchases).forEach(items => {
+
+    (items || []).forEach(item => {
+
+      purchaseTotal +=
+        Number(item.qty || 0) *
+        Number(item.unitPrice || 0);
+
+    });
+
+  });
+
+
+  let salesTotal = 0;
+
+  Object.values(todaySales).forEach(row => {
+
+    salesTotal +=
+      Number(row.qty || 0) *
+      Number(row.unitPrice || 0);
+
+  });
+
+
+  const net = salesTotal - purchaseTotal;
+
+
+  return (
+
+    <div>
+
+      <div
+        style={{
+          marginBottom:16
+        }}
+      >
+
+        <div
+          style={{
+            color:"#77736b",
+            fontSize:12
+          }}
+        >
+          Bugün
+        </div>
+
+        <div
+          style={{
+            fontSize:20,
+            fontWeight:800
+          }}
+        >
+          {formatDate(today)}
+        </div>
+
+      </div>
+
+
+      {/* ANA ÖZET */}
+
+      <div
+        className="mobile-grid-2"
+        style={{
+          display:"grid",
+          gridTemplateColumns:"repeat(2,1fr)",
+          gap:10,
+          marginBottom:10
+        }}
+      >
+
+        <StatCard
+          title="Günlük Satış"
+          value={formatTL(salesTotal)}
+          icon="📈"
+          positive
+        />
+
+        <StatCard
+          title="Günlük Alış"
+          value={formatTL(purchaseTotal)}
+          icon="🛒"
+        />
+
+      </div>
+
+
+      <div
+        style={{
+          background:"#1c1b19",
+          color:"#fff",
+          borderRadius:16,
+          padding:18,
+          marginBottom:16
+        }}
+      >
+
+        <div
+          style={{
+            color:"#aaa69c",
+            fontSize:11,
+            marginBottom:5
+          }}
+        >
+          Günlük Net
+        </div>
+
+        <div
+          style={{
+            fontSize:25,
+            fontWeight:800
+          }}
+        >
+          {formatTL(net)}
+        </div>
+
+        <div
+          style={{
+            color:"#aaa69c",
+            fontSize:11,
+            marginTop:4
+          }}
+        >
+          Satış − Alış
+        </div>
+
+      </div>
+
+
+      {/* MAĞAZALAR */}
+
+      <SectionTitle>
+        Mağaza Durumu
+      </SectionTitle>
+
+
+      <div
+        style={{
+          display:"flex",
+          flexDirection:"column",
+          gap:8,
+          marginBottom:18
+        }}
+      >
+
+        {data.stores.map(store => {
+
+          const items =
+            todayPurchases[store] || [];
+
+          const total =
+            items.reduce(
+              (sum,item) =>
+                sum +
+                Number(item.qty || 0) *
+                Number(item.unitPrice || 0),
+              0
+            );
+
+          return (
+
+            <div
+              key={store}
+              style={{
+                background:"#fff",
+                border:"1px solid #e4e1d8",
+                borderRadius:13,
+                padding:14,
+                display:"flex",
+                alignItems:"center",
+                justifyContent:"space-between"
+              }}
+            >
+
+              <div
+                style={{
+                  display:"flex",
+                  alignItems:"center",
+                  gap:11
+                }}
+              >
+
+                <div
+                  style={{
+                    width:38,
+                    height:38,
+                    borderRadius:10,
+                    background:"#eaf3ee",
+                    display:"flex",
+                    alignItems:"center",
+                    justifyContent:"center",
+                    fontSize:18
+                  }}
+                >
+                  🏪
+                </div>
+
+                <div>
+
+                  <div
+                    style={{
+                      fontSize:13,
+                      fontWeight:700
+                    }}
+                  >
+                    {store}
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize:10,
+                      color:"#77736b"
+                    }}
+                  >
+                    {items.length} ürün
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div
+                style={{
+                  fontWeight:800,
+                  fontSize:13
+                }}
+              >
+                {formatTL(total)}
+              </div>
+
+            </div>
+
+          );
+
+        })}
+
+      </div>
+
+
+      {/* HIZLI MENÜ */}
+
+      <SectionTitle>
+        Hızlı İşlemler
+      </SectionTitle>
+
+      <div
+        className="mobile-grid-2"
+        style={{
+          display:"grid",
+          gridTemplateColumns:"1fr 1fr",
+          gap:9
+        }}
+      >
+
+        <QuickButton
+          icon="🛒"
+          title="Alış Gir"
+          onClick={() => setTab("alis")}
+        />
+
+        <QuickButton
+          icon="📈"
+          title="Satış Gir"
+          onClick={() => setTab("satis")}
+        />
+
+      </div>
+
+    </div>
+
+  );
+
+}
+
+
+/* =========================================================
+   ALIŞLAR
+========================================================= */
+
+function Alis({data,persist,isAdmin}) {
+
+  const [date,setDate] =
+    useState(todayISO());
 
   const [activeStore,setActiveStore] =
     useState(null);
 
-  const [product,setProduct] =
-    useState("");
-
-  const [qty,setQty] =
-    useState("1");
-
-  const [price,setPrice] =
-    useState("");
+  const [form,setForm] =
+    useState({
+      product:"",
+      qty:"1",
+      unitPrice:""
+    });
 
   const [newStore,setNewStore] =
     useState("");
 
-  const [showAdd,setShowAdd] =
-    useState(false);
-
-  const [checked,setChecked] =
+  const [addStore,setAddStore] =
     useState(false);
 
 
-  const stores =
-    Array.isArray(config.stores)
-      ? config.stores
-      : DEFAULT_STORES;
+  const entries =
+    data.purchaseEntries[date] || {};
+
+  const locks =
+    data.purchaseLocks[date] || {};
 
 
-  const dayStores =
-    purchases.stores || {};
+  function total(store) {
 
-
-  function storeItems(store){
-
-    return Array.isArray(dayStores[store])
-      ? dayStores[store]
-      : [];
-
-  }
-
-
-  function storeTotal(store){
-
-    return storeItems(store)
+    return (entries[store] || [])
       .reduce(
-        (sum,item)=>
-          sum+
-          (Number(item.qty)||0)*
-          (Number(item.unitPrice)||0),
+        (sum,item) =>
+          sum +
+          Number(item.qty || 0) *
+          Number(item.unitPrice || 0),
         0
       );
 
   }
 
 
-  const dayTotal =
-    stores.reduce(
-      (sum,store)=>
-        sum+storeTotal(store),
-      0
-    );
-
-
-  async function addItem(e){
+  function addItem(e) {
 
     e.preventDefault();
 
-    if(!activeStore) return;
+    if (!activeStore) return;
 
-    const p = product.trim();
-    const q = Number(qty);
-    const pr = Number(price);
+    const product =
+      form.product.trim();
 
-    if(
-      !p ||
-      !q ||
-      q<=0 ||
-      isNaN(pr) ||
-      pr<0
-    ){
+    const qty =
+      Number(form.qty);
 
-      setError("Ürün bilgilerini kontrol et.");
-      return;
+    const price =
+      Number(form.unitPrice);
 
-    }
+    if (
+      !product ||
+      qty <= 0 ||
+      price < 0 ||
+      isNaN(price)
+    ) return;
 
 
     const item = {
-
       id:
-        Date.now()+
-        "-" +
-        Math.random()
-          .toString(36)
-          .slice(2,8),
+        Date.now().toString() +
+        Math.random().toString(36).slice(2),
 
-      product:p,
-      qty:q,
-      unitPrice:pr,
-
-      createdAt:
-        new Date().toISOString()
-
+      product,
+      qty,
+      unitPrice:price
     };
 
 
-    const current =
-      storeItems(activeStore);
+    persist(current => {
 
-    const next = {
+      const currentEntries =
+        current.purchaseEntries[date] || {};
 
-      ...purchases,
+      const storeItems =
+        currentEntries[activeStore] || [];
 
-      stores:{
-        ...dayStores,
+      return {
+        ...current,
 
-        [activeStore]:[
-          ...current,
-          item
-        ]
-      }
+        purchaseEntries:{
+          ...current.purchaseEntries,
 
-    };
+          [date]:{
+            ...currentEntries,
+
+            [activeStore]:[
+              ...storeItems,
+              item
+            ]
+          }
+        }
+      };
+
+    });
 
 
-    try{
-
-      await PURCHASES
-        .doc(date)
-        .set(next,{merge:true});
-
-      save();
-
-      setProduct("");
-      setQty("1");
-      setPrice("");
-
-    }catch(err){
-
-      console.error(err);
-
-      setError(
-        "Alış kaydedilemedi."
-      );
-
-    }
+    setForm({
+      product:"",
+      qty:"1",
+      unitPrice:""
+    });
 
   }
 
 
-  async function removeItem(id){
+  function deleteItem(id) {
 
-    if(!activeStore) return;
+    persist(current => {
 
-    const nextItems =
-      storeItems(activeStore)
-        .filter(x=>x.id!==id);
+      const currentEntries =
+        current.purchaseEntries[date] || {};
 
-    const next = {
+      const items =
+        currentEntries[activeStore] || [];
 
-      ...purchases,
+      return {
 
-      stores:{
-        ...dayStores,
+        ...current,
 
-        [activeStore]:nextItems
+        purchaseEntries:{
+          ...current.purchaseEntries,
 
-      }
+          [date]:{
+            ...currentEntries,
 
-    };
+            [activeStore]:
+              items.filter(
+                item => item.id !== id
+              )
+          }
+        }
 
+      };
 
-    try{
-
-      await PURCHASES
-        .doc(date)
-        .set(next,{merge:true});
-
-      save();
-
-    }catch(err){
-
-      setError(
-        "Ürün silinemedi."
-      );
-
-    }
+    });
 
   }
 
 
-  async function addStore(){
+  function lockStore() {
+
+    persist(current => {
+
+      const currentLocks =
+        current.purchaseLocks[date] || {};
+
+      return {
+
+        ...current,
+
+        purchaseLocks:{
+          ...current.purchaseLocks,
+
+          [date]:{
+            ...currentLocks,
+            [activeStore]:true
+          }
+        }
+
+      };
+
+    });
+
+  }
+
+
+  function unlockStore() {
+
+    persist(current => {
+
+      const currentLocks =
+        current.purchaseLocks[date] || {};
+
+      return {
+
+        ...current,
+
+        purchaseLocks:{
+          ...current.purchaseLocks,
+
+          [date]:{
+            ...currentLocks,
+            [activeStore]:false
+          }
+        }
+
+      };
+
+    });
+
+  }
+
+
+  function createStore() {
 
     const name =
       newStore.trim();
 
-    if(
+    if (
       !name ||
-      stores.includes(name)
-    ){
-
-      setError(
-        "Mağaza adı geçersiz veya zaten mevcut."
-      );
-
-      return;
-
-    }
+      data.stores.includes(name)
+    ) return;
 
 
-    try{
+    persist(current => ({
 
-      await CONFIG_REF.set({
+      ...current,
 
-        stores:[
-          ...stores,
-          name
-        ]
+      stores:[
+        ...current.stores,
+        name
+      ]
 
-      },{merge:true});
+    }));
 
-      setNewStore("");
-      setShowAdd(false);
-      save();
 
-    }catch(err){
-
-      setError(
-        "Mağaza kaydedilemedi."
-      );
-
-    }
+    setNewStore("");
+    setAddStore(false);
 
   }
 
 
-  async function deleteStore(store){
+  function deleteStore(store) {
 
-    if(
+    if (
       !confirm(
         `"${store}" mağazasını silmek istediğinize emin misiniz?`
       )
     ) return;
 
 
-    try{
+    persist(current => {
 
-      await CONFIG_REF.set({
+      const stores =
+        current.stores.filter(
+          s => s !== store
+        );
 
-        stores:
-          stores.filter(x=>x!==store)
+      const day =
+        current.purchaseEntries[date] || {};
 
-      },{merge:true});
+      const {
+        [store]:removed,
+        ...remaining
+      } = day;
 
-      save();
 
-      setActiveStore(null);
+      return {
 
-    }catch(err){
+        ...current,
 
-      setError(
-        "Mağaza silinemedi."
-      );
+        stores,
 
-    }
+        purchaseEntries:{
+          ...current.purchaseEntries,
+          [date]:remaining
+        }
+
+      };
+
+    });
+
+
+    setActiveStore(null);
 
   }
 
 
-  if(activeStore){
+  /* MAĞAZA DETAY */
+
+  if (activeStore) {
+
+    const locked =
+      !!locks[activeStore];
 
     const items =
-      storeItems(activeStore);
+      entries[activeStore] || [];
 
 
-    return(
+    return (
 
       <div>
 
+        <DateBar
+          date={date}
+          setDate={setDate}
+        />
+
         <button
-          className="back-btn"
-          onClick={()=>{
-
-            setActiveStore(null);
-            setChecked(false);
-
-          }}
+          onClick={() => setActiveStore(null)}
+          style={backButton}
         >
-
-          <Icon
-            name="chevron-left"
-            size={16}
-          />
-
-          Mağazalara Dön
-
+          ‹ Mağazalara Dön
         </button>
 
 
@@ -2038,133 +1707,137 @@ function Alis({
           }}
         >
 
-          <h2 className="section-title">
-            {activeStore}
-          </h2>
-
-          {isAdmin && (
-
-            <button
-              className="danger-btn"
-              onClick={()=>
-                deleteStore(activeStore)
-              }
-            >
-              <Icon
-                name="trash-2"
-                size={16}
-              />
-            </button>
-
-          )}
-
-        </div>
-
-
-        <div className="card">
-
-          <div className="form-grid">
-
-            <div className="field">
-
-              <label>
-                Ürün
-              </label>
-
-              <input
-                placeholder="Örn. Un"
-                value={product}
-                onChange={
-                  e=>setProduct(e.target.value)
-                }
-              />
-
-            </div>
-
-
-            <div className="field">
-
-              <label>
-                Miktar
-              </label>
-
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={qty}
-                onChange={
-                  e=>setQty(e.target.value)
-                }
-              />
-
-            </div>
-
-
-            <div className="field">
-
-              <label>
-                Birim Fiyat
-              </label>
-
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="0"
-                value={price}
-                onChange={
-                  e=>setPrice(e.target.value)
-                }
-              />
-
-            </div>
-
+          <div
+            style={{
+              fontSize:18,
+              fontWeight:800
+            }}
+          >
+            🏪 {activeStore}
           </div>
 
-
-          <button
-            className="primary-btn"
-            onClick={addItem}
-          >
-
-            <Icon
-              name="plus"
-              size={15}
-            />
-
-            Ürün Ekle
-
-          </button>
+          {locked && (
+            <span
+              style={{
+                fontSize:11,
+                background:"#f1efe9",
+                padding:"6px 9px",
+                borderRadius:8
+              }}
+            >
+              🔒 Onaylı
+            </span>
+          )}
 
         </div>
 
 
-        <div className="entry-list">
+        {locked && !isAdmin ? (
 
-          {items.length===0 && (
+          <div style={noticeBox}>
+            🔒 Bu kayıt onaylandı ve değiştirilemez.
+          </div>
 
-            <div className="empty">
-              Henüz ürün girilmedi.
-            </div>
+        ) : (
 
-          )}
-
-
-          {items.map(item=>(
+          <form
+            onSubmit={addItem}
+            style={card}
+          >
 
             <div
-              className="entry"
+              className="mobile-grid-1"
+              style={{
+                display:"grid",
+                gridTemplateColumns:"2fr 1fr 1fr",
+                gap:8
+              }}
+            >
+
+              <Input
+                label="Ürün"
+                placeholder="Örn. Un"
+                value={form.product}
+                onChange={v =>
+                  setForm({
+                    ...form,
+                    product:v
+                  })
+                }
+              />
+
+              <Input
+                label="Miktar"
+                type="number"
+                value={form.qty}
+                onChange={v =>
+                  setForm({
+                    ...form,
+                    qty:v
+                  })
+                }
+              />
+
+              <Input
+                label="Birim Fiyat"
+                type="number"
+                value={form.unitPrice}
+                onChange={v =>
+                  setForm({
+                    ...form,
+                    unitPrice:v
+                  })
+                }
+              />
+
+            </div>
+
+
+            <button
+              type="submit"
+              style={primaryButton}
+            >
+              + Ürün Ekle
+            </button>
+
+          </form>
+
+        )}
+
+
+        <div
+          style={{
+            display:"flex",
+            flexDirection:"column",
+            gap:8
+          }}
+        >
+
+          {items.map(item => (
+
+            <div
               key={item.id}
+              style={card}
             >
 
               <div>
 
-                <div className="entry-product">
+                <div
+                  style={{
+                    fontWeight:700,
+                    fontSize:13
+                  }}
+                >
                   {item.product}
                 </div>
 
-                <div className="entry-meta">
+                <div
+                  style={{
+                    color:"#77736b",
+                    fontSize:11,
+                    marginTop:3
+                  }}
+                >
                   {item.qty} × {formatTL(item.unitPrice)}
                 </div>
 
@@ -2175,30 +1848,29 @@ function Alis({
                 style={{
                   display:"flex",
                   alignItems:"center",
-                  gap:7
+                  gap:10
                 }}
               >
 
-                <div className="entry-price">
+                <strong>
                   {formatTL(
-                    item.qty*item.unitPrice
+                    item.qty *
+                    item.unitPrice
                   )}
-                </div>
+                </strong>
 
+                {!locked && (
 
-                <button
-                  className="danger-btn"
-                  onClick={()=>
-                    removeItem(item.id)
-                  }
-                >
+                  <button
+                    onClick={() =>
+                      deleteItem(item.id)
+                    }
+                    style={deleteButton}
+                  >
+                    🗑
+                  </button>
 
-                  <Icon
-                    name="trash-2"
-                    size={15}
-                  />
-
-                </button>
+                )}
 
               </div>
 
@@ -2209,19 +1881,56 @@ function Alis({
         </div>
 
 
-        <div className="total-card">
+        <TotalBox
+          title="Mağaza Toplamı"
+          value={total(activeStore)}
+        />
 
-          <span className="total-label">
-            {activeStore} Toplamı
-          </span>
 
-          <span className="total-value">
-            {formatTL(
-              storeTotal(activeStore)
-            )}
-          </span>
+        {!locked && !isAdmin && items.length > 0 && (
 
-        </div>
+          <button
+            onClick={lockStore}
+            style={{
+              ...primaryButton,
+              marginTop:10
+            }}
+          >
+            ✓ Kaydet ve Onayla
+          </button>
+
+        )}
+
+
+        {locked && isAdmin && (
+
+          <button
+            onClick={unlockStore}
+            style={{
+              ...secondaryButton,
+              marginTop:10
+            }}
+          >
+            🔓 Kilidi Kaldır
+          </button>
+
+        )}
+
+
+        {isAdmin && (
+
+          <button
+            onClick={() => deleteStore(activeStore)}
+            style={{
+              ...secondaryButton,
+              color:"#b4432e",
+              marginTop:10
+            }}
+          >
+            🗑 Mağazayı Sil
+          </button>
+
+        )}
 
       </div>
 
@@ -2230,139 +1939,150 @@ function Alis({
   }
 
 
-  return(
+  /* MAĞAZALAR */
+
+  const dayTotal =
+    data.stores.reduce(
+      (sum,store) =>
+        sum + total(store),
+      0
+    );
+
+
+  return (
 
     <div>
 
-      <div className="total-card">
-
-        <span className="total-label">
-          Günün Alış Toplamı
-        </span>
-
-        <span className="total-value">
-          {formatTL(dayTotal)}
-        </span>
-
-      </div>
+      <DateBar
+        date={date}
+        setDate={setDate}
+      />
 
 
-      <div className="store-list">
+      <TotalBox
+        title="Günün Alış Toplamı"
+        value={dayTotal}
+      />
 
-        {stores.map(store=>{
 
-          const items =
-            storeItems(store);
+      <div
+        style={{
+          display:"flex",
+          flexDirection:"column",
+          gap:9,
+          marginTop:12
+        }}
+      >
 
-          return(
+        {data.stores.map(store => (
 
-            <button
-              className="store-button"
-              key={store}
-              onClick={()=>
-                setActiveStore(store)
-              }
+          <button
+            key={store}
+            onClick={() =>
+              setActiveStore(store)
+            }
+            style={{
+              ...storeButton,
+              cursor:"pointer"
+            }}
+          >
+
+            <div
+              style={{
+                display:"flex",
+                alignItems:"center",
+                gap:12
+              }}
             >
 
-              <div className="store-left">
+              <div
+                style={storeIcon}
+              >
+                🏪
+              </div>
 
-                <div className="store-icon">
-                  <Icon
-                    name="store"
-                    size={18}
-                  />
+              <div
+                style={{
+                  textAlign:"left"
+                }}
+              >
+
+                <div
+                  style={{
+                    fontWeight:800,
+                    fontSize:13
+                  }}
+                >
+                  {store}
                 </div>
 
-                <div>
-
-                  <div className="store-name">
-                    {store}
-                  </div>
-
-                  <div className="store-meta">
-                    {items.length
-                      ? `${items.length} ürün`
-                      : "Ürün yok"}
-                  </div>
-
+                <div
+                  style={{
+                    color:"#77736b",
+                    fontSize:10,
+                    marginTop:2
+                  }}
+                >
+                  {(entries[store] || []).length}
+                  {" "}ürün
+                  {locks[store] ? " · 🔒 Onaylı" : ""}
                 </div>
 
               </div>
 
+            </div>
 
-              <div className="store-total">
-                {formatTL(
-                  storeTotal(store)
-                )}
-              </div>
 
-            </button>
+            <strong>
+              {formatTL(total(store))}
+            </strong>
 
-          );
+          </button>
 
-        })}
+        ))}
 
       </div>
 
 
       {isAdmin && (
 
-        <div
-          className="card"
-          style={{
-            marginTop:10
-          }}
-        >
+        <div style={{marginTop:12}}>
 
-          {!showAdd ? (
+          {!addStore ? (
 
             <button
-              className="secondary-btn"
-              style={{
-                width:"100%"
-              }}
-              onClick={()=>
-                setShowAdd(true)
+              onClick={() =>
+                setAddStore(true)
               }
+              style={secondaryButton}
             >
-
-              <Icon
-                name="plus"
-                size={15}
-              />
-
-              Yeni Mağaza Ekle
-
+              + Yeni Mağaza Ekle
             </button>
 
-          ): (
+          ) : (
 
-            <div className="add-store-row">
+            <div
+              style={{
+                display:"flex",
+                gap:7
+              }}
+            >
 
               <input
                 autoFocus
-                placeholder="Mağaza adı"
                 value={newStore}
-                onChange={
-                  e=>setNewStore(e.target.value)
+                onChange={e =>
+                  setNewStore(e.target.value)
                 }
+                placeholder="Mağaza adı"
+                style={inputStyle}
               />
 
               <button
-                className="secondary-btn"
-                onClick={addStore}
+                onClick={createStore}
+                style={primarySmall}
               >
                 Ekle
-              </button>
-
-              <button
-                className="secondary-btn"
-                onClick={()=>{
-                  setShowAdd(false);
-                  setNewStore("");
-                }}
-              >
-                <Icon name="x" size={15}/>
               </button>
 
             </div>
@@ -2384,187 +2104,327 @@ function Alis({
    SATIŞ
 ========================================================= */
 
-function Satis({
-  sales,
-  date,
-  isAdmin,
-  save,
-  setError
-}){
+function Satis({data,persist,isAdmin}) {
 
-  const rows =
-    SALE_PRODUCTS.map(product=>{
+  const [date,setDate] =
+    useState(todayISO());
 
-      const r =
-        sales[product] || {
-          qty:"",
-          unitPrice:""
-        };
+  const [confirmed,setConfirmed] =
+    useState(false);
 
-      const q =
-        Number(r.qty)||0;
 
-      const p =
-        Number(r.unitPrice)||0;
+  const day =
+    data.salesEntries[date] || {};
 
-      return{
-        product,
-        qty:r.qty ?? "",
-        unitPrice:r.unitPrice ?? "",
-        total:q*p
-      };
-
-    });
+  const locked =
+    !!data.salesLocks[date];
 
 
   const total =
-    rows.reduce(
-      (sum,row)=>
-        sum+row.total,
+    SALE_PRODUCTS.reduce(
+      (sum,product) => {
+
+        const row =
+          day[product] || {};
+
+        return sum +
+          Number(row.qty || 0) *
+          Number(row.unitPrice || 0);
+
+      },
       0
     );
 
 
-  async function update(
-    product,
-    field,
-    value
-  ){
+  function update(product,field,value) {
 
-    const current =
-      sales[product] || {
-        qty:"",
-        unitPrice:""
+    persist(current => {
+
+      const currentDay =
+        current.salesEntries[date] || {};
+
+      const currentRow =
+        currentDay[product] || {
+          qty:"",
+          unitPrice:""
+        };
+
+
+      return {
+
+        ...current,
+
+        salesEntries:{
+          ...current.salesEntries,
+
+          [date]:{
+            ...currentDay,
+
+            [product]:{
+              ...currentRow,
+              [field]:value
+            }
+
+          }
+
+        }
+
       };
 
-    const next = {
-
-      ...sales,
-
-      [product]:{
-        ...current,
-        [field]:value
-      }
-
-    };
-
-
-    try{
-
-      await SALES
-        .doc(date)
-        .set(next,{merge:true});
-
-      save();
-
-    }catch(err){
-
-      console.error(err);
-
-      setError(
-        "Satış kaydedilemedi."
-      );
-
-    }
+    });
 
   }
 
 
-  return(
+  function lock() {
+
+    persist(current => ({
+
+      ...current,
+
+      salesLocks:{
+        ...current.salesLocks,
+        [date]:true
+      }
+
+    }));
+
+  }
+
+
+  function unlock() {
+
+    persist(current => ({
+
+      ...current,
+
+      salesLocks:{
+        ...current.salesLocks,
+        [date]:false
+      }
+
+    }));
+
+  }
+
+
+  return (
 
     <div>
 
-      <div className="total-card">
+      <DateBar
+        date={date}
+        setDate={setDate}
+      />
 
-        <span className="total-label">
-          Günün Satış Toplamı
-        </span>
 
-        <span className="total-value">
-          {formatTL(total)}
-        </span>
+      <TotalBox
+        title="Günün Satış Toplamı"
+        value={total}
+        green
+      />
+
+
+      {locked && !isAdmin && (
+
+        <div style={noticeBox}>
+          🔒 Bu günün satışları onaylandı.
+        </div>
+
+      )}
+
+
+      <div
+        style={{
+          background:"#fff",
+          border:"1px solid #e4e1d8",
+          borderRadius:14,
+          overflow:"hidden",
+          marginTop:12
+        }}
+      >
+
+        <div
+          style={{
+            display:"grid",
+            gridTemplateColumns:"1.7fr .8fr 1fr 1fr",
+            gap:5,
+            padding:10,
+            background:"#f1efe9",
+            color:"#77736b",
+            fontSize:10,
+            fontWeight:800
+          }}
+        >
+
+          <span>Ürün</span>
+          <span style={{textAlign:"right"}}>Adet</span>
+          <span style={{textAlign:"right"}}>Birim</span>
+          <span style={{textAlign:"right"}}>Toplam</span>
+
+        </div>
+
+
+        {SALE_PRODUCTS.map((product,index) => {
+
+          const row =
+            day[product] || {
+              qty:"",
+              unitPrice:""
+            };
+
+          const rowTotal =
+            Number(row.qty || 0) *
+            Number(row.unitPrice || 0);
+
+
+          return (
+
+            <div
+              key={product}
+              style={{
+                display:"grid",
+                gridTemplateColumns:"1.7fr .8fr 1fr 1fr",
+                gap:5,
+                alignItems:"center",
+                padding:7,
+                borderTop:"1px solid #eeeae2",
+                background:
+                  index % 2 === 0
+                    ? "#fff"
+                    : "#fbfaf7"
+              }}
+            >
+
+              <span
+                style={{
+                  fontSize:11,
+                  fontWeight:700,
+                  overflow:"hidden",
+                  textOverflow:"ellipsis"
+                }}
+              >
+                {product}
+              </span>
+
+
+              <input
+                type="number"
+                min="0"
+                placeholder="0"
+                disabled={locked && !isAdmin}
+                value={row.qty}
+                onChange={e =>
+                  update(
+                    product,
+                    "qty",
+                    e.target.value
+                  )
+                }
+                style={tableInput}
+              />
+
+
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0"
+                disabled={locked && !isAdmin}
+                value={row.unitPrice}
+                onChange={e =>
+                  update(
+                    product,
+                    "unitPrice",
+                    e.target.value
+                  )
+                }
+                style={tableInput}
+              />
+
+
+              <strong
+                style={{
+                  fontSize:11,
+                  textAlign:"right"
+                }}
+              >
+                {formatTL(rowTotal)}
+              </strong>
+
+            </div>
+
+          );
+
+        })}
 
       </div>
 
 
-      <div className="sale-list">
+      {!locked && !isAdmin && total > 0 && (
 
-        {rows.map(row=>(
+        <div
+          style={{
+            marginTop:12,
+            background:"#fff9ec",
+            border:"1px solid #e9ddb8",
+            padding:13,
+            borderRadius:13
+          }}
+        >
 
-          <div
-            className="sale-card"
-            key={row.product}
+          <label
+            style={{
+              display:"flex",
+              gap:8,
+              fontSize:11,
+              color:"#7a6a2e"
+            }}
           >
 
-            <div className="sale-name">
-              {row.product}
-            </div>
+            <input
+              type="checkbox"
+              checked={confirmed}
+              onChange={e =>
+                setConfirmed(e.target.checked)
+              }
+            />
+
+            Bu kayıt onaylandıktan sonra değiştirilemez.
+
+          </label>
 
 
-            <div className="sale-fields">
+          <button
+            disabled={!confirmed}
+            onClick={lock}
+            style={{
+              ...primaryButton,
+              marginTop:10,
+              opacity:confirmed ? 1 : .45
+            }}
+          >
+            ✓ Kaydet ve Onayla
+          </button>
 
-              <div className="sale-field">
+        </div>
 
-                <label>
-                  Adet
-                </label>
-
-                <input
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  value={row.qty}
-                  onChange={
-                    e=>
-                      update(
-                        row.product,
-                        "qty",
-                        e.target.value
-                      )
-                  }
-                />
-
-              </div>
+      )}
 
 
-              <div className="sale-field">
+      {locked && isAdmin && (
 
-                <label>
-                  Birim Fiyat
-                </label>
+        <button
+          onClick={unlock}
+          style={{
+            ...secondaryButton,
+            marginTop:10
+          }}
+        >
+          🔓 Kilidi Kaldır
+        </button>
 
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0"
-                  value={row.unitPrice}
-                  onChange={
-                    e=>
-                      update(
-                        row.product,
-                        "unitPrice",
-                        e.target.value
-                      )
-                  }
-                />
-
-              </div>
-
-            </div>
-
-
-            <div className="sale-total">
-
-              {formatTL(row.total)}
-
-            </div>
-
-          </div>
-
-        ))}
-
-      </div>
+      )}
 
     </div>
 
@@ -2577,179 +2437,182 @@ function Satis({
    MALİYET
 ========================================================= */
 
-function Maliyet({
-  costs,
-  save,
-  setError
-}){
+function Maliyetler({data,persist}) {
+
+  return (
+
+    <div>
+
+      <div
+        style={{
+          color:"#77736b",
+          fontSize:12,
+          marginBottom:12
+        }}
+      >
+        Pizza bazında maliyet ve satış fiyatlarını girin.
+      </div>
 
 
-  async function update(
-    product,
-    field,
-    value
-  ){
+      <div
+        style={{
+          display:"flex",
+          flexDirection:"column",
+          gap:8
+        }}
+      >
 
-    const current =
-      costs[product] || {
-        cost:"",
-        price:""
-      };
+        {SALE_PRODUCTS.map(product => (
+
+          <CostRow
+            key={product}
+            product={product}
+            data={data}
+            persist={persist}
+          />
+
+        ))}
+
+      </div>
+
+    </div>
+
+  );
+
+}
 
 
-    const next = {
+function CostRow({product,data,persist}) {
 
-      ...costs,
-
-      [product]:{
-        ...current,
-        [field]:value
-      }
-
+  const current =
+    data.costs[product] || {
+      cost:"",
+      price:""
     };
 
 
-    try{
+  const cost =
+    Number(current.cost || 0);
 
-      await COSTS
-        .doc("main")
-        .set(next,{merge:true});
+  const price =
+    Number(current.price || 0);
 
-      save();
+  const profit =
+    price - cost;
 
-    }catch(err){
+  const percent =
+    price > 0
+      ? (profit / price) * 100
+      : 0;
 
-      console.error(err);
 
-      setError(
-        "Maliyet kaydedilemedi."
-      );
+  function update(field,value) {
 
-    }
+    persist(currentData => {
+
+      const old =
+        currentData.costs[product] || {
+          cost:"",
+          price:""
+        };
+
+      return {
+
+        ...currentData,
+
+        costs:{
+          ...currentData.costs,
+
+          [product]:{
+            ...old,
+            [field]:value
+          }
+
+        }
+
+      };
+
+    });
 
   }
 
 
-  return(
+  return (
 
-    <div>
+    <div
+      style={{
+        background:"#fff",
+        border:"1px solid #e4e1d8",
+        borderRadius:13,
+        padding:12
+      }}
+    >
 
-      <h2 className="section-title">
-        Maliyet Yönetimi
-      </h2>
-
-
-      <div className="cost-list">
-
-        {SALE_PRODUCTS.map(product=>{
-
-          const c =
-            costs[product] || {
-              cost:"",
-              price:""
-            };
-
-          const cost =
-            Number(c.cost)||0;
-
-          const price =
-            Number(c.price)||0;
-
-          const profit =
-            price-cost;
-
-          const pct =
-            price>0
-              ? (profit/price)*100
-              : 0;
+      <div
+        style={{
+          fontSize:12,
+          fontWeight:800,
+          marginBottom:9
+        }}
+      >
+        {product}
+      </div>
 
 
-          return(
+      <div
+        className="mobile-grid-2"
+        style={{
+          display:"grid",
+          gridTemplateColumns:"1fr 1fr",
+          gap:7
+        }}
+      >
 
-            <div
-              className="cost-card"
-              key={product}
-            >
+        <Input
+          label="Maliyet"
+          type="number"
+          value={current.cost}
+          onChange={v =>
+            update("cost",v)
+          }
+        />
 
-              <div className="cost-name">
-                {product}
-              </div>
+        <Input
+          label="Satış"
+          type="number"
+          value={current.price}
+          onChange={v =>
+            update("price",v)
+          }
+        />
 
-
-              <div className="cost-grid">
-
-                <div>
-
-                  <label>
-                    Maliyet
-                  </label>
-
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="0"
-                    value={c.cost}
-                    onChange={
-                      e=>
-                        update(
-                          product,
-                          "cost",
-                          e.target.value
-                        )
-                    }
-                  />
-
-                </div>
+      </div>
 
 
-                <div>
+      <div
+        style={{
+          display:"flex",
+          justifyContent:"space-between",
+          marginTop:9,
+          paddingTop:9,
+          borderTop:"1px solid #eeeae2",
+          fontSize:11
+        }}
+      >
 
-                  <label>
-                    Satış
-                  </label>
+        <span>
+          Kâr
+        </span>
 
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="0"
-                    value={c.price}
-                    onChange={
-                      e=>
-                        update(
-                          product,
-                          "price",
-                          e.target.value
-                        )
-                    }
-                  />
-
-                </div>
-
-              </div>
-
-
-              <div className="cost-result">
-
-                <span>
-                  Kâr:{" "}
-                  <span className="green">
-                    {formatTL(profit)}
-                  </span>
-                </span>
-
-                <span className="green">
-                  %{pct.toFixed(0)}
-                </span>
-
-              </div>
-
-            </div>
-
-          );
-
-        })}
+        <strong
+          style={{
+            color:"#1c6b4e"
+          }}
+        >
+          {formatTL(profit)}
+          {" "}
+          ({percent.toFixed(0)}%)
+        </strong>
 
       </div>
 
@@ -2764,130 +2627,152 @@ function Maliyet({
    KAR ZARAR
 ========================================================= */
 
-function KarZarar({
-  purchases,
-  sales,
-  date,
-  setDate
-}){
+function KarZarar({data}) {
 
-  const month =
-    date.slice(0,7);
+  const [month,setMonth] =
+    useState(monthISO());
 
 
-  const purchaseTotal =
-    Object.values(
-      purchases.stores || {}
-    )
-    .flat()
-    .reduce(
-      (sum,item)=>
-        sum+
-        (Number(item.qty)||0)*
-        (Number(item.unitPrice)||0),
-      0
-    );
+  let purchases = 0;
+  let sales = 0;
 
 
-  const salesTotal =
-    Object.values(sales)
-      .reduce(
-        (sum,row)=>
-          sum+
-          (Number(row.qty)||0)*
-          (Number(row.unitPrice)||0),
-        0
-      );
+  Object.entries(
+    data.purchaseEntries || {}
+  ).forEach(([date,stores]) => {
+
+    if (!date.startsWith(month)) return;
+
+    Object.values(stores || {})
+      .forEach(items => {
+
+        (items || []).forEach(item => {
+
+          purchases +=
+            Number(item.qty || 0) *
+            Number(item.unitPrice || 0);
+
+        });
+
+      });
+
+  });
 
 
-  return(
+  Object.entries(
+    data.salesEntries || {}
+  ).forEach(([date,rows]) => {
+
+    if (!date.startsWith(month)) return;
+
+    Object.values(rows || {})
+      .forEach(row => {
+
+        sales +=
+          Number(row.qty || 0) *
+          Number(row.unitPrice || 0);
+
+      });
+
+  });
+
+
+  const net =
+    sales - purchases;
+
+
+  return (
 
     <div>
 
-      <div className="date-card">
+      <div style={card}>
 
-        <Icon
-          name="calendar"
-          size={17}
-        />
+        <label
+          style={{
+            fontSize:10,
+            color:"#77736b",
+            display:"block",
+            marginBottom:5
+          }}
+        >
+          Ay Seç
+        </label>
 
         <input
           type="month"
           value={month}
-          onChange={e=>
-            setDate(
-              e.target.value+
-              "-01"
-            )
+          onChange={e =>
+            setMonth(e.target.value)
           }
+          style={inputStyle}
         />
 
-        <span className="date-label">
-          {formatMonthLabel(month)}
-        </span>
+      </div>
+
+
+      <div
+        className="mobile-grid-2"
+        style={{
+          display:"grid",
+          gridTemplateColumns:"1fr 1fr",
+          gap:9,
+          marginTop:10
+        }}
+      >
+
+        <StatCard
+          title="Toplam Satış"
+          value={formatTL(sales)}
+          icon="📈"
+          positive
+        />
+
+        <StatCard
+          title="Toplam Alış"
+          value={formatTL(purchases)}
+          icon="🛒"
+        />
 
       </div>
 
 
-      <div className="stat-grid">
-
-        <div className="stat">
-
-          <div className="stat-label">
-            Günlük Satış
-          </div>
-
-          <div className="stat-value green">
-            {formatTL(salesTotal)}
-          </div>
-
-        </div>
-
-
-        <div className="stat">
-
-          <div className="stat-label">
-            Günlük Alış
-          </div>
-
-          <div className="stat-value red">
-            {formatTL(purchaseTotal)}
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <div className="total-card">
-
-        <span className="total-label">
-          Net Kâr / Nakit Farkı
-        </span>
-
-        <span className="total-value">
-          {formatTL(
-            salesTotal-purchaseTotal
-          )}
-        </span>
-
-      </div>
-
-
-      <div className="card">
+      <div
+        style={{
+          background:"#1c1b19",
+          color:"#fff",
+          borderRadius:15,
+          padding:18,
+          marginTop:10
+        }}
+      >
 
         <div
           style={{
-            color:"#77736b",
-            fontSize:11,
-            lineHeight:1.5
+            color:"#aaa69c",
+            fontSize:11
           }}
         >
-          Bu ekran seçilen günün satış ve alış
-          kayıtlarını karşılaştırır. Aylık tam
-          raporlama için kayıtlar ayrı tarih
-          belgelerinde tutulduğu için geçmiş
-          günlerin verileri kaybolmaz.
+          Net Kâr / Nakit Akışı
+        </div>
+
+        <div
+          style={{
+            fontSize:26,
+            fontWeight:800,
+            marginTop:5
+          }}
+        >
+          {formatTL(net)}
+        </div>
+
+        <div
+          style={{
+            color:"#aaa69c",
+            fontSize:10,
+            marginTop:4
+          }}
+        >
+          {formatMonth(month)}
         </div>
 
       </div>
@@ -2903,11 +2788,7 @@ function KarZarar({
    YÖNETİCİ
 ========================================================= */
 
-function Yonetici({
-  config,
-  save,
-  setError
-}){
+function Yonetici({data,persist}) {
 
   const [username,setUsername] =
     useState("");
@@ -2917,197 +2798,177 @@ function Yonetici({
 
 
   const users =
-    config.users || {};
+    data.users || {};
 
 
-  async function create(){
+  function createUser(e) {
 
-    const u =
+    e.preventDefault();
+
+    const name =
       username.trim();
 
-    const p =
+    const pass =
       password.trim();
 
-
-    if(!u || !p){
-
-      setError(
-        "Kullanıcı adı ve şifre girin."
-      );
-
-      return;
-
-    }
+    if (
+      !name ||
+      !pass ||
+      users[name]
+    ) return;
 
 
-    if(users[u]){
+    persist(current => ({
 
-      setError(
-        "Bu kullanıcı zaten mevcut."
-      );
+      ...current,
 
-      return;
+      users:{
+        ...(current.users || {}),
 
-    }
-
-
-    try{
-
-      await CONFIG_REF.set({
-
-        users:{
-          ...users,
-
-          [u]:{
-            password:p,
-            role:"user"
-          }
-
+        [name]:{
+          password:pass,
+          role:"user"
         }
 
-      },{merge:true});
+      }
+
+    }));
 
 
-      setUsername("");
-      setPassword("");
-
-      save();
-
-    }catch(err){
-
-      console.error(err);
-
-      setError(
-        "Kullanıcı oluşturulamadı."
-      );
-
-    }
+    setUsername("");
+    setPassword("");
 
   }
 
 
-  async function deleteUser(name){
+  function deleteUser(name) {
 
-    if(
+    if (
       !confirm(
-        `"${name}" kullanıcısı silinsin mi?`
+        `"${name}" kullanıcısını silmek istediğinize emin misiniz?`
       )
     ) return;
 
 
-    const next = {
-      ...users
-    };
+    persist(current => {
 
-    delete next[name];
+      const {
+        [name]:removed,
+        ...remaining
+      } = current.users || {};
 
 
-    try{
+      return {
 
-      await CONFIG_REF.set({
+        ...current,
 
-        users:next
+        users:remaining
 
-      },{merge:true});
+      };
 
-      save();
-
-    }catch(err){
-
-      setError(
-        "Kullanıcı silinemedi."
-      );
-
-    }
+    });
 
   }
 
 
-  return(
+  return (
 
     <div>
 
-      <h2 className="section-title">
-        Kullanıcı Yönetimi
-      </h2>
+      <form
+        onSubmit={createUser}
+        style={card}
+      >
+
+        <div
+          style={{
+            fontSize:14,
+            fontWeight:800,
+            marginBottom:10
+          }}
+        >
+          👤 Yeni Kullanıcı
+        </div>
 
 
-      <div className="card">
+        <div
+          className="mobile-grid-1"
+          style={{
+            display:"grid",
+            gridTemplateColumns:"1fr 1fr",
+            gap:8
+          }}
+        >
 
-        <div className="form-grid">
+          <Input
+            label="Kullanıcı adı"
+            value={username}
+            onChange={setUsername}
+          />
 
-          <div className="field">
-
-            <label>
-              Kullanıcı Adı
-            </label>
-
-            <input
-              autoCapitalize="none"
-              placeholder="Yeni kullanıcı"
-              value={username}
-              onChange={
-                e=>setUsername(e.target.value)
-              }
-            />
-
-          </div>
-
-
-          <div className="field">
-
-            <label>
-              Şifre
-            </label>
-
-            <input
-              placeholder="Şifre"
-              value={password}
-              onChange={
-                e=>setPassword(e.target.value)
-              }
-            />
-
-          </div>
+          <Input
+            label="Şifre"
+            type="password"
+            value={password}
+            onChange={setPassword}
+          />
 
         </div>
 
 
         <button
-          className="primary-btn"
-          onClick={create}
+          type="submit"
+          style={{
+            ...primaryButton,
+            marginTop:10
+          }}
         >
-
-          <Icon
-            name="user-plus"
-            size={15}
-          />
-
-          Kullanıcı Oluştur
-
+          + Kullanıcı Oluştur
         </button>
 
-      </div>
+      </form>
 
 
-      <div>
+      <SectionTitle>
+        Kullanıcılar
+      </SectionTitle>
+
+
+      <div
+        style={{
+          display:"flex",
+          flexDirection:"column",
+          gap:8
+        }}
+      >
 
         {Object.entries(users).map(
-          ([name,user])=>(
+          ([name,u]) => (
 
             <div
-              className="user-row"
               key={name}
+              style={card}
             >
 
               <div>
 
-                <div className="user-name">
+                <div
+                  style={{
+                    fontWeight:800,
+                    fontSize:13
+                  }}
+                >
                   {name}
                 </div>
 
-                <div className="user-role">
-                  {user.role==="admin"
+                <div
+                  style={{
+                    color:"#77736b",
+                    fontSize:10,
+                    marginTop:3
+                  }}
+                >
+                  {u.role === "admin"
                     ? "Yönetici"
                     : "Kullanıcı"}
                 </div>
@@ -3115,20 +2976,15 @@ function Yonetici({
               </div>
 
 
-              {user.role!=="admin" && (
+              {u.role !== "admin" && (
 
                 <button
-                  className="danger-btn"
-                  onClick={()=>
+                  onClick={() =>
                     deleteUser(name)
                   }
+                  style={deleteButton}
                 >
-
-                  <Icon
-                    name="trash-2"
-                    size={16}
-                  />
-
+                  🗑
                 </button>
 
               )}
@@ -3140,39 +2996,209 @@ function Yonetici({
 
       </div>
 
+    </div>
+
+  );
+
+}
+
+
+/* =========================================================
+   KÜÇÜK BİLEŞENLER
+========================================================= */
+
+function MenuButton({
+  active,
+  icon,
+  label,
+  onClick
+}) {
+
+  return (
+
+    <button
+      onClick={onClick}
+      style={{
+        width:"100%",
+        display:"flex",
+        alignItems:"center",
+        gap:11,
+        padding:"12px 13px",
+        marginBottom:4,
+        borderRadius:10,
+        border:"none",
+        background:
+          active
+            ? "#b4432e"
+            : "transparent",
+        color:"#fff",
+        cursor:"pointer",
+        textAlign:"left",
+        fontSize:13,
+        fontWeight:active ? 800 : 500
+      }}
+    >
+
+      <Icon>
+        {icon}
+      </Icon>
+
+      {label}
+
+    </button>
+
+  );
+
+}
+
+
+function DateBar({date,setDate}) {
+
+  return (
+
+    <div
+      style={{
+        ...card,
+        display:"flex",
+        alignItems:"center",
+        gap:10,
+        marginBottom:10
+      }}
+    >
+
+      <span>
+        📅
+      </span>
+
+      <input
+        type="date"
+        value={date}
+        onChange={e =>
+          setDate(e.target.value)
+        }
+        style={{
+          ...inputStyle,
+          border:0,
+          padding:0,
+          background:"transparent"
+        }}
+      />
+
+      <span
+        className="desktop-only"
+        style={{
+          marginLeft:"auto",
+          color:"#77736b",
+          fontSize:11
+        }}
+      >
+        {formatDate(date)}
+      </span>
+
+    </div>
+
+  );
+
+}
+
+
+function Input({
+  label,
+  value,
+  onChange,
+  type="text",
+  placeholder=""
+}) {
+
+  return (
+
+    <label>
+
+      <span
+        style={{
+          display:"block",
+          fontSize:10,
+          color:"#77736b",
+          marginBottom:4
+        }}
+      >
+        {label}
+      </span>
+
+      <input
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        onChange={e =>
+          onChange(e.target.value)
+        }
+        style={inputStyle}
+      />
+
+    </label>
+
+  );
+
+}
+
+
+function StatCard({
+  title,
+  value,
+  icon,
+  positive
+}) {
+
+  return (
+
+    <div
+      style={{
+        background:"#fff",
+        border:"1px solid #e4e1d8",
+        borderRadius:14,
+        padding:14
+      }}
+    >
 
       <div
-        className="card"
         style={{
-          marginTop:12,
-          background:"#f1efe9"
+          display:"flex",
+          justifyContent:"space-between",
+          alignItems:"center",
+          marginBottom:8
         }}
       >
 
-        <div
+        <span
           style={{
-            fontSize:11,
-            fontWeight:800,
-            marginBottom:5
+            fontSize:18
           }}
         >
-          Veri sistemi
-        </div>
+          {icon}
+        </span>
 
-        <div
+        <span
           style={{
-            fontSize:10,
-            color:"#6b6862",
-            lineHeight:1.5
+            color:"#77736b",
+            fontSize:10
           }}
         >
-          Kullanıcılar artık alış veya satış
-          kaydıyla aynı belgeye yazılmıyor.
-          Bu nedenle bir kayıt yapılırken
-          kullanıcı listesinin üzerine yazılması
-          engellenmiş oluyor.
-        </div>
+          {title}
+        </span>
 
+      </div>
+
+      <div
+        style={{
+          fontSize:16,
+          fontWeight:800,
+          color:
+            positive
+              ? "#1c6b4e"
+              : "#b4432e"
+        }}
+      >
+        {value}
       </div>
 
     </div>
@@ -3182,6 +3208,382 @@ function Yonetici({
 }
 
 
+function QuickButton({
+  icon,
+  title,
+  onClick
+}) {
+
+  return (
+
+    <button
+      onClick={onClick}
+      style={{
+        background:"#fff",
+        border:"1px solid #e4e1d8",
+        borderRadius:13,
+        padding:15,
+        cursor:"pointer",
+        textAlign:"left"
+      }}
+    >
+
+      <div
+        style={{
+          fontSize:21,
+          marginBottom:7
+        }}
+      >
+        {icon}
+      </div>
+
+      <div
+        style={{
+          fontWeight:800,
+          fontSize:12
+        }}
+      >
+        {title}
+      </div>
+
+    </button>
+
+  );
+
+}
+
+
+function SectionTitle({children}) {
+
+  return (
+
+    <div
+      style={{
+        fontSize:13,
+        fontWeight:800,
+        margin:"15px 0 8px"
+      }}
+    >
+      {children}
+    </div>
+
+  );
+
+}
+
+
+function TotalBox({
+  title,
+  value,
+  green=false
+}) {
+
+  return (
+
+    <div
+      style={{
+        background:"#1c1b19",
+        color:"#fff",
+        borderRadius:14,
+        padding:15,
+        display:"flex",
+        justifyContent:"space-between",
+        alignItems:"center"
+      }}
+    >
+
+      <span
+        style={{
+          color:"#aaa69c",
+          fontSize:11
+        }}
+      >
+        {title}
+      </span>
+
+      <strong
+        style={{
+          color:green ? "#b9e4ce" : "#fff",
+          fontSize:17
+        }}
+      >
+        {formatTL(value)}
+      </strong>
+
+    </div>
+
+  );
+
+}
+
+
+/* =========================================================
+   STİLLER
+========================================================= */
+
+const card = {
+
+  background:"#fff",
+
+  border:"1px solid #e4e1d8",
+
+  borderRadius:14,
+
+  padding:13,
+
+  display:"flex",
+
+  alignItems:"center",
+
+  justifyContent:"space-between"
+
+};
+
+
+const storeButton = {
+
+  width:"100%",
+
+  border:"1px solid #e4e1d8",
+
+  background:"#fff",
+
+  borderRadius:14,
+
+  padding:13,
+
+  display:"flex",
+
+  alignItems:"center",
+
+  justifyContent:"space-between",
+
+  textAlign:"left"
+
+};
+
+
+const storeIcon = {
+
+  width:38,
+
+  height:38,
+
+  borderRadius:10,
+
+  background:"#eaf3ee",
+
+  display:"flex",
+
+  alignItems:"center",
+
+  justifyContent:"center",
+
+  fontSize:18
+
+};
+
+
+const inputStyle = {
+
+  width:"100%",
+
+  padding:"10px 11px",
+
+  border:"1px solid #e4e1d8",
+
+  borderRadius:9,
+
+  background:"#fcfcfa",
+
+  outline:"none",
+
+  fontSize:12,
+
+  color:"#1c1b19"
+
+};
+
+
+const tableInput = {
+
+  width:"100%",
+
+  padding:"7px 5px",
+
+  border:"1px solid #e4e1d8",
+
+  borderRadius:6,
+
+  background:"#fcfcfa",
+
+  outline:"none",
+
+  fontSize:11,
+
+  textAlign:"right"
+
+};
+
+
+const primaryButton = {
+
+  width:"100%",
+
+  padding:11,
+
+  marginTop:10,
+
+  border:0,
+
+  borderRadius:9,
+
+  background:"#1c1b19",
+
+  color:"#fff",
+
+  fontWeight:800,
+
+  fontSize:12,
+
+  cursor:"pointer"
+
+};
+
+
+const primarySmall = {
+
+  border:0,
+
+  borderRadius:10,
+
+  background:"#1c1b19",
+
+  color:"#fff",
+
+  padding:"0 15px",
+
+  fontWeight:800,
+
+  cursor:"pointer"
+
+};
+
+
+const secondaryButton = {
+
+  width:"100%",
+
+  padding:11,
+
+  border:"1px solid #e4e1d8",
+
+  borderRadius:10,
+
+  background:"#fff",
+
+  color:"#1c1b19",
+
+  fontWeight:700,
+
+  fontSize:12,
+
+  cursor:"pointer"
+
+};
+
+
+const deleteButton = {
+
+  border:0,
+
+  background:"transparent",
+
+  color:"#a8a49a",
+
+  cursor:"pointer",
+
+  fontSize:16
+
+};
+
+
+const backButton = {
+
+  border:0,
+
+  background:"transparent",
+
+  padding:0,
+
+  marginBottom:12,
+
+  color:"#77736b",
+
+  fontSize:12,
+
+  cursor:"pointer"
+
+};
+
+
+const noticeBox = {
+
+  background:"#f1efe9",
+
+  border:"1px solid #e4e1d8",
+
+  borderRadius:11,
+
+  padding:12,
+
+  fontSize:11,
+
+  color:"#68645d",
+
+  marginBottom:10
+
+};
+
+
+const loginInput = {
+
+  width:"100%",
+
+  padding:14,
+
+  marginBottom:10,
+
+  borderRadius:11,
+
+  border:"1px solid #3a3833",
+
+  background:"#292825",
+
+  color:"#fff",
+
+  outline:"none",
+
+  fontSize:13
+
+};
+
+
+const sideClose = {
+
+  border:0,
+
+  background:"transparent",
+
+  color:"#aaa69c",
+
+  fontSize:27,
+
+  cursor:"pointer"
+
+};
+
+
 /* =========================================================
    BAŞLAT
 ========================================================= */
@@ -3189,7 +3591,7 @@ function Yonetici({
 ReactDOM.createRoot(
   document.getElementById("root")
 ).render(
-  <App/>
+  <ManoPizza />
 );
 
 </script>
