@@ -1,21 +1,590 @@
 <!DOCTYPE html>
 <html lang="tr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mano Pizza</title>
-    <!-- React ve Babel Kütüphaneleri (Derleme hatasını tamamen ortadan kaldırır) -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  </head>
-  <body style="margin: 0; background: #F7F6F2;">
-    <div id="root"></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mano Pizza</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-[#F7F6F2] text-[#1C1B19] m-0">
+  <div id="root"></div>
 
-    <script type="text/babel" data-presets="react">
-      // Buraya birazdan vereceğim tek dosyalık tam kodu yapıştıracaksın.
-    </script>
-  </body>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    window.firebaseModules = { initializeApp, getFirestore, doc, setDoc, onSnapshot };
+  </script>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyBLXwi0r4QrMlpA7PxYEFwy5ADr_Q9nPqk",
+      authDomain: "mano-pizza.firebaseapp.com",
+      projectId: "mano-pizza",
+      storageBucket: "mano-pizza.firebasestorage.app",
+      messagingSenderId: "558530166779",
+      appId: "1:558530166779:web:fe990140b59ad5dd1e155e"
+    };
+
+    const app = window.firebaseModules.initializeApp(firebaseConfig);
+    const db = window.firebaseModules.getFirestore(app);
+    const DOC_REF = window.firebaseModules.doc(db, "mano_pizza", "veri");
+    const { setDoc, onSnapshot } = window.firebaseModules;
+
+    const DEFAULT_STORES = ["Metro Market", "File Market"];
+    const ADMIN_USERNAME = "mathrew";
+    const ADMIN_PASSWORD = "01102022";
+    const SALE_PRODUCTS = ["Margarita Pizza", ...Array.from({ length: 20 }, (_, i) => `Pizza No:${i + 1}`)];
+
+    function formatTL(n) {
+      return new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 2 }).format(n || 0);
+    }
+    function todayISO() { return new Date().toISOString().slice(0, 10); }
+    function thisMonthISO() { return new Date().toISOString().slice(0, 7); }
+    function formatDateLabel(iso) {
+      return new Date(iso + "T00:00:00").toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric", weekday: "long" });
+    }
+    function formatMonthLabel(iso) {
+      return new Date(iso + "-01T00:00:00").toLocaleDateString("tr-TR", { month: "long", year: "numeric" });
+    }
+
+    const EMPTY_DATA = {
+      stores: DEFAULT_STORES,
+      purchaseEntries: {},
+      purchaseLocks: {},
+      salesEntries: {},
+      salesLocks: {},
+      costs: {},
+      lastActiveStore: null,
+      users: { [ADMIN_USERNAME]: { password: ADMIN_PASSWORD, role: "admin" } },
+    };
+
+    function ManoPizza() {
+      const [data, setData] = useState(EMPTY_DATA);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState("");
+      const [currentUser, setCurrentUser] = useState(null);
+      const [date, setDate] = useState(todayISO());
+      const [tab, setTab] = useState("alis");
+
+      useEffect(() => {
+        const unsubscribe = onSnapshot(DOC_REF, (docSnap) => {
+          if (docSnap.exists()) {
+            const parsed = docSnap.data();
+            const merged = parsed && parsed.stores ? { ...EMPTY_DATA, ...parsed } : EMPTY_DATA;
+            merged.users = { ...EMPTY_DATA.users, ...(parsed?.users || {}) };
+            setData(merged);
+          } else {
+            setDoc(DOC_REF, EMPTY_DATA);
+            setData(EMPTY_DATA);
+          }
+          setLoading(false);
+        }, (err) => {
+          console.error(err);
+          setError("Veriler yüklenirken hata oluştu.");
+          setLoading(false);
+        });
+        return () => unsubscribe();
+      }, []);
+
+      async function persist(next) {
+        setData(next);
+        try {
+          await setDoc(DOC_REF, next);
+          setError("");
+        } catch (err) {
+          setError("Kaydedilemedi, bağlantını kontrol et.");
+        }
+      }
+
+      if (loading) {
+        return (
+          <div className="bg-[#1C1B19] min-h-screen flex items-center justify-center">
+            <p className="text-[#9C9890] text-sm">Yükleniyor…</p>
+          </div>
+        );
+      }
+
+      if (!currentUser) {
+        return <LoginScreen users={data.users} onSuccess={setCurrentUser} />;
+      }
+
+      const isAdmin = currentUser.role === "admin";
+      const tabs = isAdmin
+        ? [
+            { id: "alis", label: "Alış", icon: "shopping-bag" },
+            { id: "satis", label: "Satış", icon: "trending-up" },
+            { id: "maliyet", label: "Maliyetler", icon: "percent" },
+            { id: "karzarar", label: "Kâr / Zarar", icon: "trending-down" },
+            { id: "yonetici", label: "Yönetici", icon: "shield-check" },
+          ]
+        : [
+            { id: "alis", label: "Alış", icon: "shopping-bag" },
+            { id: "satis", label: "Satış", icon: "trending-up" },
+          ];
+
+      return (
+        <div className="bg-[#F7F6F2] min-h-screen text-[#1C1B19] pb-16">
+          <div className="max-w-[780px] mx-auto p-4 sm:p-6">
+            <header className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-lg bg-[#B4432E] flex items-center justify-center text-[#F7F6F2]">
+                  <i data-lucide="pizza" className="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h1 className="text-lg font-bold m-0 tracking-tight">Mano Pizza</h1>
+                  <p className="text-xs text-[#6B6862] m-0">{currentUser.username} · {isAdmin ? "Yönetici" : "Kullanıcı"}</p>
+                </div>
+              </div>
+              <button onClick={() => setCurrentUser(null)} className="flex items-center gap-1.5 border border-[#E4E1D8] bg-white text-[#6B6862] rounded-lg px-2.5 py-1.5 text-xs cursor-pointer">
+                <i data-lucide="log-out" className="w-3.5 h-3.5"></i> Çıkış
+              </button>
+            </header>
+
+            {(tab === "alis" || tab === "satis") && (
+              <div className="flex items-center gap-2.5 bg-white border border-[#E4E1D8] rounded-xl p-2.5 mb-3.5">
+                <i data-lucide="calendar" className="w-4 h-4 text-[#6B6862]"></i>
+                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="border-none bg-transparent text-sm text-[#1C1B19] flex-1 outline-none" />
+                <span className="text-xs text-[#A8A49A]">{formatDateLabel(date)}</span>
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {tabs.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setTab(t.id)}
+                  className={`flex-1 min-w-[28%] flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl border text-xs font-semibold cursor-pointer transition-all ${
+                    tab === t.id ? "bg-[#1C1B19] text-[#F7F6F2] border-[#1C1B19]" : "bg-white text-[#6B6862] border-[#E4E1D8]"
+                  }`}
+                >
+                  <i data-lucide={t.icon} className="w-3.5 h-3.5"></i>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {tab === "alis" && <AlisTab data={data} date={date} persist={persist} error={error} isAdmin={isAdmin} />}
+            {tab === "satis" && <SatisTab data={data} date={date} persist={persist} error={error} isAdmin={isAdmin} />}
+            {tab === "maliyet" && isAdmin && <MaliyetlerTab data={data} persist={persist} error={error} />}
+            {tab === "karzarar" && isAdmin && <KarZararTab data={data} />}
+            {tab === "yonetici" && isAdmin && <YoneticiTab data={data} persist={persist} error={error} />}
+          </div>
+        </div>
+      );
+    }
+
+    function LoginScreen({ users, onSuccess }) {
+      const [stage, setStage] = useState("splash");
+      const [username, setUsername] = useState("");
+      const [password, setPassword] = useState("");
+      const [err, setErr] = useState("");
+
+      function submit(e) {
+        e.preventDefault();
+        const u = users[username.trim()];
+        if (u && u.password === password) {
+          onSuccess({ username: username.trim(), role: u.role });
+        } else {
+          setErr("Kullanıcı adı veya şifre hatalı.");
+          setPassword("");
+        }
+      }
+
+      return (
+        <div className="bg-[#1C1B19] min-h-screen flex items-center justify-center p-6 text-center">
+          <div className="w-full max-w-[320px]">
+            <div className="w-16 h-16 rounded-2xl bg-[#B4432E] flex items-center justify-center mx-auto mb-4 text-[#F7F6F2]">
+              <i data-lucide="pizza" className="w-8 h-8"></i>
+            </div>
+            <h1 className="text-[#F7F6F2] text-2xl font-bold mb-1">Mano Pizza</h1>
+            <p className="text-[#9C9890] text-sm mb-8">Gelir Gider</p>
+
+            {stage === "splash" ? (
+              <button onClick={() => setStage("login")} className="w-full py-3.5 rounded-xl border-none bg-[#F7F6F2] text-[#1C1B19] font-bold text-sm cursor-pointer">
+                Giriş Yap
+              </button>
+            ) : (
+              <form onSubmit={submit} className="text-left">
+                <span className="text-[11px] text-[#9C9890] block mb-1">Kullanıcı Adı</span>
+                <input autoFocus type="text" autoCapitalize="none" value={username} onChange={(e) => setUsername(e.target.value)} className="w-full p-3 rounded-xl border border-[#3A3934] bg-[#2A2926] text-[#F7F6F2] text-sm outline-none mb-3" />
+                <span className="text-[11px] text-[#9C9890] block mb-1">Şifre</span>
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-3 rounded-xl border border-[#3A3934] bg-[#2A2926] text-[#F7F6F2] text-sm outline-none" />
+                {err && <p className="text-[#E08A75] text-xs mt-2">{err}</p>}
+                <button type="submit" className="w-full py-3.5 rounded-xl border-none bg-[#F7F6F2] text-[#1C1B19] font-bold text-sm cursor-pointer mt-5">
+                  Giriş Yap
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    function AlisTab({ data, date, persist, error, isAdmin }) {
+      const [activeStore, setActiveStore] = useState(data.lastActiveStore || null);
+      const [newStoreName, setNewStoreName] = useState("");
+      const [showAddStore, setShowAddStore] = useState(false);
+      const [itemForm, setItemForm] = useState({ product: "", qty: "1", unitPrice: "" });
+
+      const dayEntries = data.purchaseEntries[date] || {};
+      const dayLocks = data.purchaseLocks[date] || {};
+      const storeTotal = (st) => (dayEntries[st] || []).reduce((s, it) => s + it.qty * it.unitPrice, 0);
+      const dayTotal = useMemo(() => data.stores.reduce((s, st) => s + storeTotal(st), 0), [data, date]);
+
+      function openStore(st) {
+        setActiveStore(st);
+        persist({ ...data, lastActiveStore: st });
+      }
+
+      function addStore() {
+        const name = newStoreName.trim();
+        if (!name || data.stores.includes(name)) return;
+        persist({ ...data, stores: [...data.stores, name] });
+        setNewStoreName("");
+        setShowAddStore(false);
+      }
+
+      function removeStore(name) {
+        const { [name]: _r, ...restToday } = dayEntries;
+        const { [name]: _l, ...restLocks } = dayLocks;
+        persist({
+          ...data,
+          stores: data.stores.filter((s) => s !== name),
+          purchaseEntries: { ...data.purchaseEntries, [date]: restToday },
+          purchaseLocks: { ...data.purchaseLocks, [date]: restLocks },
+          lastActiveStore: data.lastActiveStore === name ? null : data.lastActiveStore,
+        });
+        if (activeStore === name) setActiveStore(null);
+      }
+
+      function addItem(e) {
+        e.preventDefault();
+        const qty = parseFloat(itemForm.qty);
+        const unitPrice = parseFloat(itemForm.unitPrice);
+        const product = itemForm.product.trim();
+        if (!product || !qty || qty <= 0 || isNaN(unitPrice) || unitPrice < 0) return;
+        const item = { id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, product, qty, unitPrice };
+        const storeItems = dayEntries[activeStore] || [];
+        const nextDay = { ...dayEntries, [activeStore]: [...storeItems, item] };
+        persist({ ...data, purchaseEntries: { ...data.purchaseEntries, [date]: nextDay } });
+        setItemForm({ product: "", qty: "1", unitPrice: "" });
+      }
+
+      function removeItem(id) {
+        const storeItems = (dayEntries[activeStore] || []).filter((it) => it.id !== id);
+        const nextDay = { ...dayEntries, [activeStore]: storeItems };
+        persist({ ...data, purchaseEntries: { ...data.purchaseEntries, [date]: nextDay } });
+      }
+
+      function setLock(st, locked) {
+        const nextLocks = { ...dayLocks, [st]: locked };
+        persist({ ...data, purchaseLocks: { ...data.purchaseLocks, [date]: nextLocks } });
+      }
+
+      if (activeStore && data.stores.includes(activeStore)) {
+        const locked = !!dayLocks[activeStore];
+        return (
+          <div>
+            <button onClick={() => setActiveStore(null)} className="flex items-center gap-1 border-none bg-transparent text-[#6B6862] text-xs cursor-pointer p-0 mb-3">
+              <i data-lucide="chevron-left" className="w-4 h-4"></i> Mağazalara dön
+            </button>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-base font-bold m-0 flex items-center gap-1.5">
+                {activeStore} {locked && <i data-lucide="lock" className="w-3.5 h-3.5 text-[#A8A49A]"></i>}
+              </h2>
+              {isAdmin && (
+                <div className="flex gap-2">
+                  {locked && (
+                    <button onClick={() => setLock(activeStore, false)} className="flex items-center gap-1 border-none bg-transparent text-[#1C6B4E] font-semibold text-xs cursor-pointer">
+                      <i data-lucide="unlock" className="w-3.5 h-3.5"></i> Kilidi Kaldır
+                    </button>
+                  )}
+                  <button onClick={() => removeStore(activeStore)} className="border-none bg-transparent text-[#A8A49A] text-xs cursor-pointer">Sil</button>
+                </div>
+              )}
+            </div>
+
+            {locked && !isAdmin ? (
+              <div className="bg-[#F1EFE9] border border-[#E4E1D8] rounded-xl p-3 mb-3 flex items-center gap-2">
+                <i data-lucide="lock" className="w-4 h-4 text-[#6B6862]"></i>
+                <span className="text-xs text-[#6B6862]">Bu kayıt onaylandı, değiştirilemez.</span>
+              </div>
+            ) : (
+              <form onSubmit={addItem} className="bg-white border border-[#E4E1D8] rounded-xl p-3.5 mb-4">
+                <div className="grid grid-cols-[2fr_1fr_1fr] gap-2 mb-2.5">
+                  <label>
+                    <span className="text-[11px] text-[#6B6862] block mb-1">Ürün</span>
+                    <input type="text" placeholder="Örn. Un" value={itemForm.product} onChange={(e) => setItemForm((f) => ({ ...f, product: e.target.value }))} className="w-full p-2 rounded-lg border border-[#E4E1D8] text-xs bg-[#FCFCFA] outline-none" />
+                  </label>
+                  <label>
+                    <span className="text-[11px] text-[#6B6862] block mb-1">Miktar</span>
+                    <input type="number" min="0" step="0.01" value={itemForm.qty} onChange={(e) => setItemForm((f) => ({ ...f, qty: e.target.value }))} className="w-full p-2 rounded-lg border border-[#E4E1D8] text-xs bg-[#FCFCFA] outline-none" />
+                  </label>
+                  <label>
+                    <span className="text-[11px] text-[#6B6862] block mb-1">Birim Fiyat</span>
+                    <input type="number" min="0" step="0.01" placeholder="0" value={itemForm.unitPrice} onChange={(e) => setItemForm((f) => ({ ...f, unitPrice: e.target.value }))} className="w-full p-2 rounded-lg border border-[#E4E1D8] text-xs bg-[#FCFCFA] outline-none" />
+                  </label>
+                </div>
+                <button type="submit" className="w-full py-2 rounded-lg border-none bg-[#1C1B19] text-[#F7F6F2] font-semibold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                  <i data-lucide="plus" className="w-4 h-4"></i> Ürün Ekle
+                </button>
+              </form>
+            )}
+
+            <div className="flex flex-col gap-2 mb-3">
+              {(dayEntries[activeStore] || []).length === 0 && <p className="text-[#6B6862] text-xs text-center py-4">Henüz ürün girilmedi.</p>}
+              {(dayEntries[activeStore] || []).map((it) => (
+                <div key={it.id} className="flex items-center justify-between bg-white border border-[#E4E1D8] rounded-xl p-3">
+                  <div>
+                    <div className="text-xs font-semibold">{it.product}</div>
+                    <div className="text-[11px] text-[#6B6862]">{it.qty} × {formatTL(it.unitPrice)}</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold">{formatTL(it.qty * it.unitPrice)}</span>
+                    {isAdmin && <button onClick={() => removeItem(it.id)} className="border-none bg-transparent text-[#A8A49A] cursor-pointer p-1"><i data-lucide="trash-2" className="w-4 h-4"></i></button>}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-[#1C1B19] rounded-xl p-3 flex justify-between items-center text-[#F7F6F2]">
+              <span className="text-xs text-[#C7C4BB]">{activeStore} Toplamı</span>
+              <span className="text-sm font-bold">{formatTL(storeTotal(activeStore))}</span>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div>
+          <div className="bg-[#1C1B19] rounded-xl p-3.5 mb-4 flex justify-between items-center text-[#F7F6F2]">
+            <span className="text-xs text-[#C7C4BB]">Günün Alış Toplamı</span>
+            <span className="text-base font-bold">{formatTL(dayTotal)}</span>
+          </div>
+
+          <div className="flex flex-col gap-2 mb-3">
+            {data.stores.map((store) => {
+              const items = dayEntries[store] || [];
+              const total = storeTotal(store);
+              const locked = !!dayLocks[store];
+              return (
+                <button key={store} onClick={() => openStore(store)} className="flex items-center justify-between bg-white border border-[#E4E1D8] rounded-xl p-3.5 cursor-pointer text-left">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-[#EAF3EE] flex items-center justify-center text-[#1C6B4E]">
+                      <i data-lucide="store" className="w-4 h-4"></i>
+                    </div>
+                    <div>
+                      <div className="text-xs font-semibold flex items-center gap-1.5">{store} {locked && <i data-lucide="lock" className="w-3 h-3 text-[#A8A49A]"></i>}</div>
+                      <div className="text-[11px] text-[#6B6862]">{items.length === 0 ? "Ürün yok" : `${items.length} ürün`}</div>
+                    </div>
+                  </div>
+                  <div className="text-xs font-bold">{formatTL(total)}</div>
+                </button>
+              );
+            })}
+          </div>
+
+          {isAdmin && (
+            showAddStore ? (
+              <div className="flex gap-2">
+                <input autoFocus type="text" placeholder="Mağaza adı" value={newStoreName} onChange={(e) => setNewStoreName(e.target.value)} className="flex-1 p-2.5 rounded-xl border border-[#E4E1D8] text-xs bg-white outline-none" />
+                <button onClick={addStore} className="px-4 rounded-xl border-none bg-[#1C1B19] text-[#F7F6F2] font-semibold text-xs cursor-pointer">Ekle</button>
+                <button onClick={() => setShowAddStore(false)} className="w-10 rounded-xl border border-[#E4E1D8] bg-white flex items-center justify-center cursor-pointer"><i data-lucide="x" className="w-4 h-4"></i></button>
+              </div>
+            ) : (
+              <button onClick={() => setShowAddStore(true)} className="w-full py-2.5 rounded-xl border border-[#E4E1D8] bg-white text-[#1C1B19] font-semibold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                <i data-lucide="plus" className="w-4 h-4"></i> Yeni Mağaza Ekle
+              </button>
+            )
+          )}
+        </div>
+      );
+    }
+
+    function SatisTab({ data, date, persist, error, isAdmin }) {
+      const [confirmChecked, setConfirmChecked] = useState(false);
+      const dayRow = data.salesEntries[date] || {};
+      const locked = !!data.salesLocks[date];
+      const readOnly = locked && !isAdmin;
+
+      function updateRow(product, field, value) {
+        const current = dayRow[product] || { qty: "", unitPrice: "" };
+        const nextRow = { ...current, [field]: value };
+        persist({ ...data, salesEntries: { ...data.salesEntries, [date]: { ...dayRow, [product]: nextRow } } });
+      }
+
+      function setLock(value) {
+        persist({ ...data, salesLocks: { ...data.salesLocks, [date]: value } });
+      }
+
+      const rows = SALE_PRODUCTS.map((product) => {
+        const r = dayRow[product] || { qty: "", unitPrice: "" };
+        const qty = parseFloat(r.qty) || 0;
+        const unitPrice = parseFloat(r.unitPrice) || 0;
+        return { product, qty: r.qty ?? "", unitPrice: r.unitPrice ?? "", total: qty * unitPrice };
+      });
+
+      const grandTotal = rows.reduce((s, r) => s + r.total, 0);
+
+      return (
+        <div>
+          <div className="bg-[#1C1B19] rounded-xl p-3.5 mb-3 flex justify-between items-center text-[#F7F6F2]">
+            <span className="text-xs text-[#C7C4BB]">Günün Satış Toplamı</span>
+            <span className="text-base font-bold">{formatTL(grandTotal)}</span>
+          </div>
+
+          {isAdmin && locked && (
+            <button onClick={() => setLock(false)} className="flex items-center gap-1 border-none bg-transparent text-[#1C6B4E] font-semibold text-xs cursor-pointer mb-2.5">
+              <i data-lucide="unlock" className="w-3.5 h-3.5"></i> Kilidi Kaldır
+            </button>
+          )}
+
+          <div className="bg-white border border-[#E4E1D8] rounded-xl overflow-hidden mb-3">
+            <div className="grid grid-cols-[2fr_1fr_1fr_1.2fr] gap-1 p-2.5 bg-[#F1EFE9] text-[11px] text-[#6B6862] font-semibold">
+              <span>Ürün</span>
+              <span className="text-right">Adet</span>
+              <span className="text-right">Birim F.</span>
+              <span className="text-right">Toplam</span>
+            </div>
+            {rows.map((r, i) => (
+              <div key={r.product} className={`grid grid-cols-[2fr_1fr_1fr_1.2fr] gap-1 items-center p-2 border-t border-[#EFEDE6] ${i % 2 === 0 ? "bg-white" : "bg-[#FBFAF7]"}`}>
+                <span className="text-xs font-medium truncate">{r.product}</span>
+                <input type="number" min="0" placeholder="0" value={r.qty} disabled={readOnly} onChange={(e) => updateRow(r.product, "qty", e.target.value)} className="p-1 rounded border border-[#E4E1D8] text-xs text-right bg-[#FCFCFA] outline-none" />
+                <input type="number" min="0" step="0.01" placeholder="0" value={r.unitPrice} disabled={readOnly} onChange={(e) => updateRow(r.product, "unitPrice", e.target.value)} className="p-1 rounded border border-[#E4E1D8] text-xs text-right bg-[#FCFCFA] outline-none" />
+                <span className="text-xs font-bold text-right">{formatTL(r.total)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function MaliyetlerTab({ data, persist }) {
+      const costs = data.costs || {};
+      function updateCost(product, field, value) {
+        const current = costs[product] || { cost: "", price: "" };
+        persist({ ...data, costs: { ...costs, [product]: { ...current, [field]: value } } });
+      }
+      return (
+        <div className="bg-white border border-[#E4E1D8] rounded-xl overflow-hidden">
+          <div className="grid grid-cols-[1.6fr_1fr_1fr_1fr_0.8fr] gap-1 p-2.5 bg-[#F1EFE9] text-[11px] text-[#6B6862] font-semibold">
+            <span>Ürün</span>
+            <span className="text-right">Maliyet</span>
+            <span className="text-right">Satış</span>
+            <span className="text-right">Kâr</span>
+            <span className="text-right">%</span>
+          </div>
+          {SALE_PRODUCTS.map((p, i) => {
+            const c = costs[p] || { cost: "", price: "" };
+            const cost = parseFloat(c.cost) || 0;
+            const price = parseFloat(c.price) || 0;
+            const margin = price - cost;
+            const marginPct = price > 0 ? (margin / price) * 100 : 0;
+            return (
+              <div key={p} className={`grid grid-cols-[1.6fr_1fr_1fr_1fr_0.8fr] gap-1 items-center p-2 border-t border-[#EFEDE6] ${i % 2 === 0 ? "bg-white" : "bg-[#FBFAF7]"}`}>
+                <span className="text-xs font-medium truncate">{p}</span>
+                <input type="number" min="0" step="0.01" placeholder="0" value={c.cost} onChange={(e) => updateCost(p, "cost", e.target.value)} className="p-1 rounded border border-[#E4E1D8] text-xs text-right bg-[#FCFCFA] outline-none" />
+                <input type="number" min="0" step="0.01" placeholder="0" value={c.price} onChange={(e) => updateCost(p, "price", e.target.value)} className="p-1 rounded border border-[#E4E1D8] text-xs text-right bg-[#FCFCFA] outline-none" />
+                <span className="text-xs font-bold text-right text-[#1C6B4E]">{formatTL(margin)}</span>
+                <span className="text-[11px] font-semibold text-right text-[#1C6B4E]">{marginPct.toFixed(0)}%</span>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    function KarZararTab({ data }) {
+      const [month, setMonth] = useState(thisMonthISO());
+      const stats = useMemo(() => {
+        let purchaseTotal = 0;
+        Object.entries(data.purchaseEntries).forEach(([d, stores]) => {
+          if (!d.startsWith(month)) return;
+          Object.values(stores).forEach((items) => items.forEach((it) => (purchaseTotal += it.qty * it.unitPrice)));
+        });
+        let salesTotal = 0;
+        Object.entries(data.salesEntries).forEach(([d, row]) => {
+          if (!d.startsWith(month)) return;
+          Object.values(row).forEach((r) => { salesTotal += (parseFloat(r.qty) || 0) * (parseFloat(r.unitPrice) || 0); });
+        });
+        return { purchaseTotal, salesTotal, net: salesTotal - purchaseTotal };
+      }, [data, month]);
+
+      return (
+        <div>
+          <div className="flex items-center gap-2 bg-white border border-[#E4E1D8] rounded-xl p-2.5 mb-3">
+            <i data-lucide="calendar" className="w-4 h-4 text-[#6B6862]"></i>
+            <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className="border-none bg-transparent text-xs text-[#1C1B19] flex-1 outline-none" />
+            <span className="text-xs text-[#A8A49A]">{formatMonthLabel(month)}</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2.5 mb-3">
+            <div className="bg-white border border-[#E4E1D8] rounded-xl p-3">
+              <span className="text-[11px] text-[#6B6862] block mb-1">Toplam Satış</span>
+              <span className="text-sm font-bold text-[#1C6B4E]">{formatTL(stats.salesTotal)}</span>
+            </div>
+            <div className="bg-white border border-[#E4E1D8] rounded-xl p-3">
+              <span className="text-[11px] text-[#6B6862] block mb-1">Toplam Alış</span>
+              <span className="text-sm font-bold text-[#B4432E]">{formatTL(stats.purchaseTotal)}</span>
+            </div>
+          </div>
+          <div className="bg-white border border-[#E4E1D8] rounded-xl p-3.5">
+            <span className="text-[11px] text-[#6B6862] block mb-1">Net Kâr / Nakit Akışı</span>
+            <span className="text-base font-bold">{formatTL(stats.net)}</span>
+          </div>
+        </div>
+      );
+    }
+
+    function YoneticiTab({ data, persist }) {
+      const [form, setForm] = useState({ username: "", password: "" });
+      const users = data.users || {};
+      function createUser(e) {
+        e.preventDefault();
+        const u = form.username.trim();
+        const p = form.password.trim();
+        if (!u || !p || users[u]) return;
+        persist({ ...data, users: { ...users, [u]: { password: p, role: "user" } } });
+        setForm({ username: "", password: "" });
+      }
+      function deleteUser(username) {
+        const { [username]: _, ...rest } = users;
+        persist({ ...data, users: rest });
+      }
+      return (
+        <div>
+          <form onSubmit={createUser} className="bg-white border border-[#E4E1D8] rounded-xl p-3.5 mb-4">
+            <h3 className="text-xs font-bold mb-2.5 flex items-center gap-1.5"><i data-lucide="user-plus" className="w-4 h-4"></i> Yeni Kullanıcı Oluştur</h3>
+            <div className="grid grid-cols-2 gap-2 mb-2.5">
+              <input type="text" placeholder="Kullanıcı Adı" autoCapitalize="none" value={form.username} onChange={(e) => setForm(f => ({...f, username: e.target.value}))} className="p-2 border border-[#E4E1D8] rounded-lg text-xs bg-[#FCFCFA] outline-none" />
+              <input type="text" placeholder="Şifre" value={form.password} onChange={(e) => setForm(f => ({...f, password: e.target.value}))} className="p-2 border border-[#E4E1D8] rounded-lg text-xs bg-[#FCFCFA] outline-none" />
+            </div>
+            <button type="submit" className="w-full py-2 bg-[#1C1B19] text-[#F7F6F2] font-semibold text-xs rounded-lg border-none cursor-pointer">Oluştur</button>
+          </form>
+          <div className="flex flex-col gap-2">
+            {Object.entries(users).map(([username, u]) => (
+              <div key={username} className="flex items-center justify-between bg-white border border-[#E4E1D8] rounded-xl p-3">
+                <div>
+                  <div className="text-xs font-semibold">{username}</div>
+                  <div className="text-[11px] text-[#6B6862]">{u.role === "admin" ? "Yönetici" : "Kullanıcı"}</div>
+                </div>
+                {u.role !== "admin" && (
+                  <button onClick={() => deleteUser(username)} className="border-none bg-transparent text-[#A8A49A] cursor-pointer"><i data-lucide="trash-2" className="w-4 h-4"></i></button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<ManoPizza />, document.getElementById("root"));
+    setTimeout(() => { lucide.createIcons(); }, 100);
+  </script>
+</body>
 </html>
