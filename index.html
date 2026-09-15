@@ -2,112 +2,110 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mano Pizza | İşletme Yönetim Paneli</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#1C1B19" />
+  <title>Mano Pizza • İşletme Paneli</title>
 
-  <!-- React -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-
-  <!-- Babel -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-  <!-- Tailwind -->
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-
-  <!-- Lucide -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
     * {
       box-sizing: border-box;
-    }
-
-    html,
-    body,
-    #root {
-      margin: 0;
-      min-height: 100%;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    body {
-      background: #f7f6f2;
-    }
-
-    input,
-    select,
-    button {
-      font: inherit;
-    }
-
-    button {
       -webkit-tap-highlight-color: transparent;
     }
 
-    ::-webkit-scrollbar {
-      width: 7px;
-      height: 7px;
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: #F7F6F2;
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
     }
 
-    ::-webkit-scrollbar-track {
-      background: #f1efe9;
+    body {
+      overscroll-behavior-y: none;
     }
 
-    ::-webkit-scrollbar-thumb {
-      background: #c8c4bb;
-      border-radius: 20px;
+    input, button, select {
+      font: inherit;
     }
 
-    .fade-in {
-      animation: fadeIn .2s ease;
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      opacity: .5;
     }
 
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(4px);
+    .safe-bottom {
+      padding-bottom: max(24px, env(safe-area-inset-bottom));
+    }
+
+    .glass {
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .press {
+      transition: transform .12s ease, opacity .12s ease;
+    }
+
+    .press:active {
+      transform: scale(.98);
+      opacity: .9;
+    }
+
+    @media (min-width: 700px) {
+      .desktop-table {
+        display: block;
       }
 
-      to {
-        opacity: 1;
-        transform: translateY(0);
+      .mobile-card {
+        display: none;
       }
     }
 
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
+    @media (max-width: 699px) {
+      .desktop-table {
+        display: none;
+      }
 
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+      .mobile-card {
+        display: block;
+      }
     }
   </style>
 </head>
 
 <body>
-
 <div id="root"></div>
 
 <script type="module">
-  import { initializeApp }
-    from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import {
+    initializeApp
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 
   import {
     getFirestore,
     doc,
+    collection,
     setDoc,
-    onSnapshot
+    deleteDoc,
+    onSnapshot,
+    getDoc
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  window.firebaseModules = {
+  window.firebaseReady = Promise.resolve({
     initializeApp,
     getFirestore,
     doc,
+    collection,
     setDoc,
-    onSnapshot
-  };
+    deleteDoc,
+    onSnapshot,
+    getDoc
+  });
 </script>
 
 <script type="text/babel">
@@ -132,24 +130,6 @@ const firebaseConfig = {
   appId: "1:558530166779:web:fe990140b59ad5dd1e155e"
 };
 
-const firebaseApp =
-  window.firebaseModules.initializeApp(firebaseConfig);
-
-const db =
-  window.firebaseModules.getFirestore(firebaseApp);
-
-const DATA_REF =
-  window.firebaseModules.doc(
-    db,
-    "mano_pizza",
-    "veri"
-  );
-
-const {
-  setDoc,
-  onSnapshot
-} = window.firebaseModules;
-
 
 /* =========================================================
    SABİTLER
@@ -163,7 +143,7 @@ const DEFAULT_STORES = [
   "File Market"
 ];
 
-const PRODUCTS = [
+const SALE_PRODUCTS = [
   "Margarita Pizza",
   ...Array.from(
     { length: 20 },
@@ -171,88 +151,74 @@ const PRODUCTS = [
   )
 ];
 
-const DEFAULT_DATA = {
-  stores: DEFAULT_STORES,
 
-  purchaseEntries: {},
-  purchaseLocks: {},
+/* =========================================================
+   FIREBASE REFERANSLARI
+========================================================= */
 
-  salesEntries: {},
-  salesLocks: {},
+let FB = null;
+let db = null;
 
-  costs: {},
+async function initFirebase() {
 
-  expenses: {},
+  FB = await window.firebaseReady;
 
-  users: {
-    [ADMIN_USERNAME]: {
-      password: ADMIN_PASSWORD,
-      role: "admin"
-    }
-  }
-};
+  const app = FB.initializeApp(firebaseConfig);
+
+  db = FB.getFirestore(app);
+}
 
 
 /* =========================================================
    YARDIMCI FONKSİYONLAR
 ========================================================= */
 
-function todayISO() {
-  return new Date()
-    .toISOString()
-    .slice(0, 10);
-}
-
-function monthISO() {
-  return new Date()
-    .toISOString()
-    .slice(0, 7);
-}
-
 function formatTL(value) {
 
-  return new Intl.NumberFormat(
-    "tr-TR",
-    {
-      style: "currency",
-      currency: "TRY",
-      maximumFractionDigits: 2
-    }
-  ).format(Number(value) || 0);
-
+  return new Intl.NumberFormat("tr-TR", {
+    style: "currency",
+    currency: "TRY",
+    maximumFractionDigits: 2
+  }).format(Number(value) || 0);
 }
 
-function formatNumber(value) {
 
-  return new Intl.NumberFormat(
-    "tr-TR",
-    {
-      maximumFractionDigits: 2
-    }
-  ).format(Number(value) || 0);
+function todayISO() {
 
+  const d = new Date();
+
+  const offset =
+    d.getTimezoneOffset() * 60000;
+
+  return new Date(
+    d.getTime() - offset
+  ).toISOString().slice(0, 10);
 }
 
-function formatDate(iso) {
 
-  if (!iso) return "";
+function thisMonthISO() {
+
+  return todayISO().slice(0, 7);
+}
+
+
+function formatDateLabel(iso) {
 
   return new Date(
     iso + "T00:00:00"
   ).toLocaleDateString(
     "tr-TR",
     {
-      weekday: "long",
       day: "numeric",
       month: "long",
-      year: "numeric"
+      year: "numeric",
+      weekday: "long"
     }
   );
 }
 
-function formatMonth(iso) {
 
-  if (!iso) return "";
+function formatMonthLabel(iso) {
 
   return new Date(
     iso + "-01T00:00:00"
@@ -265,154 +231,109 @@ function formatMonth(iso) {
   );
 }
 
-function mergeData(remote) {
-
-  return {
-    ...DEFAULT_DATA,
-    ...(remote || {}),
-
-    stores:
-      remote?.stores?.length
-        ? remote.stores
-        : DEFAULT_STORES,
-
-    users: {
-      ...DEFAULT_DATA.users,
-      ...(remote?.users || {})
-    },
-
-    purchaseEntries:
-      remote?.purchaseEntries || {},
-
-    purchaseLocks:
-      remote?.purchaseLocks || {},
-
-    salesEntries:
-      remote?.salesEntries || {},
-
-    salesLocks:
-      remote?.salesLocks || {},
-
-    costs:
-      remote?.costs || {},
-
-    expenses:
-      remote?.expenses || {}
-  };
-}
-
 
 /* =========================================================
-   ICON
+   FIRESTORE PATH YAPISI
+
+   mano_pizza/
+      config/main
+      users/{username}
+      stores/{store}
+      purchases/{date_store}
+      sales/{date}
+      costs/{product}
 ========================================================= */
 
-function Icon({
-  name,
-  size = 18,
-  className = ""
-}) {
+const refs = {
 
-  useEffect(() => {
+  config: () =>
+    FB.doc(db, "mano_pizza", "config"),
 
-    if (window.lucide) {
-      window.lucide.createIcons();
-    }
+  user: username =>
+    FB.doc(
+      db,
+      "mano_pizza",
+      "users",
+      username
+    ),
 
-  });
+  users: () =>
+    FB.collection(
+      db,
+      "mano_pizza",
+      "users"
+    ),
 
-  return (
-    <i
-      data-lucide={name}
-      className={className}
-      style={{
-        width: size,
-        height: size
-      }}
-    />
-  );
-}
+  store: name =>
+    FB.doc(
+      db,
+      "mano_pizza",
+      "stores",
+      encodeURIComponent(name)
+    ),
 
+  stores: () =>
+    FB.collection(
+      db,
+      "mano_pizza",
+      "stores"
+    ),
 
-/* =========================================================
-   STAT CARD
-========================================================= */
+  purchase: (date, store) =>
+    FB.doc(
+      db,
+      "mano_pizza",
+      "purchases",
+      `${date}_${encodeURIComponent(store)}`
+    ),
 
-function StatCard({
-  title,
-  value,
-  subtitle,
-  icon,
-  tone = "dark"
-}) {
+  purchases: () =>
+    FB.collection(
+      db,
+      "mano_pizza",
+      "purchases"
+    ),
 
-  const tones = {
+  sale: date =>
+    FB.doc(
+      db,
+      "mano_pizza",
+      "sales",
+      date
+    ),
 
-    dark:
-      "bg-[#1C1B19] text-white",
+  sales: () =>
+    FB.collection(
+      db,
+      "mano_pizza",
+      "sales"
+    ),
 
-    green:
-      "bg-[#EAF3EE] text-[#185C42]",
+  cost: product =>
+    FB.doc(
+      db,
+      "mano_pizza",
+      "costs",
+      encodeURIComponent(product)
+    ),
 
-    red:
-      "bg-[#FBEDEA] text-[#9E3928]",
-
-    yellow:
-      "bg-[#FFF6DF] text-[#806923]"
-  };
-
-  return (
-
-    <div
-      className={
-        "rounded-2xl p-4 " +
-        tones[tone]
-      }
-    >
-
-      <div className="flex justify-between gap-3">
-
-        <div>
-
-          <div className="text-xs opacity-70">
-            {title}
-          </div>
-
-          <div className="text-xl font-black mt-1">
-            {value}
-          </div>
-
-          {subtitle && (
-
-            <div className="text-[10px] opacity-60 mt-1">
-              {subtitle}
-            </div>
-
-          )}
-
-        </div>
-
-        <Icon
-          name={icon}
-          size={20}
-          className="opacity-70"
-        />
-
-      </div>
-
-    </div>
-
-  );
-}
+  costs: () =>
+    FB.collection(
+      db,
+      "mano_pizza",
+      "costs"
+    )
+};
 
 
 /* =========================================================
    LOGIN
 ========================================================= */
 
-function Login({
-  users,
-  onLogin
-}) {
+function LoginScreen({ onSuccess }) {
+
+  const [stage, setStage] =
+    useState("splash");
 
   const [username, setUsername] =
     useState("");
@@ -423,1109 +344,1744 @@ function Login({
   const [error, setError] =
     useState("");
 
-  function submit(e) {
+  const [checking, setChecking] =
+    useState(false);
+
+
+  async function login(e) {
 
     e.preventDefault();
 
-    const clean =
-      username.trim();
+    const u =
+      username.trim().toLowerCase();
 
-    const user =
-      users[clean];
+    const p =
+      password;
 
-    if (
-      user &&
-      user.password === password
-    ) {
+    if (!u || !p) {
 
-      onLogin({
-        username: clean,
-        role: user.role
-      });
+      setError(
+        "Kullanıcı adı ve şifre gerekli."
+      );
 
       return;
     }
 
-    setError(
-      "Kullanıcı adı veya şifre hatalı."
-    );
+    setChecking(true);
+    setError("");
 
-    setPassword("");
+    try {
+
+      const snap =
+        await FB.getDoc(
+          refs.user(u)
+        );
+
+      if (
+        snap.exists() &&
+        snap.data().password === p
+      ) {
+
+        onSuccess({
+          username: u,
+          role: snap.data().role
+        });
+
+        return;
+      }
+
+      /* İlk admin kullanıcısı */
+
+      if (
+        u === ADMIN_USERNAME &&
+        p === ADMIN_PASSWORD
+      ) {
+
+        await FB.setDoc(
+          refs.user(u),
+          {
+            username: u,
+            password: p,
+            role: "admin",
+            createdAt: Date.now()
+          },
+          { merge: true }
+        );
+
+        onSuccess({
+          username: u,
+          role: "admin"
+        });
+
+        return;
+      }
+
+      setError(
+        "Kullanıcı adı veya şifre hatalı."
+      );
+
+      setPassword("");
+
+    } catch (err) {
+
+      console.error(err);
+
+      setError(
+        "Bağlantı kurulamadı. İnternet bağlantını kontrol et."
+      );
+
+    } finally {
+
+      setChecking(false);
+
+    }
   }
 
+
   return (
+    <div className="
+      min-h-screen
+      bg-[#1C1B19]
+      flex
+      items-center
+      justify-center
+      px-5
+    ">
 
-    <div className="min-h-screen bg-[#1C1B19] flex items-center justify-center p-5">
+      <div className="w-full max-w-[360px]">
 
-      <div className="w-full max-w-[390px]">
+        <div className="
+          w-20 h-20
+          rounded-[24px]
+          bg-[#B4432E]
+          flex
+          items-center
+          justify-center
+          mx-auto
+          mb-5
+          shadow-2xl
+        ">
 
-        <div className="text-center mb-8">
-
-          <div className="w-20 h-20 mx-auto rounded-3xl bg-[#B4432E] flex items-center justify-center text-white mb-5 shadow-xl">
-
-            <Icon
-              name="pizza"
-              size={38}
-            />
-
-          </div>
-
-          <h1 className="text-3xl font-black text-white">
-            Mano Pizza
-          </h1>
-
-          <p className="text-[#9C9890] text-sm mt-1">
-            İşletme Yönetim Paneli
-          </p>
+          <i
+            data-lucide="pizza"
+            className="w-10 h-10 text-white"
+          />
 
         </div>
 
-        <form
-          onSubmit={submit}
-          className="bg-[#292824] border border-[#3C3A35] rounded-3xl p-5 shadow-2xl"
-        >
+        <h1 className="
+          text-white
+          text-3xl
+          font-black
+          text-center
+          tracking-tight
+        ">
+          Mano Pizza
+        </h1>
 
-          <label className="text-xs text-[#AAA69D]">
-            Kullanıcı Adı
-          </label>
+        <p className="
+          text-[#9C9890]
+          text-sm
+          text-center
+          mt-1
+          mb-10
+        ">
+          İşletme Yönetim Paneli
+        </p>
 
-          <input
-            autoFocus
-            autoCapitalize="none"
-            value={username}
-            onChange={e =>
-              setUsername(e.target.value)
-            }
-            className="mt-1 mb-4 w-full p-3.5 rounded-xl bg-[#1F1E1B] border border-[#45433D] text-white text-sm outline-none focus:border-[#B4432E]"
-          />
 
-          <label className="text-xs text-[#AAA69D]">
-            Şifre
-          </label>
-
-          <input
-            type="password"
-            value={password}
-            onChange={e =>
-              setPassword(e.target.value)
-            }
-            className="mt-1 w-full p-3.5 rounded-xl bg-[#1F1E1B] border border-[#45433D] text-white text-sm outline-none focus:border-[#B4432E]"
-          />
-
-          {error && (
-
-            <div className="mt-3 p-3 rounded-xl bg-[#432A25] text-[#E69A88] text-xs">
-              {error}
-            </div>
-
-          )}
+        {stage === "splash" ? (
 
           <button
-            className="mt-5 w-full py-3.5 rounded-xl bg-[#F7F6F2] text-[#1C1B19] font-black text-sm hover:opacity-90"
+            onClick={() => setStage("login")}
+            className="
+              press
+              w-full
+              py-4
+              rounded-2xl
+              bg-[#F7F6F2]
+              text-[#1C1B19]
+              font-bold
+              text-sm
+            "
           >
-            Giriş Yap
+            Panele Giriş Yap
           </button>
 
-        </form>
+        ) : (
 
-        <div className="text-center text-[10px] text-[#68645D] mt-5">
-          Mano Pizza Management System
-        </div>
-
-      </div>
-
-    </div>
-
-  );
-}
-
-
-/* =========================================================
-   DASHBOARD
-========================================================= */
-
-function Dashboard({
-  data,
-  month
-}) {
-
-  const stats = useMemo(() => {
-
-    let sales = 0;
-    let purchases = 0;
-    let expenses = 0;
-
-    const products = {};
-
-    const stores = {};
-
-    Object.entries(
-      data.salesEntries || {}
-    ).forEach(
-      ([date, rows]) => {
-
-        if (!date.startsWith(month))
-          return;
-
-        Object.entries(rows || {})
-          .forEach(
-            ([product, row]) => {
-
-              const qty =
-                Number(row.qty) || 0;
-
-              const price =
-                Number(row.unitPrice) || 0;
-
-              const total =
-                qty * price;
-
-              sales += total;
-
-              products[product] =
-                (products[product] || 0)
-                + total;
-
-            }
-          );
-
-      }
-    );
-
-    Object.entries(
-      data.purchaseEntries || {}
-    ).forEach(
-      ([date, storeRows]) => {
-
-        if (!date.startsWith(month))
-          return;
-
-        Object.entries(
-          storeRows || {}
-        ).forEach(
-          ([store, items]) => {
-
-            let total = 0;
-
-            (items || []).forEach(
-              item => {
-
-                total +=
-                  (Number(item.qty) || 0)
-                  *
-                  (Number(item.unitPrice) || 0);
-
-              }
-            );
-
-            purchases += total;
-
-            stores[store] =
-              (stores[store] || 0)
-              + total;
-
-          }
-        );
-
-      }
-    );
-
-    Object.entries(
-      data.expenses || {}
-    ).forEach(
-      ([date, items]) => {
-
-        if (!date.startsWith(month))
-          return;
-
-        (items || []).forEach(
-          item => {
-
-            expenses +=
-              Number(item.amount) || 0;
-
-          }
-        );
-
-      }
-    );
-
-    const ranking =
-      Object.entries(products)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 6);
-
-    return {
-
-      sales,
-      purchases,
-      expenses,
-
-      gross:
-        sales - purchases,
-
-      net:
-        sales - purchases - expenses,
-
-      ranking,
-
-      stores
-
-    };
-
-  }, [data, month]);
-
-
-  const margin =
-    stats.sales
-      ? (
-          stats.net /
-          stats.sales
-        ) * 100
-      : 0;
-
-
-  return (
-
-    <div className="space-y-4 fade-in">
-
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
-
-        <StatCard
-          title="Aylık Ciro"
-          value={formatTL(stats.sales)}
-          subtitle={formatMonth(month)}
-          icon="trending-up"
-          tone="green"
-        />
-
-        <StatCard
-          title="Toplam Alış"
-          value={formatTL(stats.purchases)}
-          icon="shopping-bag"
-          tone="red"
-        />
-
-        <StatCard
-          title="İşletme Giderleri"
-          value={formatTL(stats.expenses)}
-          icon="receipt"
-          tone="yellow"
-        />
-
-        <StatCard
-          title="Net Kâr"
-          value={formatTL(stats.net)}
-          subtitle={`Marj %${margin.toFixed(1)}`}
-          icon="circle-dollar-sign"
-          tone="dark"
-        />
-
-      </div>
-
-
-      <div className="grid lg:grid-cols-2 gap-4">
-
-        <section className="bg-white border border-[#E4E1D8] rounded-2xl p-4">
-
-          <div className="flex justify-between items-center mb-5">
+          <form
+            onSubmit={login}
+            className="space-y-4"
+          >
 
             <div>
-              <h3 className="font-black text-sm">
-                En Çok Ciro Getirenler
-              </h3>
 
-              <p className="text-[11px] text-[#77736B]">
-                {formatMonth(month)}
-              </p>
-            </div>
+              <label className="
+                block
+                text-[11px]
+                text-[#9C9890]
+                mb-1.5
+              ">
+                Kullanıcı Adı
+              </label>
 
-            <Icon
-              name="bar-chart-3"
-              size={18}
-              className="text-[#77736B]"
-            />
-
-          </div>
-
-          {stats.ranking.length === 0 && (
-
-            <div className="py-8 text-center text-xs text-[#77736B]">
-              Bu ay satış verisi bulunmuyor.
-            </div>
-
-          )}
-
-          <div className="space-y-4">
-
-            {stats.ranking.map(
-              ([name, value], index) => {
-
-                const max =
-                  stats.ranking[0]?.[1] || 1;
-
-                const width =
-                  Math.max(
-                    8,
-                    (value / max) * 100
-                  );
-
-                return (
-
-                  <div key={name}>
-
-                    <div className="flex justify-between text-xs mb-1.5">
-
-                      <span className="font-semibold">
-                        {index + 1}. {name}
-                      </span>
-
-                      <span className="font-bold">
-                        {formatTL(value)}
-                      </span>
-
-                    </div>
-
-                    <div className="h-2 bg-[#F0EEE8] rounded-full overflow-hidden">
-
-                      <div
-                        className="h-full bg-[#B4432E] rounded-full"
-                        style={{
-                          width: `${width}%`
-                        }}
-                      />
-
-                    </div>
-
-                  </div>
-
-                );
-
-              }
-            )}
-
-          </div>
-
-        </section>
-
-
-        <section className="bg-white border border-[#E4E1D8] rounded-2xl p-4">
-
-          <h3 className="font-black text-sm mb-4">
-            Finansal Özet
-          </h3>
-
-          <div className="space-y-1">
-
-            <SummaryRow
-              label="Toplam Satış"
-              value={formatTL(stats.sales)}
-              green
-            />
-
-            <SummaryRow
-              label="Toplam Alış"
-              value={formatTL(stats.purchases)}
-              red
-            />
-
-            <SummaryRow
-              label="Brüt Kâr"
-              value={formatTL(stats.gross)}
-            />
-
-            <SummaryRow
-              label="İşletme Giderleri"
-              value={formatTL(stats.expenses)}
-            />
-
-            <div className="border-t border-[#EEEAE2] mt-3 pt-3">
-
-              <SummaryRow
-                label="Net Kâr"
-                value={formatTL(stats.net)}
-                bold
+              <input
+                autoFocus
+                type="text"
+                autoCapitalize="none"
+                autoCorrect="off"
+                value={username}
+                onChange={e =>
+                  setUsername(e.target.value)
+                }
+                className="
+                  w-full
+                  h-12
+                  px-4
+                  rounded-xl
+                  border
+                  border-[#3A3934]
+                  bg-[#2A2926]
+                  text-white
+                  outline-none
+                "
               />
 
             </div>
 
-          </div>
 
-        </section>
+            <div>
+
+              <label className="
+                block
+                text-[11px]
+                text-[#9C9890]
+                mb-1.5
+              ">
+                Şifre
+              </label>
+
+              <input
+                type="password"
+                value={password}
+                onChange={e =>
+                  setPassword(e.target.value)
+                }
+                className="
+                  w-full
+                  h-12
+                  px-4
+                  rounded-xl
+                  border
+                  border-[#3A3934]
+                  bg-[#2A2926]
+                  text-white
+                  outline-none
+                "
+              />
+
+            </div>
+
+
+            {error && (
+
+              <div className="
+                rounded-xl
+                bg-[#42241F]
+                border
+                border-[#6D352A]
+                p-3
+                text-xs
+                text-[#F0A696]
+              ">
+                {error}
+              </div>
+
+            )}
+
+
+            <button
+              disabled={checking}
+              className="
+                press
+                w-full
+                h-12
+                rounded-xl
+                bg-[#B4432E]
+                text-white
+                font-bold
+                disabled:opacity-50
+              "
+            >
+              {checking
+                ? "Kontrol ediliyor..."
+                : "Giriş Yap"}
+            </button>
+
+
+            <button
+              type="button"
+              onClick={() => setStage("splash")}
+              className="
+                w-full
+                text-[#9C9890]
+                text-xs
+                py-2
+              "
+            >
+              Geri dön
+            </button>
+
+          </form>
+
+        )}
 
       </div>
 
-
-      <section className="bg-white border border-[#E4E1D8] rounded-2xl p-4">
-
-        <div className="flex items-center justify-between mb-4">
-
-          <div>
-            <h3 className="font-black text-sm">
-              Mağaza Alış Dağılımı
-            </h3>
-
-            <p className="text-[11px] text-[#77736B]">
-              Aylık alış tutarları
-            </p>
-          </div>
-
-          <Icon
-            name="store"
-            size={18}
-            className="text-[#77736B]"
-          />
-
-        </div>
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-
-          {Object.entries(stats.stores)
-            .map(
-              ([store, value]) => (
-
-                <div
-                  key={store}
-                  className="bg-[#F8F7F3] rounded-xl p-3 flex justify-between"
-                >
-
-                  <span className="text-xs font-semibold">
-                    {store}
-                  </span>
-
-                  <span className="text-xs font-black">
-                    {formatTL(value)}
-                  </span>
-
-                </div>
-
-              )
-            )}
-
-        </div>
-
-      </section>
-
     </div>
-
   );
 }
 
 
 /* =========================================================
-   SUMMARY ROW
+   KAYIT DURUMU
 ========================================================= */
 
-function SummaryRow({
-  label,
-  value,
-  green,
-  red,
-  bold
-}) {
+function SaveStatus({ status }) {
 
-  return (
+  if (status === "saving") {
 
-    <div className="flex justify-between items-center py-2 text-xs">
-
-      <span className={bold ? "font-black" : ""}>
-        {label}
+    return (
+      <span className="
+        inline-flex
+        items-center
+        gap-1.5
+        text-[10px]
+        text-[#A16C22]
+      ">
+        <span className="
+          w-1.5 h-1.5
+          rounded-full
+          bg-[#D29B3D]
+          animate-pulse
+        />
+        Kaydediliyor
       </span>
-
-      <span
-        className={
-          "font-bold " +
-          (green
-            ? "text-[#185C42]"
-            : red
-            ? "text-[#9E3928]"
-            : "")
-        }
-      >
-        {value}
-      </span>
-
-    </div>
-
-  );
-}
-
-
-/* =========================================================
-   SALES
-========================================================= */
-
-function Sales({
-  data,
-  persist,
-  date,
-  isAdmin
-}) {
-
-  const rows =
-    PRODUCTS.map(product => {
-
-      const row =
-        data.salesEntries?.[date]?.[product]
-        || {
-          qty: "",
-          unitPrice: ""
-        };
-
-      const qty =
-        Number(row.qty) || 0;
-
-      const price =
-        Number(row.unitPrice) || 0;
-
-      return {
-
-        product,
-
-        qty:
-          row.qty ?? "",
-
-        unitPrice:
-          row.unitPrice ?? "",
-
-        total:
-          qty * price
-
-      };
-
-    });
-
-
-  const locked =
-    !!data.salesLocks?.[date];
-
-
-  const total =
-    rows.reduce(
-      (sum, row) =>
-        sum + row.total,
-      0
     );
 
+  }
 
-  function update(
-    product,
-    field,
-    value
-  ) {
+  if (status === "error") {
 
-    if (
-      locked &&
-      !isAdmin
-    ) return;
+    return (
+      <span className="
+        inline-flex
+        items-center
+        gap-1.5
+        text-[10px]
+        text-[#B4432E]
+      ">
+        <i data-lucide="cloud-off" className="w-3 h-3" />
+        Kaydedilemedi
+      </span>
+    );
 
-    const current =
-      data.salesEntries?.[date]?.[product]
-      || {};
+  }
 
-    persist({
+  return (
+    <span className="
+      inline-flex
+      items-center
+      gap-1.5
+      text-[10px]
+      text-[#1C6B4E]
+    ">
+      <i data-lucide="cloud-check" className="w-3 h-3" />
+      Buluta kaydedildi
+    </span>
+  );
+}
 
-      ...data,
 
-      salesEntries: {
+/* =========================================================
+   ANA UYGULAMA
+========================================================= */
 
-        ...data.salesEntries,
+function ManoPizza() {
 
-        [date]: {
+  const [currentUser, setCurrentUser] =
+    useState(null);
 
-          ...(data.salesEntries?.[date] || {}),
+  const [stores, setStores] =
+    useState(DEFAULT_STORES);
 
-          [product]: {
+  const [purchases, setPurchases] =
+    useState({});
 
-            ...current,
+  const [sales, setSales] =
+    useState({});
 
-            [field]: value
+  const [costs, setCosts] =
+    useState({});
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [firebaseError, setFirebaseError] =
+    useState("");
+
+  const [saveStatus, setSaveStatus] =
+    useState("saved");
+
+  const [date, setDate] =
+    useState(todayISO());
+
+  const [tab, setTab] =
+    useState("alis");
+
+
+  /* -------------------------------------------------------
+     GERÇEK ZAMANLI FIRESTORE DİNLEYİCİLERİ
+  ------------------------------------------------------- */
+
+  useEffect(() => {
+
+    if (!db) return;
+
+    let loaded = {
+      stores: false,
+      purchases: false,
+      sales: false,
+      costs: false
+    };
+
+    function checkLoaded() {
+
+      if (
+        loaded.stores &&
+        loaded.purchases &&
+        loaded.sales &&
+        loaded.costs
+      ) {
+
+        setLoading(false);
+
+      }
+    }
+
+
+    /* MAĞAZALAR */
+
+    const unsubStores =
+      FB.onSnapshot(
+        refs.stores(),
+        snap => {
+
+          if (snap.empty) {
+
+            DEFAULT_STORES.forEach(async name => {
+
+              try {
+
+                await FB.setDoc(
+                  refs.store(name),
+                  {
+                    name,
+                    createdAt: Date.now()
+                  },
+                  { merge: true }
+                );
+
+              } catch (e) {
+
+                console.error(e);
+
+              }
+
+            });
+
+          } else {
+
+            const list =
+              snap.docs
+                .map(d => d.data().name)
+                .filter(Boolean)
+                .sort();
+
+            setStores(
+              list.length
+                ? list
+                : DEFAULT_STORES
+            );
 
           }
 
+          loaded.stores = true;
+          checkLoaded();
+
+        },
+        err => {
+
+          console.error(err);
+
+          setFirebaseError(
+            "Mağazalar okunamadı."
+          );
+
+          loaded.stores = true;
+          checkLoaded();
+
         }
+      );
 
-      }
 
-    });
+    /* ALIŞLAR */
 
+    const unsubPurchases =
+      FB.onSnapshot(
+        refs.purchases(),
+        snap => {
+
+          const obj = {};
+
+          snap.docs.forEach(d => {
+
+            const x = d.data();
+
+            if (!x.date || !x.store)
+              return;
+
+            if (!obj[x.date])
+              obj[x.date] = {};
+
+            obj[x.date][x.store] =
+              x.items || [];
+
+          });
+
+          setPurchases(obj);
+
+          loaded.purchases = true;
+          checkLoaded();
+
+        },
+        err => {
+
+          console.error(err);
+
+          loaded.purchases = true;
+          checkLoaded();
+
+        }
+      );
+
+
+    /* SATIŞLAR */
+
+    const unsubSales =
+      FB.onSnapshot(
+        refs.sales(),
+        snap => {
+
+          const obj = {};
+
+          snap.docs.forEach(d => {
+
+            const x = d.data();
+
+            if (x.date)
+              obj[x.date] =
+                x.rows || {};
+
+          });
+
+          setSales(obj);
+
+          loaded.sales = true;
+          checkLoaded();
+
+        },
+        err => {
+
+          console.error(err);
+
+          loaded.sales = true;
+          checkLoaded();
+
+        }
+      );
+
+
+    /* MALİYETLER */
+
+    const unsubCosts =
+      FB.onSnapshot(
+        refs.costs(),
+        snap => {
+
+          const obj = {};
+
+          snap.docs.forEach(d => {
+
+            const x = d.data();
+
+            if (x.product)
+              obj[x.product] = {
+                cost: x.cost ?? "",
+                price: x.price ?? ""
+              };
+
+          });
+
+          setCosts(obj);
+
+          loaded.costs = true;
+          checkLoaded();
+
+        },
+        err => {
+
+          console.error(err);
+
+          loaded.costs = true;
+          checkLoaded();
+
+        }
+      );
+
+
+    return () => {
+
+      unsubStores();
+      unsubPurchases();
+      unsubSales();
+      unsubCosts();
+
+    };
+
+  }, []);
+
+
+  /* -------------------------------------------------------
+     MAĞAZA EKLE
+  ------------------------------------------------------- */
+
+  async function addStore(name) {
+
+    const clean =
+      name.trim();
+
+    if (
+      !clean ||
+      stores.includes(clean)
+    ) return false;
+
+    setSaveStatus("saving");
+
+    try {
+
+      await FB.setDoc(
+        refs.store(clean),
+        {
+          name: clean,
+          createdAt: Date.now()
+        },
+        { merge: true }
+      );
+
+      setSaveStatus("saved");
+
+      return true;
+
+    } catch (e) {
+
+      console.error(e);
+
+      setSaveStatus("error");
+
+      return false;
+    }
   }
 
 
-  function toggleLock() {
+  /* -------------------------------------------------------
+     MAĞAZA SİL
+  ------------------------------------------------------- */
 
-    persist({
+  async function deleteStore(name) {
 
-      ...data,
+    if (
+      !confirm(
+        `"${name}" mağazasını silmek istediğine emin misin?`
+      )
+    ) return;
 
-      salesLocks: {
+    setSaveStatus("saving");
 
-        ...data.salesLocks,
+    try {
 
-        [date]: !locked
+      await FB.deleteDoc(
+        refs.store(name)
+      );
 
-      }
+      setSaveStatus("saved");
 
-    });
+    } catch (e) {
 
+      console.error(e);
+
+      setSaveStatus("error");
+
+    }
   }
 
 
-  return (
+  /* -------------------------------------------------------
+     ALIŞ KAYDET
+  ------------------------------------------------------- */
 
-    <div className="fade-in">
+  async function savePurchase(
+    selectedDate,
+    store,
+    items,
+    locked = false
+  ) {
 
-      <div className="bg-[#1C1B19] text-white rounded-2xl p-4 mb-4 flex justify-between items-center">
+    setSaveStatus("saving");
 
-        <div>
+    try {
 
-          <div className="text-[11px] text-[#A8A49A]">
-            Günlük Satış
+      await FB.setDoc(
+        refs.purchase(
+          selectedDate,
+          store
+        ),
+        {
+          date: selectedDate,
+          store,
+          items,
+          locked,
+          updatedAt: Date.now(),
+          updatedBy: currentUser?.username || ""
+        },
+        { merge: true }
+      );
+
+      setSaveStatus("saved");
+
+    } catch (e) {
+
+      console.error(e);
+
+      setSaveStatus("error");
+
+      throw e;
+    }
+  }
+
+
+  /* -------------------------------------------------------
+     SATIŞ KAYDET
+  ------------------------------------------------------- */
+
+  async function saveSales(
+    selectedDate,
+    rows,
+    locked = false
+  ) {
+
+    setSaveStatus("saving");
+
+    try {
+
+      await FB.setDoc(
+        refs.sale(selectedDate),
+        {
+          date: selectedDate,
+          rows,
+          locked,
+          updatedAt: Date.now(),
+          updatedBy: currentUser?.username || ""
+        },
+        { merge: true }
+      );
+
+      setSaveStatus("saved");
+
+    } catch (e) {
+
+      console.error(e);
+
+      setSaveStatus("error");
+
+      throw e;
+    }
+  }
+
+
+  /* -------------------------------------------------------
+     MALİYET KAYDET
+  ------------------------------------------------------- */
+
+  async function saveCost(
+    product,
+    cost,
+    price
+  ) {
+
+    setSaveStatus("saving");
+
+    try {
+
+      await FB.setDoc(
+        refs.cost(product),
+        {
+          product,
+          cost,
+          price,
+          updatedAt: Date.now(),
+          updatedBy: currentUser?.username || ""
+        },
+        { merge: true }
+      );
+
+      setSaveStatus("saved");
+
+    } catch (e) {
+
+      console.error(e);
+
+      setSaveStatus("error");
+
+    }
+  }
+
+
+  if (loading) {
+
+    return (
+      <div className="
+        min-h-screen
+        bg-[#1C1B19]
+        flex
+        items-center
+        justify-center
+        text-white
+      ">
+
+        <div className="text-center">
+
+          <div className="
+            w-14 h-14
+            rounded-2xl
+            bg-[#B4432E]
+            flex
+            items-center
+            justify-center
+            mx-auto
+            mb-4
+          ">
+
+            <i
+              data-lucide="pizza"
+              className="w-7 h-7"
+            />
+
           </div>
 
-          <div className="text-[10px] text-[#77736B] mt-1">
-            {formatDate(date)}
+          <div className="
+            text-sm
+            text-[#C7C4BB]
+          ">
+            Mano Pizza yükleniyor...
           </div>
 
-        </div>
+          <div className="
+            text-[11px]
+            text-[#77736C]
+            mt-2
+          ">
+            Veriler Firebase'den alınıyor
+          </div>
 
-        <div className="text-lg font-black">
-          {formatTL(total)}
         </div>
 
       </div>
+    );
+  }
 
 
-      {locked && (
+  if (!currentUser) {
 
-        <div className="mb-3 bg-[#F1EFE9] border border-[#E4E1D8] rounded-xl p-3 flex items-center gap-2 text-xs">
-
-          <Icon name="lock" size={15} />
-
-          <span>
-            Bu günün satışları onaylandı.
-          </span>
-
-          {isAdmin && (
-
-            <button
-              onClick={toggleLock}
-              className="ml-auto text-[#185C42] font-bold"
-            >
-              Kilidi Aç
-            </button>
-
-          )}
-
-        </div>
-
-      )}
+    return (
+      <LoginScreen
+        onSuccess={setCurrentUser}
+      />
+    );
+  }
 
 
-      <div className="bg-white border border-[#E4E1D8] rounded-2xl overflow-x-auto">
-
-        <div className="min-w-[650px]">
-
-          <div className="grid grid-cols-[2fr_1fr_1.2fr_1.2fr] bg-[#F1EFE9] p-3 text-[11px] text-[#6B6862] font-black">
-
-            <span>Ürün</span>
-
-            <span className="text-right">
-              Adet
-            </span>
-
-            <span className="text-right">
-              Birim Fiyat
-            </span>
-
-            <span className="text-right">
-              Toplam
-            </span>
-
-          </div>
+  const isAdmin =
+    currentUser.role === "admin";
 
 
-          {rows.map(
-            (row, index) => (
+  const tabs = isAdmin
+    ? [
+        {
+          id: "alis",
+          label: "Alış",
+          icon: "shopping-bag"
+        },
+        {
+          id: "satis",
+          label: "Satış",
+          icon: "trending-up"
+        },
+        {
+          id: "maliyet",
+          label: "Maliyet",
+          icon: "percent"
+        },
+        {
+          id: "karzarar",
+          label: "Kâr / Zarar",
+          icon: "chart-no-axes-combined"
+        },
+        {
+          id: "yonetici",
+          label: "Yönetici",
+          icon: "shield-check"
+        }
+      ]
+    : [
+        {
+          id: "alis",
+          label: "Alış",
+          icon: "shopping-bag"
+        },
+        {
+          id: "satis",
+          label: "Satış",
+          icon: "trending-up"
+        }
+      ];
 
-              <div
-                key={row.product}
-                className={
-                  "grid grid-cols-[2fr_1fr_1.2fr_1.2fr] gap-2 items-center p-2 border-t border-[#EFECE5] " +
-                  (index % 2
-                    ? "bg-[#FCFBF8]"
-                    : "bg-white")
-                }
-              >
 
-                <span className="text-xs font-semibold truncate">
-                  {row.product}
+  return (
+    <div className="
+      min-h-screen
+      bg-[#F7F6F2]
+      text-[#1C1B19]
+      safe-bottom
+    ">
+
+      <div className="
+        max-w-[900px]
+        mx-auto
+        px-4
+        sm:px-6
+        py-4
+      ">
+
+        {/* HEADER */}
+
+        <header className="
+          flex
+          items-center
+          justify-between
+          mb-4
+        ">
+
+          <div className="
+            flex
+            items-center
+            gap-3
+          ">
+
+            <div className="
+              w-10 h-10
+              rounded-xl
+              bg-[#B4432E]
+              flex
+              items-center
+              justify-center
+              text-white
+              shadow-sm
+            ">
+
+              <i
+                data-lucide="pizza"
+                className="w-5 h-5"
+              />
+
+            </div>
+
+            <div>
+
+              <h1 className="
+                text-lg
+                font-black
+                tracking-tight
+                m-0
+              ">
+                Mano Pizza
+              </h1>
+
+              <div className="
+                flex
+                items-center
+                gap-2
+                mt-0.5
+              ">
+
+                <span className="
+                  text-[11px]
+                  text-[#6B6862]
+                ">
+                  {currentUser.username}
                 </span>
 
-                <input
-                  type="number"
-                  min="0"
-                  value={row.qty}
-                  disabled={
-                    locked && !isAdmin
-                  }
-                  onChange={e =>
-                    update(
-                      row.product,
-                      "qty",
-                      e.target.value
-                    )
-                  }
-                  className="p-2 border border-[#E4E1D8] rounded-lg text-xs text-right bg-[#FCFCFA] outline-none"
+                <span className="
+                  w-1
+                  h-1
+                  rounded-full
+                  bg-[#C9C5BB]
                 />
 
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={row.unitPrice}
-                  disabled={
-                    locked && !isAdmin
-                  }
-                  onChange={e =>
-                    update(
-                      row.product,
-                      "unitPrice",
-                      e.target.value
-                    )
-                  }
-                  className="p-2 border border-[#E4E1D8] rounded-lg text-xs text-right bg-[#FCFCFA] outline-none"
-                />
-
-                <span className="text-xs font-black text-right">
-                  {formatTL(row.total)}
+                <span className="
+                  text-[11px]
+                  text-[#6B6862]
+                ">
+                  {isAdmin
+                    ? "Yönetici"
+                    : "Kullanıcı"}
                 </span>
 
               </div>
 
-            )
-          )}
+            </div>
+
+          </div>
+
+
+          <div className="
+            flex
+            items-center
+            gap-3
+          ">
+
+            <SaveStatus
+              status={saveStatus}
+            />
+
+            <button
+              onClick={() =>
+                setCurrentUser(null)
+              }
+              className="
+                press
+                flex
+                items-center
+                gap-1.5
+                border
+                border-[#E4E1D8]
+                bg-white
+                rounded-xl
+                px-3
+                py-2
+                text-xs
+                text-[#6B6862]
+              "
+            >
+
+              <i
+                data-lucide="log-out"
+                className="w-3.5 h-3.5"
+              />
+
+              <span className="hidden sm:inline">
+                Çıkış
+              </span>
+
+            </button>
+
+          </div>
+
+        </header>
+
+
+        {firebaseError && (
+
+          <div className="
+            mb-3
+            rounded-xl
+            bg-[#FFF1ED]
+            border
+            border-[#E8C1B7]
+            p-3
+            text-xs
+            text-[#9A3D2C]
+          ">
+            {firebaseError}
+          </div>
+
+        )}
+
+
+        {/* TARİH */}
+
+        {(tab === "alis" ||
+          tab === "satis") && (
+
+          <div className="
+            flex
+            items-center
+            gap-3
+            bg-white
+            border
+            border-[#E4E1D8]
+            rounded-2xl
+            p-3
+            mb-3
+            shadow-sm
+          ">
+
+            <div className="
+              w-9 h-9
+              rounded-xl
+              bg-[#F1EFE9]
+              flex
+              items-center
+              justify-center
+              shrink-0
+            ">
+
+              <i
+                data-lucide="calendar-days"
+                className="
+                  w-4 h-4
+                  text-[#6B6862]
+                "
+              />
+
+            </div>
+
+            <div className="flex-1">
+
+              <div className="
+                text-[10px]
+                text-[#A8A49A]
+                uppercase
+                tracking-wide
+              ">
+                Kayıt tarihi
+              </div>
+
+              <input
+                type="date"
+                value={date}
+                onChange={e =>
+                  setDate(e.target.value)
+                }
+                className="
+                  border-none
+                  bg-transparent
+                  outline-none
+                  text-sm
+                  font-bold
+                  w-full
+                "
+              />
+
+            </div>
+
+            <div className="
+              hidden
+              sm:block
+              text-right
+            ">
+
+              <div className="
+                text-xs
+                text-[#6B6862]
+              ">
+                {formatDateLabel(date)}
+              </div>
+
+            </div>
+
+          </div>
+
+        )}
+
+
+        {/* TABLAR */}
+
+        <div className="
+          grid
+          grid-cols-2
+          sm:flex
+          gap-1.5
+          mb-4
+        ">
+
+          {tabs.map(t => (
+
+            <button
+              key={t.id}
+              onClick={() =>
+                setTab(t.id)
+              }
+              className={`
+                press
+                flex
+                items-center
+                justify-center
+                gap-1.5
+                py-2.5
+                px-2
+                rounded-xl
+                border
+                text-[11px]
+                sm:text-xs
+                font-bold
+                ${
+                  tab === t.id
+                    ? "bg-[#1C1B19] text-white border-[#1C1B19]"
+                    : "bg-white text-[#6B6862] border-[#E4E1D8]"
+                }
+              `}
+            >
+
+              <i
+                data-lucide={t.icon}
+                className="w-3.5 h-3.5"
+              />
+
+              {t.label}
+
+            </button>
+
+          ))}
 
         </div>
 
-      </div>
 
+        {/* İÇERİK */}
 
-      {!locked && !isAdmin && (
+        {tab === "alis" && (
 
-        <button
-          onClick={toggleLock}
-          className="mt-3 w-full py-3 bg-[#1C1B19] text-white rounded-xl text-xs font-black"
-        >
-
-          <Icon
-            name="check-circle-2"
-            size={15}
-            className="inline mr-1"
+          <AlisTab
+            stores={stores}
+            purchases={purchases}
+            date={date}
+            isAdmin={isAdmin}
+            savePurchase={savePurchase}
+            addStore={addStore}
+            deleteStore={deleteStore}
           />
 
-          Günlük Satışı Onayla
+        )}
 
-        </button>
 
-      )}
+        {tab === "satis" && (
+
+          <SatisTab
+            sales={sales}
+            date={date}
+            isAdmin={isAdmin}
+            saveSales={saveSales}
+          />
+
+        )}
+
+
+        {tab === "maliyet" && isAdmin && (
+
+          <MaliyetlerTab
+            costs={costs}
+            saveCost={saveCost}
+          />
+
+        )}
+
+
+        {tab === "karzarar" && isAdmin && (
+
+          <KarZararTab
+            purchases={purchases}
+            sales={sales}
+          />
+
+        )}
+
+
+        {tab === "yonetici" && isAdmin && (
+
+          <YoneticiTab />
+
+        )}
+
+      </div>
 
     </div>
-
   );
 }
 
 
 /* =========================================================
-   PURCHASES
+   ALIŞ
 ========================================================= */
 
-function Purchases({
-  data,
-  persist,
+function AlisTab({
+  stores,
+  purchases,
   date,
-  isAdmin
+  isAdmin,
+  savePurchase,
+  addStore,
+  deleteStore
 }) {
 
   const [activeStore, setActiveStore] =
     useState(null);
 
-  const [form, setForm] =
-    useState({
-      product: "",
-      qty: "1",
-      unitPrice: ""
-    });
+  const [newStore, setNewStore] =
+    useState("");
+
+  const [showAddStore, setShowAddStore] =
+    useState(false);
+
+  const [product, setProduct] =
+    useState("");
+
+  const [qty, setQty] =
+    useState("1");
+
+  const [price, setPrice] =
+    useState("");
+
+  const [confirm, setConfirm] =
+    useState(false);
 
 
   const day =
-    data.purchaseEntries?.[date] || {};
+    purchases[date] || {};
 
-  const locks =
-    data.purchaseLocks?.[date] || {};
+
+  function totalStore(store) {
+
+    return (day[store] || [])
+      .reduce(
+        (sum, item) =>
+          sum +
+          Number(item.qty || 0) *
+          Number(item.unitPrice || 0),
+        0
+      );
+  }
+
+
+  const dayTotal =
+    stores.reduce(
+      (sum, store) =>
+        sum + totalStore(store),
+      0
+    );
+
+
+  const items =
+    activeStore
+      ? (day[activeStore] || [])
+      : [];
+
+
+  const locked =
+    activeStore
+      ? !!(
+          day[
+            `${activeStore}_LOCK`
+          ]
+        )
+      : false;
+
+
+  async function addItem(e) {
+
+    e.preventDefault();
+
+    const p =
+      product.trim();
+
+    const q =
+      Number(qty);
+
+    const pr =
+      Number(price);
+
+    if (
+      !p ||
+      !q ||
+      q <= 0 ||
+      Number.isNaN(pr) ||
+      pr < 0
+    ) return;
+
+
+    const next = [
+      ...items,
+      {
+        id:
+          `${Date.now()}_${Math.random()
+            .toString(36)
+            .slice(2, 7)}`,
+        product: p,
+        qty: q,
+        unitPrice: pr,
+        createdAt: Date.now()
+      }
+    ];
+
+
+    await savePurchase(
+      date,
+      activeStore,
+      next,
+      locked
+    );
+
+
+    setProduct("");
+    setQty("1");
+    setPrice("");
+
+  }
+
+
+  async function removeItem(id) {
+
+    if (locked && !isAdmin)
+      return;
+
+    const next =
+      items.filter(
+        x => x.id !== id
+      );
+
+    await savePurchase(
+      date,
+      activeStore,
+      next,
+      locked
+    );
+  }
+
+
+  async function lockStore() {
+
+    if (!confirm)
+      return;
+
+    await savePurchase(
+      date,
+      activeStore,
+      items,
+      true
+    );
+
+    setConfirm(false);
+  }
+
+
+  async function unlockStore() {
+
+    await savePurchase(
+      date,
+      activeStore,
+      items,
+      false
+    );
+  }
 
 
   if (activeStore) {
 
-    const items =
-      day[activeStore] || [];
-
-    const locked =
-      !!locks[activeStore];
-
-
-    const total =
-      items.reduce(
-        (sum, item) =>
-          sum +
-          Number(item.qty) *
-          Number(item.unitPrice),
-        0
-      );
-
-
-    function addItem(e) {
-
-      e.preventDefault();
-
-      if (
-        locked &&
-        !isAdmin
-      ) return;
-
-      if (
-        !form.product.trim()
-      ) return;
-
-      const item = {
-
-        id:
-          Date.now() +
-          "-" +
-          Math.random()
-            .toString(36)
-            .slice(2),
-
-        product:
-          form.product.trim(),
-
-        qty:
-          Number(form.qty) || 0,
-
-        unitPrice:
-          Number(form.unitPrice) || 0
-
-      };
-
-
-      persist({
-
-        ...data,
-
-        purchaseEntries: {
-
-          ...data.purchaseEntries,
-
-          [date]: {
-
-            ...day,
-
-            [activeStore]: [
-              ...items,
-              item
-            ]
-
-          }
-
-        }
-
-      });
-
-
-      setForm({
-        product: "",
-        qty: "1",
-        unitPrice: ""
-      });
-
-    }
-
-
-    function removeItem(id) {
-
-      if (
-        locked &&
-        !isAdmin
-      ) return;
-
-      persist({
-
-        ...data,
-
-        purchaseEntries: {
-
-          ...data.purchaseEntries,
-
-          [date]: {
-
-            ...day,
-
-            [activeStore]:
-              items.filter(
-                item =>
-                  item.id !== id
-              )
-
-          }
-
-        }
-
-      });
-
-    }
-
-
-    function toggleLock() {
-
-      persist({
-
-        ...data,
-
-        purchaseLocks: {
-
-          ...data.purchaseLocks,
-
-          [date]: {
-
-            ...locks,
-
-            [activeStore]:
-              !locked
-
-          }
-
-        }
-
-      });
-
-    }
-
-
     return (
-
-      <div className="fade-in">
+      <div>
 
         <button
           onClick={() =>
             setActiveStore(null)
           }
-          className="flex items-center gap-1 text-xs text-[#6B6862] mb-4"
+          className="
+            flex
+            items-center
+            gap-1
+            bg-transparent
+            border-none
+            text-[#6B6862]
+            text-xs
+            mb-3
+          "
         >
 
-          <Icon
-            name="chevron-left"
-            size={15}
+          <i
+            data-lucide="chevron-left"
+            className="w-4 h-4"
           />
 
-          Mağazalara Dön
+          Mağazalara dön
 
         </button>
 
 
-        <div className="flex justify-between items-center mb-4">
+        <div className="
+          flex
+          items-center
+          justify-between
+          mb-3
+        ">
 
           <div>
 
-            <h2 className="font-black">
+            <h2 className="
+              text-xl
+              font-black
+              tracking-tight
+            ">
               {activeStore}
             </h2>
 
-            <div className="text-[11px] text-[#77736B]">
-              {formatDate(date)}
+            <div className="
+              text-[11px]
+              text-[#6B6862]
+              mt-0.5
+            ">
+              {items.length} ürün kaydı
             </div>
 
           </div>
 
-          {locked && (
 
-            <div className="flex items-center gap-1 text-xs text-[#77736B]">
-              <Icon name="lock" size={14} />
-              Onaylandı
-            </div>
+          <div className="
+            flex
+            items-center
+            gap-2
+          ">
 
-          )}
+            {locked && (
+
+              <span className="
+                flex
+                items-center
+                gap-1
+                text-[10px]
+                text-[#1C6B4E]
+                bg-[#EAF3EE]
+                px-2.5
+                py-1.5
+                rounded-lg
+              ">
+
+                <i
+                  data-lucide="lock"
+                  className="w-3 h-3"
+                />
+
+                Onaylı
+
+              </span>
+
+            )}
+
+            {isAdmin && locked && (
+
+              <button
+                onClick={unlockStore}
+                className="
+                  text-xs
+                  text-[#1C6B4E]
+                  font-bold
+                  bg-transparent
+                  border-none
+                "
+              >
+                Kilidi kaldır
+              </button>
+
+            )}
+
+          </div>
 
         </div>
 
 
-        {!locked && (
+        {/* GİRİŞ FORMU */}
+
+        {(!locked || isAdmin) && (
 
           <form
             onSubmit={addItem}
-            className="bg-white border border-[#E4E1D8] rounded-2xl p-4 mb-4"
+            className="
+              bg-white
+              border
+              border-[#E4E1D8]
+              rounded-2xl
+              p-4
+              mb-4
+              shadow-sm
+            "
           >
 
-            <div className="grid sm:grid-cols-[2fr_1fr_1fr] gap-2">
+            <div className="
+              text-xs
+              font-bold
+              mb-3
+            ">
+              Yeni alış kaydı
+            </div>
 
-              <input
-                placeholder="Ürün adı"
-                value={form.product}
-                onChange={e =>
-                  setForm({
-                    ...form,
-                    product:
-                      e.target.value
-                  })
-                }
-                className="p-2.5 border border-[#E4E1D8] rounded-xl text-xs bg-[#FCFCFA] outline-none"
-              />
 
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="Miktar"
-                value={form.qty}
-                onChange={e =>
-                  setForm({
-                    ...form,
-                    qty:
-                      e.target.value
-                  })
-                }
-                className="p-2.5 border border-[#E4E1D8] rounded-xl text-xs bg-[#FCFCFA] outline-none"
-              />
+            <div className="
+              grid
+              grid-cols-1
+              sm:grid-cols-[2fr_1fr_1fr]
+              gap-3
+            ">
 
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="Birim fiyat"
-                value={form.unitPrice}
-                onChange={e =>
-                  setForm({
-                    ...form,
-                    unitPrice:
-                      e.target.value
-                  })
-                }
-                className="p-2.5 border border-[#E4E1D8] rounded-xl text-xs bg-[#FCFCFA] outline-none"
-              />
+              <label>
+
+                <span className="
+                  text-[10px]
+                  text-[#6B6862]
+                  block
+                  mb-1
+                ">
+                  Ürün
+                </span>
+
+                <input
+                  type="text"
+                  placeholder="Örn. Un"
+                  value={product}
+                  onChange={e =>
+                    setProduct(e.target.value)
+                  }
+                  className="
+                    w-full
+                    h-11
+                    px-3
+                    rounded-xl
+                    border
+                    border-[#E4E1D8]
+                    bg-[#FCFCFA]
+                    text-sm
+                    outline-none
+                  "
+                />
+
+              </label>
+
+
+              <label>
+
+                <span className="
+                  text-[10px]
+                  text-[#6B6862]
+                  block
+                  mb-1
+                ">
+                  Miktar
+                </span>
+
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={qty}
+                  onChange={e =>
+                    setQty(e.target.value)
+                  }
+                  className="
+                    w-full
+                    h-11
+                    px-3
+                    rounded-xl
+                    border
+                    border-[#E4E1D8]
+                    bg-[#FCFCFA]
+                    text-sm
+                    outline-none
+                  "
+                />
+
+              </label>
+
+
+              <label>
+
+                <span className="
+                  text-[10px]
+                  text-[#6B6862]
+                  block
+                  mb-1
+                ">
+                  Birim fiyat
+                </span>
+
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0"
+                  value={price}
+                  onChange={e =>
+                    setPrice(e.target.value)
+                  }
+                  className="
+                    w-full
+                    h-11
+                    px-3
+                    rounded-xl
+                    border
+                    border-[#E4E1D8]
+                    bg-[#FCFCFA]
+                    text-sm
+                    outline-none
+                  "
+                />
+
+              </label>
 
             </div>
 
 
             <button
-              className="mt-3 w-full py-2.5 bg-[#1C1B19] text-white rounded-xl text-xs font-black"
+              type="submit"
+              className="
+                press
+                w-full
+                h-11
+                mt-3
+                rounded-xl
+                bg-[#1C1B19]
+                text-white
+                font-bold
+                text-xs
+                flex
+                items-center
+                justify-center
+                gap-2
+              "
             >
 
-              <Icon
-                name="plus"
-                size={15}
-                className="inline mr-1"
+              <i
+                data-lucide="plus"
+                className="w-4 h-4"
               />
 
-              Ürün Ekle
+              Ürünü Kaydet
 
             </button>
 
@@ -1534,47 +2090,102 @@ function Purchases({
         )}
 
 
-        <div className="space-y-2">
+        {/* ÜRÜNLER */}
+
+        <div className="
+          flex
+          flex-col
+          gap-2
+        ">
 
           {items.length === 0 && (
 
-            <div className="text-center py-8 text-xs text-[#77736B]">
-              Henüz alış kaydı yok.
+            <div className="
+              bg-white
+              border
+              border-dashed
+              border-[#D8D4C8]
+              rounded-2xl
+              p-8
+              text-center
+            ">
+
+              <i
+                data-lucide="shopping-bag"
+                className="
+                  w-7 h-7
+                  mx-auto
+                  mb-2
+                  text-[#C0BBB0]
+                "
+              />
+
+              <div className="
+                text-xs
+                text-[#6B6862]
+              ">
+                Henüz alış kaydı yok.
+              </div>
+
             </div>
 
           )}
 
-          {items.map(
-            item => (
 
-              <div
-                key={item.id}
-                className="bg-white border border-[#E4E1D8] rounded-xl p-3 flex justify-between items-center"
-              >
+          {items.map(item => (
+
+            <div
+              key={item.id}
+              className="
+                bg-white
+                border
+                border-[#E4E1D8]
+                rounded-2xl
+                p-4
+                shadow-sm
+              "
+            >
+
+              <div className="
+                flex
+                items-start
+                justify-between
+                gap-3
+              ">
 
                 <div>
 
-                  <b className="text-xs">
+                  <div className="
+                    font-bold
+                    text-sm
+                  ">
                     {item.product}
-                  </b>
+                  </div>
 
-                  <div className="text-[11px] text-[#77736B] mt-1">
-                    {formatNumber(item.qty)}
-                    {" × "}
-                    {formatTL(item.unitPrice)}
+                  <div className="
+                    text-xs
+                    text-[#6B6862]
+                    mt-1
+                  ">
+                    {item.qty} × {formatTL(item.unitPrice)}
                   </div>
 
                 </div>
 
 
-                <div className="flex items-center gap-3">
+                <div className="
+                  text-right
+                ">
 
-                  <b className="text-xs">
+                  <div className="
+                    font-black
+                    text-sm
+                  ">
                     {formatTL(
-                      Number(item.qty) *
-                      Number(item.unitPrice)
+                      item.qty *
+                      item.unitPrice
                     )}
-                  </b>
+                  </div>
 
                   {!locked && (
 
@@ -1582,12 +2193,19 @@ function Purchases({
                       onClick={() =>
                         removeItem(item.id)
                       }
+                      className="
+                        mt-2
+                        text-[#A8A49A]
+                        bg-transparent
+                        border-none
+                      "
                     >
-                      <Icon
-                        name="trash-2"
-                        size={15}
-                        className="text-[#A39E94]"
+
+                      <i
+                        data-lucide="trash-2"
+                        className="w-4 h-4"
                       />
+
                     </button>
 
                   )}
@@ -1596,1721 +2214,1953 @@ function Purchases({
 
               </div>
 
-            )
-          )}
+            </div>
+
+          ))}
 
         </div>
 
 
-        <div className="mt-3 bg-[#1C1B19] text-white rounded-xl p-3 flex justify-between">
+        {/* TOPLAM */}
 
-          <span className="text-xs text-[#C6C1B7]">
-            Mağaza Toplamı
-          </span>
+        <div className="
+          bg-[#1C1B19]
+          rounded-2xl
+          p-4
+          mt-3
+          flex
+          justify-between
+          items-center
+          text-white
+        ">
 
-          <b className="text-sm">
-            {formatTL(total)}
-          </b>
+          <div>
+
+            <div className="
+              text-[10px]
+              text-[#9C9890]
+              uppercase
+              tracking-wide
+            ">
+              Mağaza toplamı
+            </div>
+
+            <div className="
+              text-sm
+              font-bold
+              mt-0.5
+            ">
+              {activeStore}
+            </div>
+
+          </div>
+
+          <div className="
+            text-lg
+            font-black
+          ">
+            {formatTL(
+              totalStore(activeStore)
+            )}
+          </div>
 
         </div>
 
 
-        {!locked && !isAdmin && items.length > 0 && (
+        {/* ONAY */}
 
-          <button
-            onClick={toggleLock}
-            className="mt-3 w-full py-3 bg-[#1C1B19] text-white rounded-xl text-xs font-black"
-          >
+        {!locked &&
+          !isAdmin &&
+          items.length > 0 && (
 
-            <Icon
-              name="check-circle-2"
-              size={15}
-              className="inline mr-1"
-            />
+          <div className="
+            bg-[#FFF9EC]
+            border
+            border-[#E9DDB8]
+            rounded-2xl
+            p-4
+            mt-3
+          ">
 
-            Alışı Onayla
+            <label className="
+              flex
+              gap-2
+              text-xs
+              text-[#7A6A2E]
+            ">
 
-          </button>
+              <input
+                type="checkbox"
+                checked={confirm}
+                onChange={e =>
+                  setConfirm(e.target.checked)
+                }
+              />
 
-        )}
+              <span>
+                Girdiğim alış kayıtlarını kontrol
+                ettim ve onaylıyorum.
+              </span>
+
+            </label>
 
 
-        {locked && isAdmin && (
+            <button
+              disabled={!confirm}
+              onClick={lockStore}
+              className={`
+                w-full
+                h-11
+                mt-3
+                rounded-xl
+                border-none
+                font-bold
+                text-xs
+                ${
+                  confirm
+                    ? "bg-[#1C1B19] text-white"
+                    : "bg-[#D8D4C8] text-[#9A968C]"
+                }
+              `}
+            >
+              Kaydet ve Onayla
+            </button>
 
-          <button
-            onClick={toggleLock}
-            className="mt-3 w-full py-3 border border-[#E4E1D8] bg-white rounded-xl text-xs font-bold text-[#185C42]"
-          >
-
-            <Icon
-              name="unlock"
-              size={15}
-              className="inline mr-1"
-            />
-
-            Kilidi Aç
-
-          </button>
+          </div>
 
         )}
 
       </div>
-
     );
   }
 
 
-  const dayTotal =
-    data.stores.reduce(
-      (sum, store) => {
-
-        const items =
-          day[store] || [];
-
-        return (
-          sum +
-          items.reduce(
-            (s, item) =>
-              s +
-              Number(item.qty) *
-              Number(item.unitPrice),
-            0
-          )
-        );
-
-      },
-      0
-    );
-
-
   return (
+    <div>
 
-    <div className="fade-in">
+      {/* GÜN TOPLAMI */}
 
-      <div className="bg-[#1C1B19] text-white rounded-2xl p-4 mb-4 flex justify-between items-center">
+      <div className="
+        bg-[#1C1B19]
+        rounded-2xl
+        p-5
+        mb-4
+        text-white
+      ">
 
-        <div>
-
-          <div className="text-[11px] text-[#A8A49A]">
-            Günün Alış Toplamı
-          </div>
-
-          <div className="text-[10px] text-[#77736B] mt-1">
-            {formatDate(date)}
-          </div>
-
+        <div className="
+          text-xs
+          text-[#9C9890]
+        ">
+          Günün alış toplamı
         </div>
 
-        <b className="text-lg">
+        <div className="
+          text-2xl
+          font-black
+          mt-1
+        ">
           {formatTL(dayTotal)}
-        </b>
+        </div>
 
       </div>
 
 
-      <div className="space-y-2">
+      {/* MAĞAZALAR */}
 
-        {data.stores.map(
-          store => {
+      <div className="
+        grid
+        grid-cols-1
+        sm:grid-cols-2
+        gap-2.5
+      ">
 
-            const items =
-              day[store] || [];
+        {stores.map(store => {
 
-            const total =
-              items.reduce(
-                (sum, item) =>
-                  sum +
-                  Number(item.qty) *
-                  Number(item.unitPrice),
-                0
-              );
+          const items =
+            day[store] || [];
 
-            const locked =
-              !!locks[store];
+          const total =
+            totalStore(store);
 
-            return (
+          const isLocked =
+            !!day[
+              `${store}_LOCK`
+            ];
 
-              <button
-                key={store}
-                onClick={() =>
-                  setActiveStore(store)
-                }
-                className="w-full bg-white border border-[#E4E1D8] rounded-2xl p-4 flex justify-between items-center text-left hover:border-[#C8C3B8]"
-              >
+          return (
+            <button
+              key={store}
+              onClick={() =>
+                setActiveStore(store)
+              }
+              className="
+                press
+                text-left
+                bg-white
+                border
+                border-[#E4E1D8]
+                rounded-2xl
+                p-4
+                shadow-sm
+              "
+            >
 
-                <div className="flex items-center gap-3">
+              <div className="
+                flex
+                items-center
+                justify-between
+              ">
 
-                  <div className="w-10 h-10 rounded-xl bg-[#EAF3EE] text-[#185C42] flex items-center justify-center">
+                <div className="
+                  flex
+                  items-center
+                  gap-3
+                ">
 
-                    <Icon
-                      name="store"
-                      size={18}
+                  <div className="
+                    w-10 h-10
+                    rounded-xl
+                    bg-[#EAF3EE]
+                    flex
+                    items-center
+                    justify-center
+                    text-[#1C6B4E]
+                  ">
+
+                    <i
+                      data-lucide="store"
+                      className="w-5 h-5"
                     />
 
                   </div>
 
                   <div>
 
-                    <div className="flex items-center gap-1.5">
+                    <div className="
+                      text-sm
+                      font-bold
+                      flex
+                      items-center
+                      gap-1.5
+                    ">
 
-                      <b className="text-xs">
-                        {store}
-                      </b>
+                      {store}
 
-                      {locked && (
+                      {isLocked && (
 
-                        <Icon
-                          name="lock"
-                          size={12}
-                          className="text-[#A39E94]"
+                        <i
+                          data-lucide="lock"
+                          className="
+                            w-3 h-3
+                            text-[#1C6B4E]
+                          "
                         />
 
                       )}
 
                     </div>
 
-                    <div className="text-[11px] text-[#77736B] mt-1">
-                      {items.length} ürün
-                      {locked
-                        ? " · Onaylandı"
-                        : ""}
+                    <div className="
+                      text-[11px]
+                      text-[#6B6862]
+                      mt-0.5
+                    ">
+                      {items.length
+                        ? `${items.length} ürün`
+                        : "Henüz kayıt yok"}
                     </div>
 
                   </div>
 
                 </div>
 
-                <b className="text-xs">
+
+                <div className="
+                  text-sm
+                  font-black
+                ">
                   {formatTL(total)}
-                </b>
+                </div>
 
-              </button>
+              </div>
 
-            );
-
-          }
-        )}
+            </button>
+          );
+        })}
 
       </div>
 
-    </div>
 
-  );
-}
+      {/* MAĞAZA EKLE */}
+
+      {isAdmin && (
+
+        <div className="mt-3">
+
+          {!showAddStore ? (
+
+            <button
+              onClick={() =>
+                setShowAddStore(true)
+              }
+              className="
+                press
+                w-full
+                h-12
+                bg-white
+                border
+                border-dashed
+                border-[#D8D4C8]
+                rounded-2xl
+                text-xs
+                font-bold
+                flex
+                items-center
+                justify-center
+                gap-2
+              "
+            >
+
+              <i
+                data-lucide="plus"
+                className="w-4 h-4"
+              />
+
+              Yeni mağaza ekle
+
+            </button>
+
+          ) : (
+
+            <div className="
+              bg-white
+              border
+              border-[#E4E1D8]
+              rounded-2xl
+              p-3
+              flex
+              gap-2
+            ">
+
+              <input
+                autoFocus
+                placeholder="Mağaza adı"
+                value={newStore}
+                onChange={e =>
+                  setNewStore(e.target.value)
+                }
+                className="
+                  flex-1
+                  h-11
+                  px-3
+                  rounded-xl
+                  border
+                  border-[#E4E1D8]
+                  text-sm
+                  outline-none
+                "
+              />
+
+              <button
+                onClick={async () => {
+
+                  const ok =
+                    await addStore(newStore);
+
+                  if (ok) {
+
+                    setNewStore("");
+                    setShowAddStore(false);
+
+                  }
+
+                }}
+                className="
+                  px-4
+                  rounded-xl
+                  bg-[#1C1B19]
+                  text-white
+                  text-xs
+                  font-bold
+                "
+              >
+                Ekle
+              </button>
+
+              <button
+                onClick={() =>
+                  setShowAddStore(false)
+                }
+                className="
+                  w-11
+                  rounded-xl
+                  border
+                  border-[#E4E1D8]
+                  bg-white
+                "
+              >
+
+                <i
+                  data-lucide="x"
+                  className="w-4 h-4 mx-auto"
+                />
+
+              </button>
+
+            </div>
+
+          )}
+
+        </div>
+
+      )}
 
 
-/* =========================================================
-   COSTS
-========================================================= */
+      {/* ADMIN MAĞAZA SİLME */}
 
-function Costs({
-  data,
-  persist
-}) {
+      {isAdmin && stores.length > 0 && (
 
-  return (
+        <div className="mt-5">
 
-    <div className="fade-in">
+          <div className="
+            text-[10px]
+            text-[#A8A49A]
+            uppercase
+            tracking-wider
+            mb-2
+          ">
+            Mağaza yönetimi
+          </div>
 
-      <div className="bg-[#FFF6DF] border border-[#E9DDB8] rounded-2xl p-4 mb-4">
+          <div className="
+            bg-white
+            border
+            border-[#E4E1D8]
+            rounded-2xl
+            divide-y
+            divide-[#EFEDE6]
+          ">
 
-        <div className="flex gap-2">
+            {stores.map(store => (
 
-          <Icon
-            name="circle-help"
-            size={17}
-            className="text-[#806923]"
-          />
+              <div
+                key={store}
+                className="
+                  flex
+                  items-center
+                  justify-between
+                  p-3
+                "
+              >
 
-          <div>
+                <span className="
+                  text-xs
+                  font-semibold
+                ">
+                  {store}
+                </span>
 
-            <b className="text-xs text-[#6F5B1F]">
-              Food Cost
-            </b>
+                <button
+                  onClick={() =>
+                    deleteStore(store)
+                  }
+                  className="
+                    text-[#A8A49A]
+                    bg-transparent
+                    border-none
+                  "
+                >
 
-            <p className="text-[11px] text-[#806923] mt-1">
-              Maliyet / satış fiyatı oranıdır.
-              Daha düşük oran, ürün başına daha yüksek brüt marj anlamına gelir.
-            </p>
+                  <i
+                    data-lucide="trash-2"
+                    className="w-4 h-4"
+                  />
+
+                </button>
+
+              </div>
+
+            ))}
 
           </div>
 
         </div>
 
-      </div>
+      )}
+
+    </div>
+  );
+}
 
 
-      <div className="bg-white border border-[#E4E1D8] rounded-2xl overflow-x-auto">
+/* =========================================================
+   SATIŞ
+========================================================= */
 
-        <div className="min-w-[700px]">
+function SatisTab({
+  sales,
+  date,
+  isAdmin,
+  saveSales
+}) {
 
-          <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] bg-[#F1EFE9] p-3 text-[11px] text-[#6B6862] font-black">
+  const current =
+    sales[date] || {};
 
-            <span>Ürün</span>
+  const [confirm, setConfirm] =
+    useState(false);
 
-            <span className="text-right">
-              Maliyet
-            </span>
 
-            <span className="text-right">
-              Satış
-            </span>
+  const locked =
+    !!current.__locked;
 
-            <span className="text-right">
-              Brüt Kâr
-            </span>
 
-            <span className="text-right">
-              Food Cost
-            </span>
+  const rows =
+    SALE_PRODUCTS.map(product => {
+
+      const r =
+        current[product] || {
+          qty: "",
+          unitPrice: ""
+        };
+
+      const qty =
+        Number(r.qty) || 0;
+
+      const unitPrice =
+        Number(r.unitPrice) || 0;
+
+      return {
+        product,
+        qty: r.qty ?? "",
+        unitPrice: r.unitPrice ?? "",
+        total: qty * unitPrice
+      };
+
+    });
+
+
+  const total =
+    rows.reduce(
+      (sum, r) =>
+        sum + r.total,
+      0
+    );
+
+
+  const hasEntry =
+    rows.some(
+      r => Number(r.qty) > 0
+    );
+
+
+  async function update(
+    product,
+    field,
+    value
+  ) {
+
+    const next = {
+      ...current,
+      [product]: {
+        ...(current[product] || {}),
+        [field]: value
+      }
+    };
+
+    await saveSales(
+      date,
+      next,
+      locked
+    );
+  }
+
+
+  async function lock() {
+
+    if (!confirm)
+      return;
+
+    await saveSales(
+      date,
+      current,
+      true
+    );
+
+    setConfirm(false);
+  }
+
+
+  async function unlock() {
+
+    await saveSales(
+      date,
+      current,
+      false
+    );
+  }
+
+
+  return (
+    <div>
+
+      {/* TOPLAM */}
+
+      <div className="
+        bg-[#1C1B19]
+        rounded-2xl
+        p-5
+        mb-4
+        text-white
+      ">
+
+        <div className="
+          flex
+          justify-between
+          items-end
+        ">
+
+          <div>
+
+            <div className="
+              text-xs
+              text-[#9C9890]
+            ">
+              Günün satış toplamı
+            </div>
+
+            <div className="
+              text-2xl
+              font-black
+              mt-1
+            ">
+              {formatTL(total)}
+            </div>
 
           </div>
 
+          {locked && (
 
-          {PRODUCTS.map(
-            (product, index) => {
+            <div className="
+              flex
+              items-center
+              gap-1
+              text-[10px]
+              bg-[#2A2926]
+              px-2.5
+              py-1.5
+              rounded-lg
+              text-[#C7C4BB]
+            ">
 
-              const current =
-                data.costs?.[product]
-                || {
-                  cost: "",
-                  price: ""
-                };
+              <i
+                data-lucide="lock"
+                className="w-3 h-3"
+              />
 
-              const cost =
-                Number(current.cost) || 0;
+              Onaylandı
 
-              const price =
-                Number(current.price) || 0;
+            </div>
 
-              const profit =
-                price - cost;
-
-              const foodCost =
-                price
-                  ? (cost / price) * 100
-                  : 0;
-
-
-              function update(
-                field,
-                value
-              ) {
-
-                persist({
-
-                  ...data,
-
-                  costs: {
-
-                    ...data.costs,
-
-                    [product]: {
-
-                      ...current,
-
-                      [field]: value
-
-                    }
-
-                  }
-
-                });
-
-              }
-
-
-              return (
-
-                <div
-                  key={product}
-                  className={
-                    "grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-2 p-2 items-center border-t border-[#EFECE5] " +
-                    (index % 2
-                      ? "bg-[#FCFBF8]"
-                      : "bg-white")
-                  }
-                >
-
-                  <span className="text-xs font-semibold truncate">
-                    {product}
-                  </span>
-
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={current.cost}
-                    onChange={e =>
-                      update(
-                        "cost",
-                        e.target.value
-                      )
-                    }
-                    className="p-2 border border-[#E4E1D8] rounded-lg text-xs text-right bg-[#FCFCFA]"
-                  />
-
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={current.price}
-                    onChange={e =>
-                      update(
-                        "price",
-                        e.target.value
-                      )
-                    }
-                    className="p-2 border border-[#E4E1D8] rounded-lg text-xs text-right bg-[#FCFCFA]"
-                  />
-
-                  <span className="text-xs font-black text-right text-[#185C42]">
-                    {formatTL(profit)}
-                  </span>
-
-                  <span
-                    className={
-                      "text-xs font-black text-right " +
-                      (
-                        foodCost > 35
-                          ? "text-[#B4432E]"
-                          : "text-[#185C42]"
-                      )
-                    }
-                  >
-                    %{foodCost.toFixed(1)}
-                  </span>
-
-                </div>
-
-              );
-
-            }
           )}
 
         </div>
 
       </div>
 
-    </div>
 
+      {locked && isAdmin && (
+
+        <button
+          onClick={unlock}
+          className="
+            mb-3
+            text-xs
+            font-bold
+            text-[#1C6B4E]
+            bg-transparent
+            border-none
+          "
+        >
+          Kilidi kaldır
+        </button>
+
+      )}
+
+
+      {/* MOBİL KARTLAR */}
+
+      <div className="
+        mobile-card
+        space-y-2
+      ">
+
+        {rows.map(r => (
+
+          <div
+            key={r.product}
+            className="
+              bg-white
+              border
+              border-[#E4E1D8]
+              rounded-2xl
+              p-4
+              shadow-sm
+            "
+          >
+
+            <div className="
+              flex
+              items-center
+              justify-between
+              mb-3
+            ">
+
+              <div className="
+                text-sm
+                font-bold
+              ">
+                {r.product}
+              </div>
+
+              <div className="
+                text-sm
+                font-black
+              ">
+                {formatTL(r.total)}
+              </div>
+
+            </div>
+
+
+            <div className="
+              grid
+              grid-cols-2
+              gap-2
+            ">
+
+              <label>
+
+                <span className="
+                  block
+                  text-[10px]
+                  text-[#6B6862]
+                  mb-1
+                ">
+                  Adet
+                </span>
+
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  value={r.qty}
+                  disabled={
+                    locked && !isAdmin
+                  }
+                  onChange={e =>
+                    update(
+                      r.product,
+                      "qty",
+                      e.target.value
+                    )
+                  }
+                  className="
+                    w-full
+                    h-11
+                    px-3
+                    rounded-xl
+                    border
+                    border-[#E4E1D8]
+                    bg-[#FCFCFA]
+                    text-sm
+                    outline-none
+                  "
+                />
+
+              </label>
+
+
+              <label>
+
+                <span className="
+                  block
+                  text-[10px]
+                  text-[#6B6862]
+                  mb-1
+                ">
+                  Birim fiyat
+                </span>
+
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0"
+                  value={r.unitPrice}
+                  disabled={
+                    locked && !isAdmin
+                  }
+                  onChange={e =>
+                    update(
+                      r.product,
+                      "unitPrice",
+                      e.target.value
+                    )
+                  }
+                  className="
+                    w-full
+                    h-11
+                    px-3
+                    rounded-xl
+                    border
+                    border-[#E4E1D8]
+                    bg-[#FCFCFA]
+                    text-sm
+                    outline-none
+                  "
+                />
+
+              </label>
+
+            </div>
+
+          </div>
+
+        ))}
+
+      </div>
+
+
+      {/* MASAÜSTÜ TABLO */}
+
+      <div className="
+        desktop-table
+        bg-white
+        border
+        border-[#E4E1D8]
+        rounded-2xl
+        overflow-hidden
+      ">
+
+        <div className="
+          grid
+          grid-cols-[2fr_1fr_1fr_1.2fr]
+          gap-2
+          px-4
+          py-3
+          bg-[#F1EFE9]
+          text-[10px]
+          text-[#6B6862]
+          font-bold
+          uppercase
+        ">
+
+          <span>Ürün</span>
+          <span className="text-right">
+            Adet
+          </span>
+          <span className="text-right">
+            Birim
+          </span>
+          <span className="text-right">
+            Toplam
+          </span>
+
+        </div>
+
+
+        {rows.map((r, i) => (
+
+          <div
+            key={r.product}
+            className="
+              grid
+              grid-cols-[2fr_1fr_1fr_1.2fr]
+              gap-2
+              items-center
+              px-4
+              py-2.5
+              border-t
+              border-[#EFEDE6]
+            "
+          >
+
+            <span className="
+              text-xs
+              font-semibold
+            ">
+              {r.product}
+            </span>
+
+            <input
+              type="number"
+              min="0"
+              value={r.qty}
+              disabled={
+                locked && !isAdmin
+              }
+              onChange={e =>
+                update(
+                  r.product,
+                  "qty",
+                  e.target.value
+                )
+              }
+              className="
+                h-9
+                px-2
+                rounded-lg
+                border
+                border-[#E4E1D8]
+                text-xs
+                text-right
+              "
+            />
+
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={r.unitPrice}
+              disabled={
+                locked && !isAdmin
+              }
+              onChange={e =>
+                update(
+                  r.product,
+                  "unitPrice",
+                  e.target.value
+                )
+              }
+              className="
+                h-9
+                px-2
+                rounded-lg
+                border
+                border-[#E4E1D8]
+                text-xs
+                text-right
+              "
+            />
+
+            <span className="
+              text-xs
+              font-black
+              text-right
+            ">
+              {formatTL(r.total)}
+            </span>
+
+          </div>
+
+        ))}
+
+      </div>
+
+
+      {/* ONAY */}
+
+      {!locked &&
+        !isAdmin &&
+        hasEntry && (
+
+        <div className="
+          mt-3
+          bg-[#FFF9EC]
+          border
+          border-[#E9DDB8]
+          rounded-2xl
+          p-4
+        ">
+
+          <label className="
+            flex
+            gap-2
+            text-xs
+            text-[#7A6A2E]
+          ">
+
+            <input
+              type="checkbox"
+              checked={confirm}
+              onChange={e =>
+                setConfirm(
+                  e.target.checked
+                )
+              }
+            />
+
+            Satış kayıtlarını kontrol
+            ettim ve onaylıyorum.
+
+          </label>
+
+
+          <button
+            disabled={!confirm}
+            onClick={lock}
+            className={`
+              w-full
+              h-11
+              mt-3
+              rounded-xl
+              font-bold
+              text-xs
+              ${
+                confirm
+                  ? "bg-[#1C1B19] text-white"
+                  : "bg-[#D8D4C8] text-[#9A968C]"
+              }
+            `}
+          >
+            Kaydet ve Onayla
+          </button>
+
+        </div>
+
+      )}
+
+    </div>
   );
 }
 
 
 /* =========================================================
-   EXPENSES
+   MALİYET
 ========================================================= */
 
-function Expenses({
-  data,
-  persist,
-  date
+function MaliyetlerTab({
+  costs,
+  saveCost
 }) {
 
-  const [form, setForm] =
-    useState({
-      title: "",
-      amount: "",
-      category: "Genel"
-    });
-
-
-  const items =
-    data.expenses?.[date] || [];
-
-
-  const total =
-    items.reduce(
-      (sum, item) =>
-        sum +
-        Number(item.amount),
-      0
-    );
-
-
-  function add(e) {
-
-    e.preventDefault();
-
-    if (
-      !form.title.trim() ||
-      !Number(form.amount)
-    ) return;
-
-
-    const item = {
-
-      id:
-        Date.now() +
-        "-" +
-        Math.random()
-          .toString(36)
-          .slice(2),
-
-      title:
-        form.title.trim(),
-
-      amount:
-        Number(form.amount),
-
-      category:
-        form.category
-
-    };
-
-
-    persist({
-
-      ...data,
-
-      expenses: {
-
-        ...data.expenses,
-
-        [date]: [
-          ...items,
-          item
-        ]
-
-      }
-
-    });
-
-
-    setForm({
-      title: "",
-      amount: "",
-      category: "Genel"
-    });
-
-  }
-
-
-  function remove(id) {
-
-    persist({
-
-      ...data,
-
-      expenses: {
-
-        ...data.expenses,
-
-        [date]:
-          items.filter(
-            item =>
-              item.id !== id
-          )
-
-      }
-
-    });
-
-  }
-
-
   return (
+    <div>
 
-    <div className="fade-in">
+      <div className="
+        bg-white
+        border
+        border-[#E4E1D8]
+        rounded-2xl
+        p-4
+        mb-3
+      ">
 
-      <form
-        onSubmit={add}
-        className="bg-white border border-[#E4E1D8] rounded-2xl p-4 mb-4"
-      >
-
-        <h3 className="font-black text-sm mb-3">
-          Yeni Gider Ekle
-        </h3>
-
-        <div className="grid sm:grid-cols-2 gap-2">
-
-          <input
-            placeholder="Gider adı"
-            value={form.title}
-            onChange={e =>
-              setForm({
-                ...form,
-                title:
-                  e.target.value
-              })
-            }
-            className="p-2.5 border border-[#E4E1D8] rounded-xl text-xs bg-[#FCFCFA]"
-          />
-
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            placeholder="Tutar"
-            value={form.amount}
-            onChange={e =>
-              setForm({
-                ...form,
-                amount:
-                  e.target.value
-              })
-            }
-            className="p-2.5 border border-[#E4E1D8] rounded-xl text-xs bg-[#FCFCFA]"
-          />
-
+        <div className="
+          text-sm
+          font-black
+        ">
+          Ürün Maliyetleri
         </div>
 
-
-        <select
-          value={form.category}
-          onChange={e =>
-            setForm({
-              ...form,
-              category:
-                e.target.value
-            })
-          }
-          className="mt-2 w-full p-2.5 border border-[#E4E1D8] rounded-xl text-xs bg-[#FCFCFA]"
-        >
-
-          <option>Genel</option>
-          <option>Kira</option>
-          <option>Maaş</option>
-          <option>Elektrik</option>
-          <option>Su</option>
-          <option>Doğalgaz</option>
-          <option>Reklam</option>
-          <option>Vergi</option>
-          <option>Diğer</option>
-
-        </select>
-
-
-        <button
-          className="mt-3 w-full py-2.5 bg-[#1C1B19] text-white rounded-xl text-xs font-black"
-        >
-
-          <Icon
-            name="plus"
-            size={15}
-            className="inline mr-1"
-          />
-
-          Gider Kaydet
-
-        </button>
-
-      </form>
-
-
-      <div className="bg-[#1C1B19] text-white rounded-2xl p-4 mb-4 flex justify-between">
-
-        <div>
-
-          <div className="text-[11px] text-[#A8A49A]">
-            Günlük Gider
-          </div>
-
-          <div className="text-[10px] text-[#77736B]">
-            {formatDate(date)}
-          </div>
-
+        <div className="
+          text-[11px]
+          text-[#6B6862]
+          mt-1
+        ">
+          Maliyet ve satış fiyatlarını
+          buradan güncelleyebilirsin.
         </div>
-
-        <b>
-          {formatTL(total)}
-        </b>
 
       </div>
 
 
       <div className="space-y-2">
 
-        {items.length === 0 && (
+        {SALE_PRODUCTS.map(product => {
 
-          <div className="bg-white border border-[#E4E1D8] rounded-2xl p-8 text-center text-xs text-[#77736B]">
-            Bu gün için gider kaydı yok.
-          </div>
+          const c =
+            costs[product] || {
+              cost: "",
+              price: ""
+            };
 
-        )}
+          const cost =
+            Number(c.cost) || 0;
 
-        {items.map(
-          item => (
+          const price =
+            Number(c.price) || 0;
 
+          const profit =
+            price - cost;
+
+          const margin =
+            price > 0
+              ? (profit / price) * 100
+              : 0;
+
+
+          return (
             <div
-              key={item.id}
-              className="bg-white border border-[#E4E1D8] rounded-xl p-3 flex justify-between items-center"
+              key={product}
+              className="
+                bg-white
+                border
+                border-[#E4E1D8]
+                rounded-2xl
+                p-4
+              "
             >
 
-              <div>
+              <div className="
+                flex
+                justify-between
+                items-center
+                mb-3
+              ">
 
-                <b className="text-xs">
-                  {item.title}
-                </b>
+                <div className="
+                  text-sm
+                  font-bold
+                ">
+                  {product}
+                </div>
 
-                <div className="text-[11px] text-[#77736B] mt-1">
-                  {item.category}
+                <div className="
+                  text-right
+                ">
+
+                  <div className="
+                    text-xs
+                    font-black
+                    text-[#1C6B4E]
+                  ">
+                    {formatTL(profit)}
+                  </div>
+
+                  <div className="
+                    text-[10px]
+                    text-[#6B6862]
+                  ">
+                    %{margin.toFixed(0)} marj
+                  </div>
+
                 </div>
 
               </div>
 
-              <div className="flex items-center gap-3">
 
-                <b className="text-xs">
-                  {formatTL(item.amount)}
-                </b>
+              <div className="
+                grid
+                grid-cols-2
+                gap-2
+              ">
 
-                <button
-                  onClick={() =>
-                    remove(item.id)
-                  }
-                >
+                <label>
 
-                  <Icon
-                    name="trash-2"
-                    size={15}
-                    className="text-[#A39E94]"
+                  <span className="
+                    text-[10px]
+                    text-[#6B6862]
+                    block
+                    mb-1
+                  ">
+                    Maliyet
+                  </span>
+
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={c.cost}
+                    onChange={e =>
+                      saveCost(
+                        product,
+                        e.target.value,
+                        c.price
+                      )
+                    }
+                    className="
+                      w-full
+                      h-11
+                      px-3
+                      rounded-xl
+                      border
+                      border-[#E4E1D8]
+                      bg-[#FCFCFA]
+                      text-sm
+                      outline-none
+                    "
                   />
 
-                </button>
+                </label>
+
+
+                <label>
+
+                  <span className="
+                    text-[10px]
+                    text-[#6B6862]
+                    block
+                    mb-1
+                  ">
+                    Satış fiyatı
+                  </span>
+
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={c.price}
+                    onChange={e =>
+                      saveCost(
+                        product,
+                        c.cost,
+                        e.target.value
+                      )
+                    }
+                    className="
+                      w-full
+                      h-11
+                      px-3
+                      rounded-xl
+                      border
+                      border-[#E4E1D8]
+                      bg-[#FCFCFA]
+                      text-sm
+                      outline-none
+                    "
+                  />
+
+                </label>
 
               </div>
 
             </div>
+          );
 
-          )
-        )}
+        })}
 
       </div>
 
     </div>
-
   );
 }
 
 
 /* =========================================================
-   PROFIT LOSS
+   KÂR / ZARAR
 ========================================================= */
 
-function ProfitLoss({
-  data,
-  month
+function KarZararTab({
+  purchases,
+  sales
 }) {
 
-  const result =
+  const [month, setMonth] =
+    useState(thisMonthISO());
+
+
+  const stats =
     useMemo(() => {
 
-      let sales = 0;
-      let purchases = 0;
-      let expenses = 0;
+      let purchaseTotal = 0;
+      let salesTotal = 0;
 
 
       Object.entries(
-        data.salesEntries || {}
-      ).forEach(
-        ([date, rows]) => {
+        purchases
+      ).forEach(([date, stores]) => {
+
+        if (
+          !date.startsWith(month)
+        ) return;
+
+        Object.entries(
+          stores
+        ).forEach(([store, items]) => {
 
           if (
-            !date.startsWith(month)
+            store.includes("_LOCK")
           ) return;
 
-          Object.values(
-            rows || {}
-          ).forEach(
-            row => {
+          (items || []).forEach(
+            item => {
 
-              sales +=
-                (Number(row.qty) || 0)
-                *
-                (Number(row.unitPrice) || 0);
+              purchaseTotal +=
+                Number(item.qty || 0) *
+                Number(item.unitPrice || 0);
 
             }
           );
 
-        }
-      );
+        });
+
+      });
 
 
       Object.entries(
-        data.purchaseEntries || {}
-      ).forEach(
-        ([date, stores]) => {
-
-          if (
-            !date.startsWith(month)
-          ) return;
-
-          Object.values(
-            stores || {}
-          ).forEach(
-            items => {
-
-              (items || [])
-                .forEach(
-                  item => {
-
-                    purchases +=
-                      (Number(item.qty) || 0)
-                      *
-                      (Number(item.unitPrice) || 0);
-
-                  }
-                );
-
-            }
-          );
-
-        }
-      );
-
-
-      Object.entries(
-        data.expenses || {}
-      ).forEach(
-        ([date, items]) => {
-
-          if (
-            !date.startsWith(month)
-          ) return;
-
-          (items || [])
-            .forEach(
-              item => {
-
-                expenses +=
-                  Number(item.amount) || 0;
-
-              }
-            );
-
-        }
-      );
-
-
-      const gross =
-        sales - purchases;
-
-      const net =
-        gross - expenses;
-
-      const margin =
         sales
-          ? (net / sales) * 100
-          : 0;
+      ).forEach(([date, rows]) => {
+
+        if (
+          !date.startsWith(month)
+        ) return;
+
+        Object.entries(
+          rows
+        ).forEach(([key, row]) => {
+
+          if (
+            key === "__locked"
+          ) return;
+
+          salesTotal +=
+            Number(row.qty || 0) *
+            Number(row.unitPrice || 0);
+
+        });
+
+      });
 
 
       return {
-        sales,
-        purchases,
-        expenses,
-        gross,
-        net,
-        margin
+        salesTotal,
+        purchaseTotal,
+        net:
+          salesTotal -
+          purchaseTotal
       };
 
-    }, [data, month]);
+    }, [
+      purchases,
+      sales,
+      month
+    ]);
 
 
   return (
+    <div>
 
-    <div className="fade-in space-y-4">
+      <div className="
+        bg-white
+        border
+        border-[#E4E1D8]
+        rounded-2xl
+        p-3
+        mb-3
+        flex
+        items-center
+        gap-3
+      ">
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <i
+          data-lucide="calendar"
+          className="
+            w-4 h-4
+            text-[#6B6862]
+          "
+        />
+
+        <input
+          type="month"
+          value={month}
+          onChange={e =>
+            setMonth(e.target.value)
+          }
+          className="
+            flex-1
+            border-none
+            outline-none
+            bg-transparent
+            text-sm
+            font-bold
+          "
+        />
+
+        <span className="
+          hidden
+          sm:block
+          text-xs
+          text-[#A8A49A]
+        ">
+          {formatMonthLabel(month)}
+        </span>
+
+      </div>
+
+
+      <div className="
+        grid
+        grid-cols-1
+        sm:grid-cols-3
+        gap-2
+      ">
 
         <StatCard
-          title="Ciro"
-          value={formatTL(result.sales)}
+          title="Toplam satış"
+          value={formatTL(
+            stats.salesTotal
+          )}
           icon="trending-up"
-          tone="green"
+          positive
         />
 
         <StatCard
-          title="Alış"
-          value={formatTL(result.purchases)}
+          title="Toplam alış"
+          value={formatTL(
+            stats.purchaseTotal
+          )}
           icon="shopping-bag"
-          tone="red"
         />
 
         <StatCard
-          title="Brüt Kâr"
-          value={formatTL(result.gross)}
-          icon="percent"
-          tone="yellow"
-        />
-
-        <StatCard
-          title="Net Kâr"
-          value={formatTL(result.net)}
-          subtitle={`Marj %${result.margin.toFixed(1)}`}
-          icon="circle-dollar-sign"
-          tone="dark"
+          title="Net fark"
+          value={formatTL(
+            stats.net
+          )}
+          icon="wallet"
+          positive={
+            stats.net >= 0
+          }
         />
 
       </div>
 
 
-      <div className="bg-white border border-[#E4E1D8] rounded-2xl p-4">
+      <div className="
+        bg-white
+        border
+        border-[#E4E1D8]
+        rounded-2xl
+        p-5
+        mt-3
+      ">
 
-        <h3 className="font-black text-sm mb-4">
-          {formatMonth(month)} Kâr / Zarar
-        </h3>
+        <div className="
+          text-[10px]
+          uppercase
+          tracking-wide
+          text-[#6B6862]
+        ">
+          Hesaplama
+        </div>
 
-        <div className="space-y-1">
+        <div className="
+          text-sm
+          font-bold
+          mt-2
+        ">
+          Satış − Alış
+        </div>
 
-          <SummaryRow
-            label="Toplam Ciro"
-            value={formatTL(result.sales)}
-            green
-          />
-
-          <SummaryRow
-            label="Toplam Alış"
-            value={formatTL(result.purchases)}
-            red
-          />
-
-          <SummaryRow
-            label="Brüt Kâr"
-            value={formatTL(result.gross)}
-          />
-
-          <SummaryRow
-            label="İşletme Giderleri"
-            value={formatTL(result.expenses)}
-          />
-
-          <div className="border-t border-[#EEEAE2] mt-3 pt-3">
-
-            <SummaryRow
-              label="NET KÂR"
-              value={formatTL(result.net)}
-              bold
-            />
-
-          </div>
-
+        <div className="
+          text-xs
+          text-[#6B6862]
+          mt-1
+        ">
+          Bu ekran mevcut kayıtlar üzerinden
+          nakit farkını gösterir.
         </div>
 
       </div>
 
     </div>
-
   );
 }
 
 
-/* =========================================================
-   ADMIN
-========================================================= */
-
-function Admin({
-  data,
-  persist
+function StatCard({
+  title,
+  value,
+  icon,
+  positive
 }) {
 
-  const [form, setForm] =
-    useState({
-      username: "",
-      password: ""
-    });
-
-
-  function addUser(e) {
-
-    e.preventDefault();
-
-    const username =
-      form.username.trim();
-
-    if (
-      !username ||
-      !form.password ||
-      data.users[username]
-    ) return;
-
-
-    persist({
-
-      ...data,
-
-      users: {
-
-        ...data.users,
-
-        [username]: {
-
-          password:
-            form.password,
-
-          role:
-            "user"
-
-        }
-
-      }
-
-    });
-
-
-    setForm({
-      username: "",
-      password: ""
-    });
-
-  }
-
-
-  function deleteUser(username) {
-
-    if (
-      data.users[username]?.role ===
-      "admin"
-    ) return;
-
-    const users =
-      { ...data.users };
-
-    delete users[username];
-
-    persist({
-      ...data,
-      users
-    });
-
-  }
-
-
   return (
+    <div className="
+      bg-white
+      border
+      border-[#E4E1D8]
+      rounded-2xl
+      p-4
+    ">
 
-    <div className="fade-in space-y-4">
+      <div className="
+        flex
+        items-center
+        justify-between
+      ">
 
-      <form
-        onSubmit={addUser}
-        className="bg-white border border-[#E4E1D8] rounded-2xl p-4"
-      >
+        <span className="
+          text-[10px]
+          text-[#6B6862]
+          uppercase
+          tracking-wide
+        ">
+          {title}
+        </span>
 
-        <h3 className="font-black text-sm flex items-center gap-2 mb-4">
-
-          <Icon
-            name="user-plus"
-            size={17}
-          />
-
-          Yeni Kullanıcı
-
-        </h3>
-
-
-        <div className="grid sm:grid-cols-2 gap-2">
-
-          <input
-            placeholder="Kullanıcı adı"
-            autoCapitalize="none"
-            value={form.username}
-            onChange={e =>
-              setForm({
-                ...form,
-                username:
-                  e.target.value
-              })
-            }
-            className="p-2.5 border border-[#E4E1D8] rounded-xl text-xs bg-[#FCFCFA]"
-          />
-
-          <input
-            type="password"
-            placeholder="Şifre"
-            value={form.password}
-            onChange={e =>
-              setForm({
-                ...form,
-                password:
-                  e.target.value
-              })
-            }
-            className="p-2.5 border border-[#E4E1D8] rounded-xl text-xs bg-[#FCFCFA]"
-          />
-
-        </div>
-
-
-        <button
-          className="mt-3 w-full py-2.5 bg-[#1C1B19] text-white rounded-xl text-xs font-black"
-        >
-          Kullanıcı Oluştur
-        </button>
-
-      </form>
-
-
-      <div className="bg-white border border-[#E4E1D8] rounded-2xl p-4">
-
-        <h3 className="font-black text-sm mb-3">
-          Kullanıcılar
-        </h3>
-
-        <div className="space-y-2">
-
-          {Object.entries(
-            data.users || {}
-          ).map(
-            ([username, user]) => (
-
-              <div
-                key={username}
-                className="flex justify-between items-center p-3 rounded-xl bg-[#F8F7F3]"
-              >
-
-                <div className="flex items-center gap-3">
-
-                  <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
-
-                    <Icon
-                      name={
-                        user.role === "admin"
-                          ? "shield-check"
-                          : "user"
-                      }
-                      size={15}
-                    />
-
-                  </div>
-
-                  <div>
-
-                    <b className="text-xs">
-                      {username}
-                    </b>
-
-                    <div className="text-[10px] text-[#77736B]">
-                      {user.role === "admin"
-                        ? "Yönetici"
-                        : "Kullanıcı"}
-                    </div>
-
-                  </div>
-
-                </div>
-
-
-                {user.role !== "admin" && (
-
-                  <button
-                    onClick={() =>
-                      deleteUser(username)
-                    }
-                  >
-
-                    <Icon
-                      name="trash-2"
-                      size={15}
-                      className="text-[#A39E94]"
-                    />
-
-                  </button>
-
-                )}
-
-              </div>
-
-            )
-          )}
-
-        </div>
+        <i
+          data-lucide={icon}
+          className="
+            w-4 h-4
+            text-[#A8A49A]
+          "
+        />
 
       </div>
 
-    </div>
+      <div className={`
+        text-lg
+        font-black
+        mt-2
+        ${
+          positive
+            ? "text-[#1C6B4E]"
+            : "text-[#B4432E]"
+        }
+      `}>
+        {value}
+      </div>
 
+    </div>
   );
 }
 
 
 /* =========================================================
-   NAVIGATION
+   YÖNETİCİ
 ========================================================= */
 
-const NAV_ITEMS = [
+function YoneticiTab() {
 
-  {
-    id: "dashboard",
-    label: "Dashboard",
-    icon: "layout-dashboard"
-  },
-
-  {
-    id: "alis",
-    label: "Alış Yönetimi",
-    icon: "shopping-bag"
-  },
-
-  {
-    id: "satis",
-    label: "Satış Yönetimi",
-    icon: "trending-up"
-  },
-
-  {
-    id: "maliyet",
-    label: "Maliyetler",
-    icon: "percent"
-  },
-
-  {
-    id: "gider",
-    label: "Giderler",
-    icon: "receipt"
-  },
-
-  {
-    id: "karzarar",
-    label: "Kâr / Zarar",
-    icon: "trending-down"
-  },
-
-  {
-    id: "yonetici",
-    label: "Yönetici",
-    icon: "shield-check"
-  }
-
-];
-
-
-/* =========================================================
-   APP
-========================================================= */
-
-function App() {
-
-  const [data, setData] =
-    useState(DEFAULT_DATA);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [error, setError] =
+  const [username, setUsername] =
     useState("");
 
-  const [user, setUser] =
-    useState(null);
+  const [password, setPassword] =
+    useState("");
 
-  const [page, setPage] =
-    useState("dashboard");
+  const [users, setUsers] =
+    useState([]);
 
-  const [date, setDate] =
-    useState(todayISO());
-
-  const [month, setMonth] =
-    useState(monthISO());
-
-  const [mobileMenu, setMobileMenu] =
-    useState(false);
+  const [message, setMessage] =
+    useState("");
 
 
   useEffect(() => {
 
     const unsubscribe =
-      onSnapshot(
-        DATA_REF,
+      FB.onSnapshot(
+        refs.users(),
+        snap => {
 
-        snapshot => {
-
-          if (
-            snapshot.exists()
-          ) {
-
-            setData(
-              mergeData(
-                snapshot.data()
-              )
-            );
-
-          } else {
-
-            setDoc(
-              DATA_REF,
-              DEFAULT_DATA
-            );
-
-            setData(
-              DEFAULT_DATA
-            );
-
-          }
-
-          setLoading(false);
-
-        },
-
-        err => {
-
-          console.error(err);
-
-          setError(
-            "Firebase bağlantısında sorun oluştu."
+          setUsers(
+            snap.docs.map(
+              d => ({
+                id: d.id,
+                ...d.data()
+              })
+            )
           );
-
-          setLoading(false);
 
         }
       );
 
-
-    return unsubscribe;
+    return () =>
+      unsubscribe();
 
   }, []);
 
 
-  async function persist(next) {
+  async function createUser(e) {
 
-    setData(next);
+    e.preventDefault();
+
+    const u =
+      username.trim().toLowerCase();
+
+    const p =
+      password.trim();
+
+    if (!u || !p)
+      return;
 
     try {
 
-      await setDoc(
-        DATA_REF,
-        next
+      await FB.setDoc(
+        refs.user(u),
+        {
+          username: u,
+          password: p,
+          role: "user",
+          createdAt: Date.now()
+        },
+        { merge: false }
       );
 
-      setError("");
+      setUsername("");
+      setPassword("");
 
-    } catch (err) {
+      setMessage(
+        "Kullanıcı başarıyla kaydedildi."
+      );
 
-      console.error(err);
+      setTimeout(
+        () => setMessage(""),
+        2500
+      );
 
-      setError(
-        "Veri kaydedilemedi. İnternet bağlantısını kontrol edin."
+    } catch (e) {
+
+      console.error(e);
+
+      setMessage(
+        "Kullanıcı kaydedilemedi."
       );
 
     }
-
   }
 
 
-  if (loading) {
+  async function deleteUser(user) {
 
-    return (
+    if (
+      !confirm(
+        `"${user.username}" kullanıcısını silmek istediğine emin misin?`
+      )
+    ) return;
 
-      <div className="min-h-screen bg-[#1C1B19] flex items-center justify-center">
+    try {
 
-        <div className="text-center">
+      await FB.deleteDoc(
+        refs.user(user.username)
+      );
 
-          <div className="w-14 h-14 rounded-2xl bg-[#B4432E] text-white flex items-center justify-center mx-auto mb-4">
+    } catch (e) {
 
-            <Icon
-              name="pizza"
-              size={28}
-            />
+      console.error(e);
 
-          </div>
-
-          <div className="text-white font-bold text-sm">
-            Mano Pizza
-          </div>
-
-          <div className="text-[#77736B] text-xs mt-1">
-            Sistem yükleniyor...
-          </div>
-
-        </div>
-
-      </div>
-
-    );
-
-  }
-
-
-  if (!user) {
-
-    return (
-
-      <Login
-        users={data.users}
-        onLogin={setUser}
-      />
-
-    );
-
-  }
-
-
-  const isAdmin =
-    user.role === "admin";
-
-
-  const visibleNav =
-    isAdmin
-      ? NAV_ITEMS
-      : NAV_ITEMS.filter(
-          item =>
-            [
-              "dashboard",
-              "alis",
-              "satis"
-            ].includes(item.id)
-        );
-
-
-  const active =
-    visibleNav.find(
-      item =>
-        item.id === page
-    )
-    || visibleNav[0];
-
-
-  function navigate(id) {
-
-    setPage(id);
-    setMobileMenu(false);
-
+    }
   }
 
 
   return (
+    <div>
 
-    <div className="min-h-screen bg-[#F7F6F2] text-[#1C1B19]">
+      <div className="
+        bg-white
+        border
+        border-[#E4E1D8]
+        rounded-2xl
+        p-4
+        mb-3
+      ">
 
-      <div className="max-w-[1400px] mx-auto min-h-screen flex">
+        <div className="
+          flex
+          items-center
+          gap-2
+          mb-3
+        ">
+
+          <div className="
+            w-9 h-9
+            rounded-xl
+            bg-[#F1EFE9]
+            flex
+            items-center
+            justify-center
+          ">
+
+            <i
+              data-lucide="user-plus"
+              className="w-4 h-4"
+            />
+
+          </div>
+
+          <div>
+
+            <div className="
+              text-sm
+              font-black
+            ">
+              Yeni kullanıcı
+            </div>
+
+            <div className="
+              text-[10px]
+              text-[#6B6862]
+            ">
+              Personel hesabı oluştur
+            </div>
+
+          </div>
+
+        </div>
 
 
-        {/* SIDEBAR */}
-
-        <aside
-          className={
-            "fixed lg:sticky top-0 left-0 z-50 w-[250px] h-screen bg-[#1C1B19] text-white p-4 transition-transform " +
-            (
-              mobileMenu
-                ? "translate-x-0"
-                : "-translate-x-full lg:translate-x-0"
-            )
-          }
+        <form
+          onSubmit={createUser}
+          className="space-y-2"
         >
 
-          <div className="flex items-center gap-3 px-2 mb-8">
+          <input
+            type="text"
+            placeholder="Kullanıcı adı"
+            autoCapitalize="none"
+            value={username}
+            onChange={e =>
+              setUsername(e.target.value)
+            }
+            className="
+              w-full
+              h-11
+              px-3
+              rounded-xl
+              border
+              border-[#E4E1D8]
+              bg-[#FCFCFA]
+              text-sm
+              outline-none
+            "
+          />
 
-            <div className="w-10 h-10 rounded-xl bg-[#B4432E] flex items-center justify-center">
+          <input
+            type="text"
+            placeholder="Şifre"
+            value={password}
+            onChange={e =>
+              setPassword(e.target.value)
+            }
+            className="
+              w-full
+              h-11
+              px-3
+              rounded-xl
+              border
+              border-[#E4E1D8]
+              bg-[#FCFCFA]
+              text-sm
+              outline-none
+            "
+          />
 
-              <Icon
-                name="pizza"
-                size={21}
-              />
+          <button
+            className="
+              press
+              w-full
+              h-11
+              rounded-xl
+              bg-[#1C1B19]
+              text-white
+              text-xs
+              font-bold
+            "
+          >
+            Kullanıcı Oluştur
+          </button>
 
-            </div>
+        </form>
 
-            <div>
 
-              <div className="font-black">
-                Mano Pizza
-              </div>
+        {message && (
 
-              <div className="text-[10px] text-[#858078]">
-                İşletme Yönetim Paneli
-              </div>
-
-            </div>
-
+          <div className="
+            mt-3
+            text-xs
+            text-[#1C6B4E]
+            bg-[#EAF3EE]
+            rounded-xl
+            p-3
+          ">
+            {message}
           </div>
 
+        )}
 
-          <div className="space-y-1">
+      </div>
 
-            {visibleNav.map(
-              item => (
 
-                <button
-                  key={item.id}
-                  onClick={() =>
-                    navigate(item.id)
+      <div className="
+        text-[10px]
+        uppercase
+        tracking-wide
+        text-[#A8A49A]
+        mb-2
+      ">
+        Kullanıcılar
+      </div>
+
+
+      <div className="
+        bg-white
+        border
+        border-[#E4E1D8]
+        rounded-2xl
+        overflow-hidden
+      ">
+
+        {users.map(user => (
+
+          <div
+            key={user.id}
+            className="
+              flex
+              items-center
+              justify-between
+              p-4
+              border-b
+              border-[#EFEDE6]
+              last:border-none
+            "
+          >
+
+            <div className="
+              flex
+              items-center
+              gap-3
+            ">
+
+              <div className="
+                w-9 h-9
+                rounded-xl
+                bg-[#F1EFE9]
+                flex
+                items-center
+                justify-center
+              ">
+
+                <i
+                  data-lucide={
+                    user.role === "admin"
+                      ? "shield"
+                      : "user"
                   }
-                  className={
-                    "w-full flex items-center gap-3 px-3 py-3 rounded-xl text-xs font-bold text-left transition " +
-                    (
-                      page === item.id
-                        ? "bg-white text-[#1C1B19]"
-                        : "text-[#AAA69D] hover:bg-[#2A2926]"
-                    )
-                  }
-                >
+                  className="w-4 h-4"
+                />
 
-                  <Icon
-                    name={item.icon}
-                    size={17}
-                  />
-
-                  {item.label}
-
-                </button>
-
-              )
-            )}
-
-          </div>
-
-
-          <div className="absolute left-4 right-4 bottom-4 border-t border-[#383631] pt-3">
-
-            <div className="flex justify-between items-center">
+              </div>
 
               <div>
 
-                <div className="text-xs font-bold">
+                <div className="
+                  text-sm
+                  font-bold
+                ">
                   {user.username}
                 </div>
 
-                <div className="text-[10px] text-[#77736B]">
-                  {isAdmin
+                <div className="
+                  text-[10px]
+                  text-[#6B6862]
+                ">
+                  {user.role === "admin"
                     ? "Yönetici"
-                    : "Kullanıcı"}
+                    : "Personel"}
                 </div>
 
               </div>
 
+            </div>
+
+
+            {user.role !== "admin" && (
 
               <button
                 onClick={() =>
-                  setUser(null)
+                  deleteUser(user)
                 }
-                className="text-[#969188]"
+                className="
+                  w-9 h-9
+                  rounded-xl
+                  bg-[#FFF1ED]
+                  text-[#B4432E]
+                  border-none
+                  flex
+                  items-center
+                  justify-center
+                "
               >
 
-                <Icon
-                  name="log-out"
-                  size={17}
+                <i
+                  data-lucide="trash-2"
+                  className="w-4 h-4"
                 />
 
               </button>
 
-            </div>
+            )}
 
           </div>
 
-        </aside>
+        ))}
 
 
-        {mobileMenu && (
+        {users.length === 0 && (
 
-          <div
-            onClick={() =>
-              setMobileMenu(false)
-            }
-            className="fixed inset-0 bg-black/40 z-40 lg:hidden"
-          />
+          <div className="
+            p-6
+            text-center
+            text-xs
+            text-[#6B6862]
+          ">
+            Henüz kullanıcı yok.
+          </div>
 
         )}
-
-
-        {/* MAIN */}
-
-        <main className="flex-1 min-w-0">
-
-          {/* HEADER */}
-
-          <header className="sticky top-0 z-30 bg-[#F7F6F2]/95 backdrop-blur border-b border-[#E5E1D8]">
-
-            <div className="px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
-
-              <div className="flex items-center gap-3">
-
-                <button
-                  onClick={() =>
-                    setMobileMenu(true)
-                  }
-                  className="lg:hidden"
-                >
-
-                  <Icon
-                    name="menu"
-                    size={21}
-                  />
-
-                </button>
-
-
-                <div>
-
-                  <div className="flex items-center gap-2">
-
-                    <Icon
-                      name={active.icon}
-                      size={18}
-                    />
-
-                    <h1 className="text-lg font-black">
-                      {active.label}
-                    </h1>
-
-                  </div>
-
-                  <div className="text-[10px] text-[#77736B] mt-0.5">
-                    Mano Pizza · {user.username}
-                  </div>
-
-                </div>
-
-              </div>
-
-
-              {[
-                "alis",
-                "satis",
-                "gider"
-              ].includes(page) && (
-
-                <input
-                  type="date"
-                  value={date}
-                  onChange={e =>
-                    setDate(e.target.value)
-                  }
-                  className="bg-white border border-[#E2DED5] rounded-xl px-2.5 py-2 text-xs outline-none"
-                />
-
-              )}
-
-
-              {[
-                "dashboard",
-                "karzarar"
-              ].includes(page) && (
-
-                <input
-                  type="month"
-                  value={month}
-                  onChange={e =>
-                    setMonth(e.target.value)
-                  }
-                  className="bg-white border border-[#E2DED5] rounded-xl px-2.5 py-2 text-xs outline-none"
-                />
-
-              )}
-
-            </div>
-
-          </header>
-
-
-          {/* CONTENT */}
-
-          <div className="p-4 sm:p-6">
-
-            {error && (
-
-              <div className="mb-4 p-3 rounded-xl bg-[#FBEDEA] text-[#9E3928] text-xs flex items-center gap-2">
-
-                <Icon
-                  name="triangle-alert"
-                  size={15}
-                />
-
-                {error}
-
-              </div>
-
-            )}
-
-
-            {page === "dashboard" && (
-
-              <Dashboard
-                data={data}
-                month={month}
-              />
-
-            )}
-
-
-            {page === "alis" && (
-
-              <Purchases
-                data={data}
-                persist={persist}
-                date={date}
-                isAdmin={isAdmin}
-              />
-
-            )}
-
-
-            {page === "satis" && (
-
-              <Sales
-                data={data}
-                persist={persist}
-                date={date}
-                isAdmin={isAdmin}
-              />
-
-            )}
-
-
-            {page === "maliyet" &&
-              isAdmin && (
-
-                <Costs
-                  data={data}
-                  persist={persist}
-                />
-
-              )}
-
-
-            {page === "gider" &&
-              isAdmin && (
-
-                <Expenses
-                  data={data}
-                  persist={persist}
-                  date={date}
-                />
-
-              )}
-
-
-            {page === "karzarar" &&
-              isAdmin && (
-
-                <ProfitLoss
-                  data={data}
-                  month={month}
-                />
-
-              )}
-
-
-            {page === "yonetici" &&
-              isAdmin && (
-
-                <Admin
-                  data={data}
-                  persist={persist}
-                />
-
-              )}
-
-          </div>
-
-        </main>
 
       </div>
 
     </div>
-
   );
-
 }
 
 
 /* =========================================================
-   START
+   BAŞLAT
 ========================================================= */
 
-ReactDOM
-  .createRoot(
-    document.getElementById("root")
-  )
-  .render(
-    <App />
-  );
+async function startApp() {
+
+  try {
+
+    await initFirebase();
+
+    ReactDOM.render(
+      <ManoPizza />,
+      document.getElementById("root")
+    );
+
+    setTimeout(() => {
+
+      if (
+        window.lucide &&
+        window.lucide.createIcons
+      ) {
+        window.lucide.createIcons();
+      }
+
+    }, 200);
+
+  } catch (error) {
+
+    console.error(error);
+
+    document.getElementById("root").innerHTML = `
+      <div style="
+        min-height:100vh;
+        background:#1C1B19;
+        color:white;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:30px;
+        text-align:center;
+        font-family:Arial,sans-serif;
+      ">
+        Firebase bağlantısı kurulamadı.
+      </div>
+    `;
+
+  }
+
+}
+
+
+startApp();
 
 </script>
 
