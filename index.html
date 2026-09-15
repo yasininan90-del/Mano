@@ -2,44 +2,38 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<title>Mano Pizza Yönetim</title>
+<title>Mano Pizza | İşletme Paneli</title>
 
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
 <style>
 * {
   box-sizing: border-box;
-}
-
-html, body, #root {
-  margin: 0;
-  min-height: 100%;
-  width: 100%;
-}
-
-body {
-  background: #f7f6f2;
-  color: #1c1b19;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-}
-
-button,
-input {
-  font-family: inherit;
-}
-
-button {
   -webkit-tap-highlight-color: transparent;
 }
 
-input {
-  min-width: 0;
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #f6f4ef;
+  color: #1c1b19;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button, input {
+  font-family: inherit;
+}
+
+input:focus {
+  outline: none;
+  border-color: #b4432e !important;
+  box-shadow: 0 0 0 2px rgba(180,67,46,.08);
 }
 
 ::-webkit-scrollbar {
@@ -48,262 +42,12 @@ input {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c9c6bd;
-  border-radius: 10px;
+  background: #c9c5bb;
+  border-radius: 20px;
 }
 
-/* SIDEBAR */
-
-.sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 245px;
-  background: #1c1b19;
-  color: white;
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  transition: transform .25s ease;
-}
-
-.sidebar-logo {
-  padding: 25px 20px;
-  border-bottom: 1px solid #36342f;
-}
-
-.sidebar-nav {
-  padding: 18px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.sidebar-btn {
-  width: 100%;
-  border: 0;
-  background: transparent;
-  color: #aaa69d;
-  padding: 13px 14px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: left;
-}
-
-.sidebar-btn:hover {
-  background: #292824;
-  color: white;
-}
-
-.sidebar-btn.active {
-  background: #b4432e;
-  color: white;
-}
-
-.sidebar-bottom {
-  margin-top: auto;
-  padding: 15px;
-  border-top: 1px solid #36342f;
-}
-
-.main-area {
-  margin-left: 245px;
-  min-height: 100vh;
-}
-
-.mobile-header {
-  display: none;
-}
-
-.mobile-overlay {
-  display: none;
-}
-
-/* CARDS */
-
-.card {
-  background: white;
-  border: 1px solid #e4e1d8;
-  border-radius: 15px;
-}
-
-.dark-card {
-  background: #1c1b19;
-  color: white;
-  border-radius: 15px;
-}
-
-/* TABLE */
-
-.table-wrap {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.sales-table {
-  width: 100%;
-  min-width: 580px;
-  border-collapse: collapse;
-}
-
-.sales-table th {
-  background: #f1efe9;
-  color: #6b6862;
-  font-size: 11px;
-  padding: 11px 8px;
-  text-align: left;
-}
-
-.sales-table td {
-  border-top: 1px solid #efede6;
-  padding: 8px;
-  font-size: 12px;
-}
-
-.sales-table input {
-  width: 100%;
-  border: 1px solid #e4e1d8;
-  border-radius: 7px;
-  padding: 8px;
-  background: #fcfcfa;
-  outline: none;
-  font-size: 12px;
-}
-
-.sales-table input:focus {
-  border-color: #b4432e;
-}
-
-/* MOBILE */
-
-@media (max-width: 760px) {
-
-  .sidebar {
-    transform: translateX(-100%);
-    width: 270px;
-  }
-
-  .sidebar.open {
-    transform: translateX(0);
-  }
-
-  .mobile-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.45);
-    z-index: 90;
-  }
-
-  .mobile-overlay.show {
-    display: block;
-  }
-
-  .main-area {
-    margin-left: 0;
-  }
-
-  .mobile-header {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    height: 62px;
-    background: #fff;
-    border-bottom: 1px solid #e4e1d8;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 15px;
-  }
-
-  .content {
-    padding: 14px !important;
-  }
-
-  .desktop-only {
-    display: none !important;
-  }
-
-  .mobile-grid-1 {
-    grid-template-columns: 1fr !important;
-  }
-
-  .mobile-grid-2 {
-    grid-template-columns: 1fr 1fr !important;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  .sales-table {
-    min-width: 520px;
-  }
-
-  .stat-number {
-    font-size: 18px !important;
-  }
-
-  .page-title {
-    font-size: 18px !important;
-  }
-}
-
-/* LOGIN */
-
-.login-screen {
-  min-height: 100vh;
-  background: #1c1b19;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.login-box {
-  width: 100%;
-  max-width: 360px;
-}
-
-.login-input {
-  width: 100%;
-  background: #292824;
-  color: white;
-  border: 1px solid #3b3934;
-  padding: 13px;
-  border-radius: 10px;
-  outline: none;
-}
-
-.login-input:focus {
-  border-color: #b4432e;
-}
-
-/* STATUS */
-
-.status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.status-saving {
-  background: #d6a11e;
-}
-
-.status-saved {
-  background: #1c6b4e;
-}
-
-.status-offline {
-  background: #b4432e;
+.safe-bottom {
+  padding-bottom: calc(25px + env(safe-area-inset-bottom));
 }
 </style>
 </head>
@@ -313,61 +57,26 @@ input {
 <div id="root"></div>
 
 <script type="module">
-import {
-  initializeApp
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 
 import {
   getFirestore,
   doc,
-  onSnapshot,
   setDoc,
-  getDoc,
-  enableIndexedDbPersistence
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  onSnapshot
+} from
+"https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBLXwi0r4QrMlpA7PxYEFwy5ADr_Q9nPqk",
-  authDomain: "mano-pizza.firebaseapp.com",
-  projectId: "mano-pizza",
-  storageBucket: "mano-pizza.firebasestorage.app",
-  messagingSenderId: "558530166779",
-  appId: "1:558530166779:web:fe990140b59ad5dd1e155e"
+window.firebaseReady = {
+  initializeApp,
+  getFirestore,
+  doc,
+  setDoc,
+  onSnapshot
 };
-
-try {
-
-  const app = initializeApp(firebaseConfig);
-
-  const db = getFirestore(app);
-
-  const ref = doc(db, "mano_pizza", "veri");
-
-  try {
-    await enableIndexedDbPersistence(db);
-  } catch(e) {
-    console.log("Offline persistence:", e.message);
-  }
-
-  window.MANO_FIREBASE = {
-    db,
-    ref,
-    onSnapshot,
-    setDoc,
-    getDoc
-  };
-
-  window.dispatchEvent(new Event("firebase-ready"));
-
-} catch(error) {
-
-  console.error(error);
-
-  window.MANO_FIREBASE_ERROR = error.message;
-
-  window.dispatchEvent(new Event("firebase-ready"));
-}
 </script>
+
 
 <script type="text/babel">
 
@@ -378,9 +87,23 @@ const {
 } = React;
 
 
-/* =========================
-   AYARLAR
-========================= */
+/* =========================================================
+   FIREBASE
+========================================================= */
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBLXwi0r4QrMlpA7PxYEFwy5ADr_Q9nPqk",
+  authDomain: "mano-pizza.firebaseapp.com",
+  projectId: "mano-pizza",
+  storageBucket: "mano-pizza.firebasestorage.app",
+  messagingSenderId: "558530166779",
+  appId: "1:558530166779:web:fe990140b59ad5dd1e155e"
+};
+
+
+/* =========================================================
+   SABİTLER
+========================================================= */
 
 const ADMIN_USERNAME = "mathrew";
 const ADMIN_PASSWORD = "01102022";
@@ -390,7 +113,7 @@ const DEFAULT_STORES = [
   "File Market"
 ];
 
-const SALE_PRODUCTS = [
+const PRODUCTS = [
   "Margarita Pizza",
   ...Array.from(
     {length:20},
@@ -399,54 +122,65 @@ const SALE_PRODUCTS = [
 ];
 
 
-/* =========================
-   DEFAULT DATA
-========================= */
+/* =========================================================
+   BOŞ VERİ
+========================================================= */
 
-const EMPTY_DATA = {
+function createEmptyData(){
 
-  version: 3,
+  return {
 
-  stores: DEFAULT_STORES,
+    version: 3,
 
-  purchaseEntries: {},
+    stores: [...DEFAULT_STORES],
 
-  purchaseLocks: {},
+    purchases: {},
 
-  salesEntries: {},
+    purchaseLocks: {},
 
-  salesLocks: {},
+    sales: {},
 
-  costs: {},
+    salesLocks: {},
 
-  users: {
-    [ADMIN_USERNAME]: {
-      password: ADMIN_PASSWORD,
-      role: "admin"
+    costs: {},
+
+    users: {
+      [ADMIN_USERNAME]: {
+        password: ADMIN_PASSWORD,
+        role: "admin"
+      }
     }
-  }
-};
+
+  };
+
+}
 
 
-/* =========================
-   HELPERS
-========================= */
+/* =========================================================
+   YARDIMCI FONKSİYONLAR
+========================================================= */
 
-function todayISO() {
+function today(){
 
   const d = new Date();
 
-  return d.toLocaleDateString("en-CA");
+  return [
+    d.getFullYear(),
+    String(d.getMonth()+1).padStart(2,"0"),
+    String(d.getDate()).padStart(2,"0")
+  ].join("-");
 
 }
 
-function monthISO() {
 
-  return todayISO().slice(0,7);
+function monthNow(){
+
+  return today().slice(0,7);
 
 }
 
-function money(value) {
+
+function money(value){
 
   return new Intl.NumberFormat(
     "tr-TR",
@@ -455,32 +189,35 @@ function money(value) {
       currency:"TRY",
       maximumFractionDigits:2
     }
-  ).format(Number(value) || 0);
+  ).format(Number(value)||0);
 
 }
 
-function dateLabel(value) {
+
+function dateText(value){
 
   if(!value) return "";
 
   return new Date(
-    value + "T00:00:00"
+    value+"T00:00:00"
   ).toLocaleDateString(
     "tr-TR",
     {
       day:"numeric",
       month:"long",
-      year:"numeric",
-      weekday:"long"
+      year:"numeric"
     }
   );
 
 }
 
-function monthLabel(value) {
+
+function monthText(value){
+
+  if(!value) return "";
 
   return new Date(
-    value + "-01T00:00:00"
+    value+"-01T00:00:00"
   ).toLocaleDateString(
     "tr-TR",
     {
@@ -491,109 +228,77 @@ function monthLabel(value) {
 
 }
 
-function cloneData(data) {
 
-  return JSON.parse(
-    JSON.stringify(data)
-  );
+/* =========================================================
+   ANA UYGULAMA
+========================================================= */
 
-}
+function App(){
 
+  const [data,setData] = useState(createEmptyData());
 
-/* =========================
-   ICON
-========================= */
+  const [ready,setReady] = useState(false);
 
-function Icon({
-  name,
-  size=17
-}) {
+  const [firebaseError,setFirebaseError] = useState("");
 
-  useEffect(() => {
+  const [saving,setSaving] = useState(false);
 
-    try {
-      lucide.createIcons();
-    } catch(e){}
+  const [user,setUser] = useState(null);
 
-  });
+  const [tab,setTab] = useState("alis");
 
-  return (
-    <i
-      data-lucide={name}
-      style={{
-        width:size,
-        height:size,
-        flexShrink:0
-      }}
-    />
-  );
-
-}
+  const [date,setDate] = useState(today());
 
 
-/* =========================
-   APP
-========================= */
+  /* -------------------------------------------------------
+     FIREBASE BAĞLANTISI
+  ------------------------------------------------------- */
 
-function App() {
-
-  const [data,setData] =
-    useState(EMPTY_DATA);
-
-  const [loading,setLoading] =
-    useState(true);
-
-  const [user,setUser] =
-    useState(null);
-
-  const [menuOpen,setMenuOpen] =
-    useState(false);
-
-  const [tab,setTab] =
-    useState("alis");
-
-  const [syncStatus,setSyncStatus] =
-    useState("connecting");
-
-
-  /* FIREBASE LISTENER */
-
-  useEffect(() => {
+  useEffect(()=>{
 
     let unsubscribe;
 
-    function start() {
+    const start = async()=>{
 
-      if(!window.MANO_FIREBASE) {
+      try{
 
-        setTimeout(start,100);
+        while(!window.firebaseReady){
 
-        return;
-      }
+          await new Promise(
+            r=>setTimeout(r,100)
+          );
 
-      const firebase =
-        window.MANO_FIREBASE;
+        }
 
-      if(!firebase.ref) {
+        const {
+          initializeApp,
+          getFirestore,
+          doc,
+          onSnapshot
+        } = window.firebaseReady;
 
-        setLoading(false);
+        const app = initializeApp(firebaseConfig);
 
-        return;
-      }
+        const db = getFirestore(app);
 
-      unsubscribe =
-        firebase.onSnapshot(
-          firebase.ref,
-          snapshot => {
+        const ref = doc(
+          db,
+          "mano_pizza",
+          "veri"
+        );
 
-            if(snapshot.exists()) {
+        unsubscribe = onSnapshot(
+          ref,
 
-              const remote =
-                snapshot.data();
+          snap=>{
 
-              const merged = {
+            if(snap.exists()){
 
-                ...cloneData(EMPTY_DATA),
+              const remote = snap.data();
+
+              const clean = {
+
+                ...createEmptyData(),
 
                 ...remote,
 
@@ -602,204 +307,170 @@ function App() {
                     ? remote.stores
                     : DEFAULT_STORES,
 
-                users: {
-                  ...EMPTY_DATA.users,
-                  ...(remote.users || {})
-                }
+                users:
+                  remote.users || createEmptyData().users,
+
+                purchases:
+                  remote.purchases || {},
+
+                purchaseLocks:
+                  remote.purchaseLocks || {},
+
+                sales:
+                  remote.sales || {},
+
+                salesLocks:
+                  remote.salesLocks || {},
+
+                costs:
+                  remote.costs || {}
 
               };
 
-              setData(merged);
+              setData(clean);
 
-              localStorage.setItem(
-                "mano_pizza_backup",
-                JSON.stringify(merged)
-              );
+            }else{
 
-            } else {
-
-              const initial =
-                cloneData(EMPTY_DATA);
+              const initial = createEmptyData();
 
               setDoc(
-                firebase.ref,
+                ref,
                 initial,
-                {merge:false}
+                {merge:true}
               ).catch(console.error);
 
               setData(initial);
 
             }
 
-            setSyncStatus("saved");
+            setFirebaseError("");
 
-            setLoading(false);
+            setReady(true);
 
           },
-          error => {
 
-            console.error(
-              "Firebase:",
-              error
+          error=>{
+
+            console.error(error);
+
+            setFirebaseError(
+              "Firebase bağlantısı kurulamadı."
             );
 
-            const backup =
-              localStorage.getItem(
-                "mano_pizza_backup"
-              );
-
-            if(backup) {
-
-              try {
-
-                setData(
-                  JSON.parse(backup)
-                );
-
-              } catch(e){}
-
-            }
-
-            setSyncStatus("offline");
-
-            setLoading(false);
+            setReady(true);
 
           }
+
         );
 
-    }
+      }catch(error){
 
-    window.addEventListener(
-      "firebase-ready",
-      start
-    );
+        console.error(error);
+
+        setFirebaseError(
+          "Firebase başlatılamadı."
+        );
+
+        setReady(true);
+
+      }
+
+    };
 
     start();
 
-    return () => {
+    return ()=>{
 
-      window.removeEventListener(
-        "firebase-ready",
-        start
-      );
-
-      if(unsubscribe)
+      if(unsubscribe){
         unsubscribe();
+      }
 
     };
 
   },[]);
 
 
-  /* =========================
-     SAVE
-  ========================= */
+  /* -------------------------------------------------------
+     KAYDET
+  ------------------------------------------------------- */
 
-  async function save(next) {
+  async function save(next){
 
-    const safe =
-      cloneData(next);
+    setData(next);
 
-    setData(safe);
+    setSaving(true);
 
-    localStorage.setItem(
-      "mano_pizza_backup",
-      JSON.stringify(safe)
-    );
+    try{
 
-    setSyncStatus("saving");
+      const {
+        setDoc,
+        doc,
+        getFirestore
+      } = window.firebaseReady;
 
-    try {
+      const app =
+        initializeFirebaseAgain();
 
-      if(
-        !window.MANO_FIREBASE ||
-        !window.MANO_FIREBASE.ref
-      ) {
+      const db =
+        getFirestore(app);
 
-        throw new Error(
-          "Firebase hazır değil"
+      const ref =
+        doc(
+          db,
+          "mano_pizza",
+          "veri"
         );
 
-      }
-
-      await window.MANO_FIREBASE.setDoc(
-        window.MANO_FIREBASE.ref,
-        safe,
+      await setDoc(
+        ref,
+        next,
         {merge:false}
       );
 
-      setSyncStatus("saved");
+      setFirebaseError("");
 
-    } catch(error) {
+    }catch(error){
 
       console.error(error);
 
-      setSyncStatus("offline");
+      setFirebaseError(
+        "Kaydedilemedi. Firebase bağlantısını kontrol edin."
+      );
+
+    }finally{
+
+      setSaving(false);
 
     }
 
   }
 
 
-  if(loading) {
+  function initializeFirebaseAgain(){
 
-    return (
-      <div className="login-screen">
+    if(!window.__manoFirebase){
 
-        <div
-          style={{
-            color:"#aaa69d",
-            textAlign:"center"
-          }}
-        >
+      window.__manoFirebase =
+        window.firebaseReady.initializeApp(
+          firebaseConfig,
+          "mano-secondary"
+        );
 
-          <div
-            style={{
-              width:55,
-              height:55,
-              borderRadius:15,
-              background:"#b4432e",
-              display:"flex",
-              alignItems:"center",
-              justifyContent:"center",
-              margin:"0 auto 15px"
-            }}
-          >
+    }
 
-            <Icon
-              name="pizza"
-              size={27}
-            />
-
-          </div>
-
-          <b
-            style={{
-              color:"white",
-              fontSize:20
-            }}
-          >
-            Mano Pizza
-          </b>
-
-          <div
-            style={{
-              marginTop:8,
-              fontSize:12
-            }}
-          >
-            Veriler yükleniyor...
-          </div>
-
-        </div>
-
-      </div>
-    );
+    return window.__manoFirebase;
 
   }
 
 
-  if(!user) {
+  if(!ready){
+
+    return <Loading/>;
+
+  }
+
+
+  if(!user){
 
     return (
       <Login
@@ -811,423 +482,345 @@ function App() {
   }
 
 
-  const isAdmin =
+  const admin =
     user.role === "admin";
 
 
-  const menu = [
-
-    {
-      id:"alis",
-      label:"Alış",
-      icon:"shopping-bag"
-    },
-
-    {
-      id:"satis",
-      label:"Satış",
-      icon:"trending-up"
-    },
-
-    ...(isAdmin ? [
-
-      {
-        id:"maliyet",
-        label:"Maliyetler",
-        icon:"percent"
-      },
-
-      {
-        id:"karzarar",
-        label:"Kâr / Zarar",
-        icon:"bar-chart-3"
-      },
-
-      {
-        id:"yonetici",
-        label:"Yönetici",
-        icon:"shield-check"
-      }
-
-    ] : [])
-
-  ];
-
-
-  function selectTab(id) {
-
-    setTab(id);
-
-    setMenuOpen(false);
-
-  }
+  const tabs = admin
+    ? [
+        ["alis","Alış","🛒"],
+        ["satis","Satış","📈"],
+        ["maliyet","Maliyet","💰"],
+        ["kar","Kâr / Zarar","📊"],
+        ["yonetim","Yönetim","⚙️"]
+      ]
+    : [
+        ["alis","Alış","🛒"],
+        ["satis","Satış","📈"]
+      ];
 
 
   return (
 
-    <div>
+    <div className="min-h-screen bg-[#f6f4ef]">
 
-      {/* SIDEBAR */}
+      <div className="max-w-[900px] mx-auto px-3 sm:px-5 safe-bottom">
 
-      <aside
-        className={
-          "sidebar " +
-          (menuOpen ? "open" : "")
-        }
-      >
 
-        <div className="sidebar-logo">
+        {/* HEADER */}
 
-          <div
-            style={{
-              display:"flex",
-              alignItems:"center",
-              gap:11
-            }}
-          >
+        <header
+          className="
+            pt-4 pb-3
+            flex items-center justify-between
+          "
+        >
+
+          <div className="flex items-center gap-3">
 
             <div
-              style={{
-                width:39,
-                height:39,
-                borderRadius:11,
-                background:"#b4432e",
-                display:"flex",
-                alignItems:"center",
-                justifyContent:"center"
-              }}
+              className="
+                w-11 h-11
+                rounded-2xl
+                bg-[#b4432e]
+                text-white
+                flex items-center justify-center
+                text-xl
+                shadow-sm
+              "
             >
-
-              <Icon
-                name="pizza"
-                size={21}
-              />
-
+              🍕
             </div>
 
             <div>
 
-              <div
-                style={{
-                  fontWeight:800,
-                  fontSize:17
-                }}
+              <h1
+                className="
+                  text-[18px]
+                  font-black
+                  tracking-tight
+                  m-0
+                "
               >
-                Mano Pizza
-              </div>
+                MANO PIZZA
+              </h1>
 
-              <div
-                style={{
-                  fontSize:11,
-                  color:"#8e8a82",
-                  marginTop:2
-                }}
+              <p
+                className="
+                  text-[11px]
+                  text-[#77736b]
+                  m-0
+                "
               >
-                İşletme Yönetimi
-              </div>
+                İşletme Paneli
+              </p>
 
             </div>
 
           </div>
 
-        </div>
 
+          <div className="flex items-center gap-2">
 
-        <nav className="sidebar-nav">
-
-          {menu.map(item => (
-
-            <button
-              key={item.id}
-              onClick={() =>
-                selectTab(item.id)
-              }
-              className={
-                "sidebar-btn " +
-                (tab === item.id
-                  ? "active"
-                  : "")
-              }
+            <div
+              className="
+                hidden sm:block
+                text-right
+              "
             >
 
-              <Icon
-                name={item.icon}
-              />
+              <div className="text-xs font-bold">
+                {user.username}
+              </div>
 
-              {item.label}
+              <div className="text-[10px] text-[#77736b]">
+                {admin ? "Yönetici" : "Personel"}
+              </div>
 
+            </div>
+
+
+            <button
+              onClick={()=>setUser(null)}
+              className="
+                w-9 h-9
+                rounded-xl
+                bg-white
+                border border-[#e2dfd7]
+                text-[#77736b]
+              "
+            >
+              ↪
             </button>
-
-          ))}
-
-        </nav>
-
-
-        <div className="sidebar-bottom">
-
-          <div
-            style={{
-              fontSize:11,
-              color:"#8e8a82",
-              marginBottom:10
-            }}
-          >
-
-            {user.username}
-            {" · "}
-            {isAdmin
-              ? "Yönetici"
-              : "Kullanıcı"}
-
-          </div>
-
-          <button
-            onClick={() => {
-              setUser(null);
-              setMenuOpen(false);
-            }}
-            className="sidebar-btn"
-            style={{
-              padding:"10px 12px"
-            }}
-          >
-
-            <Icon
-              name="log-out"
-            />
-
-            Çıkış Yap
-
-          </button>
-
-        </div>
-
-      </aside>
-
-
-      {/* OVERLAY */}
-
-      <div
-        className={
-          "mobile-overlay " +
-          (menuOpen ? "show" : "")
-        }
-        onClick={() =>
-          setMenuOpen(false)
-        }
-      />
-
-
-      {/* MAIN */}
-
-      <main className="main-area">
-
-        <header className="mobile-header">
-
-          <button
-            onClick={() =>
-              setMenuOpen(true)
-            }
-            style={{
-              border:0,
-              background:"transparent",
-              padding:5
-            }}
-          >
-
-            <Icon
-              name="menu"
-              size={23}
-            />
-
-          </button>
-
-
-          <div
-            style={{
-              fontWeight:800,
-              fontSize:16
-            }}
-          >
-            {menu.find(
-              x => x.id === tab
-            )?.label}
-          </div>
-
-
-          <div
-            title={
-              syncStatus === "saved"
-                ? "Veriler kaydedildi"
-                : syncStatus === "saving"
-                ? "Kaydediliyor"
-                : "Çevrimdışı"
-            }
-            style={{
-              display:"flex",
-              alignItems:"center"
-            }}
-          >
-
-            <span
-              className={
-                "status-dot " +
-                (
-                  syncStatus === "saved"
-                  ? "status-saved"
-                  : syncStatus === "saving"
-                  ? "status-saving"
-                  : "status-offline"
-                )
-              }
-            />
 
           </div>
 
         </header>
 
 
+        {/* DURUM */}
+
         <div
-          className="content"
-          style={{
-            maxWidth:1000,
-            margin:"0 auto",
-            padding:"25px"
-          }}
+          className="
+            flex items-center justify-between
+            mb-3
+            px-3 py-2
+            rounded-xl
+            bg-white
+            border border-[#e2dfd7]
+          "
         >
 
-          {/* DESKTOP HEADER */}
+          <div className="flex items-center gap-2">
+
+            <span
+              className={`
+                w-2 h-2 rounded-full
+                ${firebaseError
+                  ? "bg-[#b4432e]"
+                  : "bg-[#2d8a63]"
+                }
+              `}
+            />
+
+            <span
+              className="
+                text-[11px]
+                text-[#77736b]
+              "
+            >
+              {firebaseError
+                ? firebaseError
+                : saving
+                  ? "Kaydediliyor..."
+                  : "Veriler senkronize"}
+            </span>
+
+          </div>
+
+          <span
+            className="
+              text-[10px]
+              text-[#aaa69d]
+            "
+          >
+            Firebase
+          </span>
+
+        </div>
+
+
+        {/* TARİH */}
+
+        {(tab==="alis" || tab==="satis") && (
 
           <div
-            className="desktop-only"
-            style={{
-              display:"flex",
-              alignItems:"center",
-              justifyContent:"space-between",
-              marginBottom:20
-            }}
+            className="
+              bg-white
+              rounded-2xl
+              border border-[#e2dfd7]
+              p-3
+              mb-3
+            "
           >
 
-            <div>
+            <div className="flex items-center gap-3">
 
-              <h1
-                className="page-title"
-                style={{
-                  margin:0,
-                  fontSize:23,
-                  fontWeight:800
-                }}
-              >
-                {menu.find(
-                  x => x.id === tab
-                )?.label}
-              </h1>
-
-              <div
-                style={{
-                  marginTop:4,
-                  fontSize:12,
-                  color:"#77736b"
-                }}
-              >
-                Mano Pizza işletme paneli
+              <div className="text-xl">
+                📅
               </div>
 
-            </div>
+              <div className="flex-1">
 
+                <div
+                  className="
+                    text-[10px]
+                    text-[#8b877e]
+                    mb-1
+                  "
+                >
+                  KAYIT TARİHİ
+                </div>
 
-            <div
-              style={{
-                display:"flex",
-                alignItems:"center",
-                gap:7,
-                fontSize:11,
-                color:"#77736b"
-              }}
-            >
+                <input
+                  type="date"
+                  value={date}
+                  onChange={
+                    e=>setDate(e.target.value)
+                  }
+                  className="
+                    w-full
+                    bg-transparent
+                    border-0
+                    text-sm
+                    font-bold
+                    p-0
+                  "
+                />
 
-              <span
-                className={
-                  "status-dot " +
-                  (
-                    syncStatus === "saved"
-                      ? "status-saved"
-                      : syncStatus === "saving"
-                      ? "status-saving"
-                      : "status-offline"
-                  )
-                }
-              />
+              </div>
 
-              {
-                syncStatus === "saved"
-                  ? "Kaydedildi"
-                  : syncStatus === "saving"
-                  ? "Kaydediliyor..."
-                  : "Çevrimdışı"
-              }
+              <div
+                className="
+                  hidden sm:block
+                  text-xs
+                  text-[#8b877e]
+                "
+              >
+                {dateText(date)}
+              </div>
 
             </div>
 
           </div>
 
-
-          {tab === "alis" && (
-
-            <Alis
-              data={data}
-              save={save}
-              isAdmin={isAdmin}
-            />
-
-          )}
+        )}
 
 
-          {tab === "satis" && (
+        {/* SEKME MENÜSÜ */}
 
-            <Satis
-              data={data}
-              save={save}
-              isAdmin={isAdmin}
-            />
+        <div
+          className="
+            grid
+            grid-cols-2
+            sm:grid-cols-5
+            gap-2
+            mb-4
+          "
+        >
 
-          )}
+          {tabs.map(([id,label,icon])=>(
 
+            <button
+              key={id}
+              onClick={()=>setTab(id)}
+              className={`
+                min-h-[52px]
+                rounded-2xl
+                border
+                flex
+                items-center
+                justify-center
+                gap-2
+                text-xs
+                font-bold
+                transition
+                ${
+                  tab===id
+                    ? "bg-[#1c1b19] text-white border-[#1c1b19]"
+                    : "bg-white text-[#77736b] border-[#e2dfd7]"
+                }
+              `}
+            >
 
-          {tab === "maliyet" &&
-            isAdmin && (
+              <span>
+                {icon}
+              </span>
 
-            <Maliyet
-              data={data}
-              save={save}
-            />
+              {label}
 
-          )}
+            </button>
 
-
-          {tab === "karzarar" &&
-            isAdmin && (
-
-            <KarZarar
-              data={data}
-            />
-
-          )}
-
-
-          {tab === "yonetici" &&
-            isAdmin && (
-
-            <Yonetici
-              data={data}
-              save={save}
-            />
-
-          )}
+          ))}
 
         </div>
 
-      </main>
+
+        {/* İÇERİK */}
+
+        {tab==="alis" && (
+
+          <Purchases
+            data={data}
+            date={date}
+            admin={admin}
+            save={save}
+          />
+
+        )}
+
+
+        {tab==="satis" && (
+
+          <Sales
+            data={data}
+            date={date}
+            admin={admin}
+            save={save}
+          />
+
+        )}
+
+
+        {tab==="maliyet" && admin && (
+
+          <Costs
+            data={data}
+            save={save}
+          />
+
+        )}
+
+
+        {tab==="kar" && admin && (
+
+          <Profit
+            data={data}
+          />
+
+        )}
+
+
+        {tab==="yonetim" && admin && (
+
+          <Management
+            data={data}
+            save={save}
+          />
+
+        )}
+
+      </div>
 
     </div>
 
@@ -1236,217 +829,238 @@ function App() {
 }
 
 
-/* =========================
+/* =========================================================
+   LOADING
+========================================================= */
+
+function Loading(){
+
+  return (
+
+    <div
+      className="
+        min-h-screen
+        bg-[#1c1b19]
+        flex
+        items-center
+        justify-center
+        text-white
+      "
+    >
+
+      <div className="text-center">
+
+        <div className="text-5xl mb-4">
+          🍕
+        </div>
+
+        <div className="font-black text-xl">
+          MANO PIZZA
+        </div>
+
+        <div
+          className="
+            text-xs
+            text-[#aaa69d]
+            mt-2
+          "
+        >
+          Panel hazırlanıyor...
+        </div>
+
+      </div>
+
+    </div>
+
+  );
+
+}
+
+
+/* =========================================================
    LOGIN
-========================= */
+========================================================= */
 
-function Login({
-  users,
-  onLogin
-}) {
+function Login({users,onLogin}){
 
-  const [username,setUsername] =
-    useState("");
+  const [username,setUsername] = useState("");
 
-  const [password,setPassword] =
-    useState("");
+  const [password,setPassword] = useState("");
 
-  const [error,setError] =
-    useState("");
-
-  const [show,setShow] =
-    useState(false);
+  const [error,setError] = useState("");
 
 
-  function submit(e) {
+  function submit(e){
 
     e.preventDefault();
 
     const name =
       username.trim();
 
-    const u =
+    const account =
       users[name];
 
     if(
-      u &&
-      u.password === password
-    ) {
+      account &&
+      account.password === password
+    ){
 
       onLogin({
         username:name,
-        role:u.role
+        role:account.role
       });
 
-    } else {
-
-      setError(
-        "Kullanıcı adı veya şifre hatalı."
-      );
-
-      setPassword("");
+      return;
 
     }
+
+    setError(
+      "Kullanıcı adı veya şifre hatalı."
+    );
+
+    setPassword("");
 
   }
 
 
   return (
 
-    <div className="login-screen">
+    <div
+      className="
+        min-h-screen
+        bg-[#1c1b19]
+        flex
+        items-center
+        justify-center
+        p-5
+      "
+    >
 
-      <div className="login-box">
+      <div
+        className="
+          w-full
+          max-w-[360px]
+        "
+      >
 
-        <div
-          style={{
-            textAlign:"center",
-            marginBottom:30
-          }}
-        >
+        <div className="text-center mb-8">
 
           <div
-            style={{
-              width:72,
-              height:72,
-              borderRadius:20,
-              background:"#b4432e",
-              display:"flex",
-              alignItems:"center",
-              justifyContent:"center",
-              margin:"0 auto 15px"
-            }}
+            className="
+              w-20 h-20
+              rounded-3xl
+              bg-[#b4432e]
+              mx-auto
+              flex
+              items-center
+              justify-center
+              text-4xl
+              mb-4
+            "
           >
-
-            <Icon
-              name="pizza"
-              size={34}
-            />
-
+            🍕
           </div>
 
-          <div
-            style={{
-              color:"white",
-              fontWeight:800,
-              fontSize:25
-            }}
+          <h1
+            className="
+              text-white
+              text-2xl
+              font-black
+              m-0
+            "
           >
-            Mano Pizza
-          </div>
+            MANO PIZZA
+          </h1>
 
-          <div
-            style={{
-              color:"#8f8b83",
-              fontSize:12,
-              marginTop:5
-            }}
+          <p
+            className="
+              text-[#99958d]
+              text-xs
+              mt-1
+            "
           >
             İşletme Yönetim Paneli
-          </div>
+          </p>
 
         </div>
 
 
-        <form onSubmit={submit}>
+        <form
+          onSubmit={submit}
+          className="
+            bg-[#292825]
+            rounded-3xl
+            p-5
+          "
+        >
 
           <label
-            style={{
-              color:"#9c9890",
-              fontSize:11
-            }}
+            className="
+              block
+              text-[11px]
+              text-[#aaa69d]
+              mb-1.5
+            "
           >
-            Kullanıcı Adı
+            Kullanıcı adı
           </label>
 
           <input
-            className="login-input"
             value={username}
             autoCapitalize="none"
-            autoCorrect="off"
-            onChange={e =>
-              setUsername(
-                e.target.value
-              )
+            onChange={
+              e=>setUsername(e.target.value)
             }
-            style={{
-              marginTop:5,
-              marginBottom:13
-            }}
+            className="
+              w-full
+              bg-[#1e1d1b]
+              border border-[#403e38]
+              text-white
+              rounded-xl
+              p-3.5
+              text-sm
+              mb-4
+            "
           />
 
 
           <label
-            style={{
-              color:"#9c9890",
-              fontSize:11
-            }}
+            className="
+              block
+              text-[11px]
+              text-[#aaa69d]
+              mb-1.5
+            "
           >
             Şifre
           </label>
 
-          <div
-            style={{
-              position:"relative",
-              marginTop:5
-            }}
-          >
-
-            <input
-              className="login-input"
-              type={
-                show
-                  ? "text"
-                  : "password"
-              }
-              value={password}
-              onChange={e =>
-                setPassword(
-                  e.target.value
-                )
-              }
-              style={{
-                paddingRight:45
-              }}
-            />
-
-            <button
-              type="button"
-              onClick={() =>
-                setShow(!show)
-              }
-              style={{
-                position:"absolute",
-                right:10,
-                top:10,
-                border:0,
-                background:"transparent",
-                color:"#999",
-                padding:4
-              }}
-            >
-
-              <Icon
-                name={
-                  show
-                    ? "eye-off"
-                    : "eye"
-                }
-                size={18}
-              />
-
-            </button>
-
-          </div>
+          <input
+            type="password"
+            value={password}
+            onChange={
+              e=>setPassword(e.target.value)
+            }
+            className="
+              w-full
+              bg-[#1e1d1b]
+              border border-[#403e38]
+              text-white
+              rounded-xl
+              p-3.5
+              text-sm
+            "
+          />
 
 
           {error && (
 
             <div
-              style={{
-                color:"#e08a75",
-                fontSize:12,
-                marginTop:10
-              }}
+              className="
+                text-[#e08a75]
+                text-xs
+                mt-3
+              "
             >
               {error}
             </div>
@@ -1456,17 +1070,16 @@ function Login({
 
           <button
             type="submit"
-            style={{
-              width:"100%",
-              marginTop:20,
-              padding:14,
-              border:0,
-              borderRadius:11,
-              background:"#f7f6f2",
-              color:"#1c1b19",
-              fontWeight:800,
-              cursor:"pointer"
-            }}
+            className="
+              w-full
+              bg-white
+              text-[#1c1b19]
+              rounded-xl
+              py-3.5
+              mt-5
+              font-black
+              text-sm
+            "
           >
             Giriş Yap
           </button>
@@ -1482,243 +1095,230 @@ function Login({
 }
 
 
-/* =========================
+/* =========================================================
    ALIŞ
-========================= */
+========================================================= */
 
-function Alis({
+function Purchases({
   data,
-  save,
-  isAdmin
-}) {
+  date,
+  admin,
+  save
+}){
 
-  const [date,setDate] =
-    useState(todayISO());
+  const [store,setStore] = useState(null);
 
-  const [store,setStore] =
-    useState(null);
+  const [newStore,setNewStore] = useState("");
 
-  const [product,setProduct] =
-    useState("");
+  const [showStore,setShowStore] = useState(false);
 
-  const [qty,setQty] =
-    useState("1");
-
-  const [price,setPrice] =
-    useState("");
-
-  const [newStore,setNewStore] =
-    useState("");
+  const [form,setForm] = useState({
+    product:"",
+    qty:"1",
+    price:""
+  });
 
 
-  const entries =
-    data.purchaseEntries[date] || {};
+  const day =
+    data.purchases[date] || {};
 
   const locks =
     data.purchaseLocks[date] || {};
 
 
-  function storeTotal(name) {
+  function totalStore(name){
 
     return (
-      entries[name] || []
+      day[name] || []
     ).reduce(
-      (sum,item) =>
+      (sum,item)=>
         sum +
-        Number(item.qty || 0) *
-        Number(item.unitPrice || 0),
+        Number(item.qty)*Number(item.price),
       0
     );
 
   }
 
 
-  const dayTotal =
+  const totalDay =
     data.stores.reduce(
-      (sum,s) =>
-        sum + storeTotal(s),
+      (s,x)=>s+totalStore(x),
       0
     );
 
 
-  function addItem(e) {
+  function addStore(){
+
+    const name =
+      newStore.trim();
+
+    if(
+      !name ||
+      data.stores.includes(name)
+    ) return;
+
+    save({
+
+      ...data,
+
+      stores:[
+        ...data.stores,
+        name
+      ]
+
+    });
+
+    setNewStore("");
+
+    setShowStore(false);
+
+  }
+
+
+  function addItem(e){
 
     e.preventDefault();
 
     if(!store) return;
 
-    if(!product.trim()) return;
+    const product =
+      form.product.trim();
 
-    const q =
-      Number(qty);
+    const qty =
+      Number(form.qty);
 
-    const p =
-      Number(price);
-
-    if(!q || q <= 0) return;
+    const price =
+      Number(form.price);
 
     if(
-      isNaN(p) ||
-      p < 0
+      !product ||
+      qty<=0 ||
+      price<0 ||
+      !Number.isFinite(qty) ||
+      !Number.isFinite(price)
     ) return;
 
 
     const item = {
 
       id:
-        Date.now().toString() +
-        Math.random()
-          .toString(36)
-          .slice(2),
+        Date.now()+"-"+Math.random(),
 
-      product:
-        product.trim(),
+      product,
 
-      qty:q,
+      qty,
 
-      unitPrice:p
+      price
 
     };
 
 
-    const next =
-      cloneData(data);
+    const nextDay = {
 
-    if(!next.purchaseEntries[date])
-      next.purchaseEntries[date] = {};
+      ...day,
 
-    if(!next.purchaseEntries[date][store])
-      next.purchaseEntries[date][store] = [];
+      [store]:[
+        ...(day[store]||[]),
+        item
+      ]
 
-
-    next.purchaseEntries[date][store]
-      .push(item);
+    };
 
 
-    save(next);
+    save({
 
-    setProduct("");
+      ...data,
 
-    setQty("1");
+      purchases:{
+        ...data.purchases,
+        [date]:nextDay
+      }
 
-    setPrice("");
+    });
+
+
+    setForm({
+      product:"",
+      qty:"1",
+      price:""
+    });
 
   }
 
 
-  function removeItem(id) {
+  function removeItem(id){
 
     if(!store) return;
 
-    const next =
-      cloneData(data);
-
-    next.purchaseEntries[date][store] =
-      (
-        next.purchaseEntries[date][store]
-        || []
-      ).filter(
-        x => x.id !== id
-      );
-
-    save(next);
-
-  }
+    const items =
+      (day[store]||[])
+      .filter(x=>x.id!==id);
 
 
-  function lockStore() {
+    save({
 
-    const next =
-      cloneData(data);
+      ...data,
 
-    if(!next.purchaseLocks[date])
-      next.purchaseLocks[date] = {};
+      purchases:{
+        ...data.purchases,
+        [date]:{
+          ...day,
+          [store]:items
+        }
+      }
 
-    next.purchaseLocks[date][store] =
-      true;
-
-    save(next);
+    });
 
   }
 
 
-  function unlockStore() {
+  function lockStore(){
 
-    const next =
-      cloneData(data);
+    save({
 
-    if(!next.purchaseLocks[date])
-      next.purchaseLocks[date] = {};
+      ...data,
 
-    next.purchaseLocks[date][store] =
-      false;
+      purchaseLocks:{
+        ...data.purchaseLocks,
+        [date]:{
+          ...locks,
+          [store]:true
+        }
+      }
 
-    save(next);
-
-  }
-
-
-  function addStore() {
-
-    const name =
-      newStore.trim();
-
-    if(!name) return;
-
-    if(
-      data.stores
-        .some(
-          x =>
-            x.toLowerCase() ===
-            name.toLowerCase()
-        )
-    ) return;
-
-
-    const next =
-      cloneData(data);
-
-    next.stores.push(name);
-
-    save(next);
-
-    setNewStore("");
+    });
 
   }
 
 
-  function deleteStore(name) {
+  function unlockStore(){
 
-    if(!confirm(
-      `"${name}" mağazasını silmek istediğinize emin misiniz?`
-    )) return;
+    save({
 
-    const next =
-      cloneData(data);
+      ...data,
 
-    next.stores =
-      next.stores.filter(
-        x => x !== name
-      );
+      purchaseLocks:{
+        ...data.purchaseLocks,
+        [date]:{
+          ...locks,
+          [store]:false
+        }
+      }
 
-    delete next.purchaseEntries[date]?.[name];
-
-    delete next.purchaseLocks[date]?.[name];
-
-    save(next);
-
-    setStore(null);
+    });
 
   }
 
 
-  if(store) {
+  /* MAĞAZA DETAY */
+
+  if(store){
+
+    const items =
+      day[store] || [];
 
     const locked =
       !!locks[store];
-
-    const items =
-      entries[store] || [];
 
 
     return (
@@ -1726,103 +1326,65 @@ function Alis({
       <div>
 
         <button
-          onClick={() =>
-            setStore(null)
-          }
-          style={{
-            border:0,
-            background:"transparent",
-            color:"#6b6862",
-            display:"flex",
-            alignItems:"center",
-            gap:4,
-            marginBottom:14,
-            fontSize:12
-          }}
+          onClick={()=>setStore(null)}
+          className="
+            mb-3
+            border-0
+            bg-transparent
+            text-[#77736b]
+            text-xs
+            font-bold
+          "
         >
-
-          <Icon
-            name="chevron-left"
-            size={16}
-          />
-
-          Mağazalara Dön
-
+          ← Mağazalara dön
         </button>
 
 
         <div
-          style={{
-            display:"flex",
-            justifyContent:"space-between",
-            alignItems:"center",
-            marginBottom:14
-          }}
+          className="
+            bg-white
+            rounded-2xl
+            border border-[#e2dfd7]
+            p-4
+            mb-3
+            flex
+            items-center
+            justify-between
+          "
         >
 
-          <h2
-            style={{
-              margin:0,
-              fontSize:17,
-              fontWeight:800
-            }}
-          >
-            {store}
+          <div>
 
-            {locked && (
-              <Icon
-                name="lock"
-                size={14}
-              />
-            )}
-
-          </h2>
-
-
-          {isAdmin && (
+            <div className="font-black">
+              {store}
+            </div>
 
             <div
-              style={{
-                display:"flex",
-                gap:12
-              }}
+              className="
+                text-[11px]
+                text-[#77736b]
+              "
             >
-
-              {locked && (
-
-                <button
-                  onClick={unlockStore}
-                  style={{
-                    border:0,
-                    background:"transparent",
-                    color:"#1c6b4e",
-                    fontSize:11,
-                    fontWeight:700
-                  }}
-                >
-
-                  Kilidi Aç
-
-                </button>
-
-              )}
-
-
-              <button
-                onClick={() =>
-                  deleteStore(store)
-                }
-                style={{
-                  border:0,
-                  background:"transparent",
-                  color:"#a8a49a",
-                  fontSize:11
-                }}
-              >
-                Sil
-              </button>
-
+              {items.length} ürün
             </div>
+
+          </div>
+
+
+          {locked && (
+
+            <span
+              className="
+                bg-[#f1efe9]
+                rounded-lg
+                px-2.5 py-1
+                text-[10px]
+                font-bold
+                text-[#77736b]
+              "
+            >
+              🔒 Onaylandı
+            </span>
 
           )}
 
@@ -1833,70 +1395,100 @@ function Alis({
 
           <form
             onSubmit={addItem}
-            className="card"
-            style={{
-              padding:15,
-              marginBottom:14
-            }}
+            className="
+              bg-white
+              border border-[#e2dfd7]
+              rounded-2xl
+              p-4
+              mb-3
+            "
           >
 
             <div
-              className="form-grid"
-              style={{
-                display:"grid",
-                gridTemplateColumns:
-                  "2fr 1fr 1fr",
-                gap:9,
-                marginBottom:10
-              }}
+              className="
+                grid
+                grid-cols-1
+                sm:grid-cols-3
+                gap-2
+                mb-2
+              "
             >
 
-              <Field
-                label="Ürün"
-                value={product}
-                onChange={setProduct}
-                placeholder="Örn. Un"
+              <input
+                placeholder="Ürün adı"
+                value={form.product}
+                onChange={
+                  e=>setForm({
+                    ...form,
+                    product:e.target.value
+                  })
+                }
+                className="
+                  p-3
+                  rounded-xl
+                  border border-[#e2dfd7]
+                  bg-[#faf9f6]
+                  text-sm
+                "
               />
 
-              <Field
-                label="Miktar"
+              <input
                 type="number"
-                value={qty}
-                onChange={setQty}
+                min="0"
+                step="0.01"
+                placeholder="Miktar"
+                value={form.qty}
+                onChange={
+                  e=>setForm({
+                    ...form,
+                    qty:e.target.value
+                  })
+                }
+                className="
+                  p-3
+                  rounded-xl
+                  border border-[#e2dfd7]
+                  bg-[#faf9f6]
+                  text-sm
+                "
               />
 
-              <Field
-                label="Birim Fiyat"
+              <input
                 type="number"
-                value={price}
-                onChange={setPrice}
-                placeholder="0"
+                min="0"
+                step="0.01"
+                placeholder="Birim fiyat"
+                value={form.price}
+                onChange={
+                  e=>setForm({
+                    ...form,
+                    price:e.target.value
+                  })
+                }
+                className="
+                  p-3
+                  rounded-xl
+                  border border-[#e2dfd7]
+                  bg-[#faf9f6]
+                  text-sm
+                "
               />
 
             </div>
 
 
             <button
-              type="submit"
-              style={{
-                width:"100%",
-                padding:11,
-                border:0,
-                borderRadius:9,
-                background:"#1c1b19",
-                color:"white",
-                fontWeight:700,
-                fontSize:12
-              }}
+              className="
+                w-full
+                bg-[#1c1b19]
+                text-white
+                rounded-xl
+                py-3
+                font-bold
+                text-xs
+              "
             >
-
-              <Icon
-                name="plus"
-                size={15}
-              />
-
-              Ürün Ekle
-
+              + Ürün Ekle
             </button>
 
           </form>
@@ -1904,119 +1496,65 @@ function Alis({
         )}
 
 
-        {locked && !isAdmin && (
+        <div className="space-y-2">
 
-          <div
-            style={{
-              padding:12,
-              background:"#f1efe9",
-              borderRadius:11,
-              marginBottom:13,
-              fontSize:12,
-              color:"#6b6862",
-              display:"flex",
-              gap:8
-            }}
-          >
-
-            <Icon
-              name="lock"
-              size={16}
-            />
-
-            Bu kayıt onaylandı ve
-            değiştirilemez.
-
-          </div>
-
-        )}
-
-
-        <div
-          style={{
-            display:"flex",
-            flexDirection:"column",
-            gap:8
-          }}
-        >
-
-          {items.map(item => (
+          {items.map(item=>(
 
             <div
               key={item.id}
-              className="card"
-              style={{
-                padding:12,
-                display:"flex",
-                justifyContent:"space-between",
-                alignItems:"center"
-              }}
+              className="
+                bg-white
+                border border-[#e2dfd7]
+                rounded-2xl
+                p-3.5
+                flex
+                items-center
+                justify-between
+              "
             >
 
               <div>
 
-                <div
-                  style={{
-                    fontWeight:700,
-                    fontSize:12
-                  }}
-                >
+                <div className="text-sm font-bold">
                   {item.product}
                 </div>
 
                 <div
-                  style={{
-                    color:"#6b6862",
-                    fontSize:11,
-                    marginTop:3
-                  }}
+                  className="
+                    text-[11px]
+                    text-[#77736b]
+                    mt-1
+                  "
                 >
-                  {item.qty}
-                  {" × "}
-                  {money(item.unitPrice)}
+                  {item.qty} × {money(item.price)}
                 </div>
 
               </div>
 
 
-              <div
-                style={{
-                  display:"flex",
-                  alignItems:"center",
-                  gap:10
-                }}
-              >
+              <div className="flex items-center gap-3">
 
-                <b
-                  style={{
-                    fontSize:12
-                  }}
-                >
+                <div className="font-black text-sm">
                   {money(
-                    item.qty *
-                    item.unitPrice
+                    item.qty*item.price
                   )}
-                </b>
+                </div>
 
 
                 {!locked && (
 
                   <button
-                    onClick={() =>
+                    onClick={()=>
                       removeItem(item.id)
                     }
-                    style={{
-                      border:0,
-                      background:"transparent",
-                      color:"#aaa69d"
-                    }}
+                    className="
+                      w-8 h-8
+                      rounded-lg
+                      border-0
+                      bg-[#f5f3ee]
+                    "
                   >
-
-                    <Icon
-                      name="trash-2"
-                      size={16}
-                    />
-
+                    🗑
                   </button>
 
                 )}
@@ -2031,59 +1569,66 @@ function Alis({
 
 
         <div
-          className="dark-card"
-          style={{
-            marginTop:12,
-            padding:14,
-            display:"flex",
-            justifyContent:"space-between"
-          }}
+          className="
+            mt-3
+            bg-[#1c1b19]
+            text-white
+            rounded-2xl
+            p-4
+            flex
+            justify-between
+          "
         >
 
-          <span
-            style={{
-              color:"#c7c4bb",
-              fontSize:11
-            }}
-          >
+          <span className="text-xs text-[#aaa69d]">
             {store} Toplamı
           </span>
 
-          <b>
-            {money(
-              storeTotal(store)
-            )}
-          </b>
+          <strong>
+            {money(totalStore(store))}
+          </strong>
 
         </div>
 
 
-        {!locked &&
-          !isAdmin &&
-          items.length > 0 && (
+        {!locked && items.length>0 && (
 
           <button
             onClick={lockStore}
-            style={{
-              width:"100%",
-              marginTop:12,
-              padding:12,
-              border:0,
-              borderRadius:10,
-              background:"#b4432e",
-              color:"white",
-              fontWeight:800,
-              fontSize:12
-            }}
+            className="
+              w-full
+              mt-3
+              bg-[#b4432e]
+              text-white
+              border-0
+              rounded-2xl
+              py-3.5
+              font-black
+              text-sm
+            "
           >
+            ✓ Kaydet ve Onayla
+          </button>
 
-            <Icon
-              name="check-circle"
-              size={15}
-            />
+        )}
 
-            Kaydet ve Onayla
 
+        {locked && admin && (
+
+          <button
+            onClick={unlockStore}
+            className="
+              w-full
+              mt-3
+              bg-white
+              border border-[#e2dfd7]
+              rounded-2xl
+              py-3
+              text-sm
+              font-bold
+            "
+          >
+            🔓 Kilidi Kaldır
           </button>
 
         )}
@@ -2095,146 +1640,94 @@ function Alis({
   }
 
 
+  /* MAĞAZALAR */
+
   return (
 
     <div>
 
-      <DateSelector
-        value={date}
-        onChange={setDate}
-      />
-
-
       <div
-        className="dark-card"
-        style={{
-          padding:16,
-          marginBottom:13,
-          display:"flex",
-          justifyContent:"space-between",
-          alignItems:"center"
-        }}
+        className="
+          bg-[#1c1b19]
+          text-white
+          rounded-2xl
+          p-4
+          mb-3
+          flex
+          justify-between
+          items-center
+        "
       >
 
-        <span
-          style={{
-            fontSize:12,
-            color:"#c7c4bb"
-          }}
-        >
+        <span className="text-xs text-[#aaa69d]">
           Günün Alış Toplamı
         </span>
 
-        <b>
-          {money(dayTotal)}
-        </b>
+        <strong>
+          {money(totalDay)}
+        </strong>
 
       </div>
 
 
-      <div
-        style={{
-          display:"flex",
-          flexDirection:"column",
-          gap:8
-        }}
-      >
+      <div className="space-y-2">
 
-        {data.stores.map(s => {
+        {data.stores.map(name=>{
 
-          const items =
-            entries[s] || [];
-
-          const total =
-            storeTotal(s);
+          const count =
+            (day[name]||[]).length;
 
           const locked =
-            !!locks[s];
-
+            !!locks[name];
 
           return (
 
             <button
-              key={s}
-              onClick={() =>
-                setStore(s)
-              }
-              className="card"
-              style={{
-                width:"100%",
-                border:"1px solid #e4e1d8",
-                padding:14,
-                display:"flex",
-                alignItems:"center",
-                justifyContent:"space-between",
-                textAlign:"left"
-              }}
+              key={name}
+              onClick={()=>setStore(name)}
+              className="
+                w-full
+                bg-white
+                border border-[#e2dfd7]
+                rounded-2xl
+                p-4
+                flex
+                items-center
+                justify-between
+                text-left
+              "
             >
 
-              <div
-                style={{
-                  display:"flex",
-                  alignItems:"center",
-                  gap:11
-                }}
-              >
+              <div className="flex items-center gap-3">
 
                 <div
-                  style={{
-                    width:37,
-                    height:37,
-                    borderRadius:10,
-                    background:"#eaf3ee",
-                    color:"#1c6b4e",
-                    display:"flex",
-                    alignItems:"center",
-                    justifyContent:"center"
-                  }}
+                  className="
+                    w-10 h-10
+                    rounded-xl
+                    bg-[#edf5ef]
+                    flex
+                    items-center
+                    justify-center
+                    text-lg
+                  "
                 >
-
-                  <Icon
-                    name="store"
-                    size={18}
-                  />
-
+                  🏪
                 </div>
-
 
                 <div>
 
-                  <div
-                    style={{
-                      fontWeight:700,
-                      fontSize:12,
-                      display:"flex",
-                      alignItems:"center",
-                      gap:5
-                    }}
-                  >
-
-                    {s}
-
-                    {locked && (
-                      <Icon
-                        name="lock"
-                        size={12}
-                      />
-                    )}
-
+                  <div className="font-bold text-sm">
+                    {name}
                   </div>
 
                   <div
-                    style={{
-                      fontSize:11,
-                      color:"#6b6862",
-                      marginTop:3
-                    }}
+                    className="
+                      text-[11px]
+                      text-[#77736b]
+                    "
                   >
-                    {
-                      items.length
-                        ? `${items.length} ürün`
-                        : "Ürün yok"
-                    }
+                    {count} ürün
+                    {locked ? " · 🔒 Onaylı" : ""}
                   </div>
 
                 </div>
@@ -2242,13 +1735,9 @@ function Alis({
               </div>
 
 
-              <b
-                style={{
-                  fontSize:12
-                }}
-              >
-                {money(total)}
-              </b>
+              <strong className="text-sm">
+                {money(totalStore(name))}
+              </strong>
 
             </button>
 
@@ -2259,49 +1748,64 @@ function Alis({
       </div>
 
 
-      {isAdmin && (
+      {admin && (
 
-        <div
-          className="card"
-          style={{
-            marginTop:12,
-            padding:13,
-            display:"flex",
-            gap:8
-          }}
-        >
+        <div className="mt-3">
 
-          <input
-            value={newStore}
-            onChange={e =>
-              setNewStore(e.target.value)
-            }
-            placeholder="Yeni mağaza adı"
-            style={{
-              flex:1,
-              minWidth:0,
-              border:"1px solid #e4e1d8",
-              borderRadius:9,
-              padding:10,
-              fontSize:12,
-              outline:"none"
-            }}
-          />
+          {!showStore ? (
 
-          <button
-            onClick={addStore}
-            style={{
-              border:0,
-              borderRadius:9,
-              background:"#1c1b19",
-              color:"white",
-              padding:"0 15px",
-              fontWeight:700,
-              fontSize:11
-            }}
-          >
-            Ekle
-          </button>
+            <button
+              onClick={()=>setShowStore(true)}
+              className="
+                w-full
+                bg-white
+                border border-[#e2dfd7]
+                rounded-2xl
+                py-3.5
+                text-sm
+                font-bold
+              "
+            >
+              + Yeni Mağaza
+            </button>
+
+          ) : (
+
+            <div className="flex gap-2">
+
+              <input
+                autoFocus
+                value={newStore}
+                onChange={
+                  e=>setNewStore(e.target.value)
+                }
+                placeholder="Mağaza adı"
+                className="
+                  flex-1
+                  p-3
+                  rounded-xl
+                  border border-[#e2dfd7]
+                  bg-white
+                "
+              />
+
+              <button
+                onClick={addStore}
+                className="
+                  px-5
+                  rounded-xl
+                  bg-[#1c1b19]
+                  text-white
+                  border-0
+                  font-bold
+                "
+              >
+                Ekle
+              </button>
+
+            </div>
+
+          )}
 
         </div>
 
@@ -2314,124 +1818,112 @@ function Alis({
 }
 
 
-/* =========================
+/* =========================================================
    SATIŞ
-========================= */
+========================================================= */
 
-function Satis({
+function Sales({
   data,
-  save,
-  isAdmin
-}) {
-
-  const [date,setDate] =
-    useState(todayISO());
-
-  const [confirm,setConfirm] =
-    useState(false);
-
+  date,
+  admin,
+  save
+}){
 
   const rows =
-    SALE_PRODUCTS.map(product => {
-
-      const r =
-        data.salesEntries[date]?.[product]
-        || {
-          qty:"",
-          unitPrice:""
-        };
-
-      const qty =
-        Number(r.qty) || 0;
-
-      const price =
-        Number(r.unitPrice) || 0;
-
-      return {
-        product,
-        qty:r.qty ?? "",
-        unitPrice:r.unitPrice ?? "",
-        total:qty * price
-      };
-
-    });
-
-
-  const total =
-    rows.reduce(
-      (sum,r) =>
-        sum + r.total,
-      0
-    );
-
+    data.sales[date] || {};
 
   const locked =
     !!data.salesLocks[date];
 
 
-  function update(
-    product,
-    field,
-    value
-  ) {
+  const total =
+    PRODUCTS.reduce(
+      (sum,p)=>{
 
-    if(
-      locked &&
-      !isAdmin
-    ) return;
+        const r =
+          rows[p] || {};
+
+        return sum +
+          (Number(r.qty)||0) *
+          (Number(r.price)||0);
+
+      },
+      0
+    );
 
 
-    const next =
-      cloneData(data);
+  function update(product,field,value){
 
-    if(!next.salesEntries[date])
-      next.salesEntries[date] = {};
+    if(locked && !admin) return;
 
-    if(!next.salesEntries[date][product])
-      next.salesEntries[date][product] = {
+
+    const old =
+      rows[product] || {
         qty:"",
-        unitPrice:""
+        price:""
       };
 
 
-    next.salesEntries[date][product][field] =
-      value;
+    save({
 
+      ...data,
 
-    save(next);
+      sales:{
+        ...data.sales,
 
-  }
+        [date]:{
 
+          ...rows,
 
-  function lock() {
+          [product]:{
+            ...old,
+            [field]:value
+          }
 
-    const next =
-      cloneData(data);
+        }
 
-    next.salesLocks[date] =
-      true;
+      }
 
-    save(next);
-
-  }
-
-
-  function unlock() {
-
-    const next =
-      cloneData(data);
-
-    next.salesLocks[date] =
-      false;
-
-    save(next);
+    });
 
   }
 
 
-  const hasEntry =
-    rows.some(
-      r => Number(r.qty) > 0
+  function lock(){
+
+    save({
+
+      ...data,
+
+      salesLocks:{
+        ...data.salesLocks,
+        [date]:true
+      }
+
+    });
+
+  }
+
+
+  function unlock(){
+
+    save({
+
+      ...data,
+
+      salesLocks:{
+        ...data.salesLocks,
+        [date]:false
+      }
+
+    });
+
+  }
+
+
+  const hasData =
+    PRODUCTS.some(
+      p=>Number(rows[p]?.qty)>0
     );
 
 
@@ -2439,263 +1931,249 @@ function Satis({
 
     <div>
 
-      <DateSelector
-        value={date}
-        onChange={setDate}
-      />
-
-
       <div
-        className="dark-card"
-        style={{
-          padding:15,
-          marginBottom:13,
-          display:"flex",
-          justifyContent:"space-between"
-        }}
+        className="
+          bg-[#1c1b19]
+          text-white
+          rounded-2xl
+          p-4
+          mb-3
+          flex
+          justify-between
+        "
       >
 
-        <span
-          style={{
-            color:"#c7c4bb",
-            fontSize:12
-          }}
-        >
-          Günün Satış Toplamı
+        <span className="text-xs text-[#aaa69d]">
+          Günün Satışı
         </span>
 
-        <b>
+        <strong>
           {money(total)}
-        </b>
+        </strong>
 
       </div>
 
 
-      {locked && !isAdmin && (
+      {locked && (
 
         <div
-          style={{
-            padding:12,
-            background:"#f1efe9",
-            border:"1px solid #e4e1d8",
-            borderRadius:11,
-            marginBottom:12,
-            fontSize:12,
-            color:"#6b6862"
-          }}
+          className="
+            bg-[#f0eee8]
+            border border-[#ddd9cf]
+            rounded-2xl
+            p-3
+            mb-3
+            text-xs
+            font-bold
+            text-[#77736b]
+          "
         >
-
-          <Icon
-            name="lock"
-            size={15}
-          />
-
-          Bu günün satışları
-          onaylandı.
-
+          🔒 Bu günün satışları onaylandı.
         </div>
 
       )}
 
 
-      {isAdmin && locked && (
+      <div
+        className="
+          bg-white
+          border border-[#e2dfd7]
+          rounded-2xl
+          overflow-hidden
+        "
+      >
 
-        <button
-          onClick={unlock}
-          style={{
-            border:0,
-            background:"transparent",
-            color:"#1c6b4e",
-            fontWeight:700,
-            fontSize:11,
-            marginBottom:10
-          }}
-        >
-          Kilidi Kaldır
-        </button>
+        {PRODUCTS.map((product,index)=>{
 
-      )}
+          const r =
+            rows[product] || {
+              qty:"",
+              price:""
+            };
 
-
-      <div className="card table-wrap">
-
-        <table className="sales-table">
-
-          <thead>
-
-            <tr>
-
-              <th>Ürün</th>
-
-              <th style={{textAlign:"right"}}>
-                Adet
-              </th>
-
-              <th style={{textAlign:"right"}}>
-                Birim F.
-              </th>
-
-              <th style={{textAlign:"right"}}>
-                Toplam
-              </th>
-
-            </tr>
-
-          </thead>
+          const line =
+            (Number(r.qty)||0) *
+            (Number(r.price)||0);
 
 
-          <tbody>
+          return (
 
-            {rows.map((r,i) => (
+            <div
+              key={product}
+              className="
+                p-3
+                border-b border-[#eeeae2]
+              "
+            >
 
-              <tr key={r.product}>
+              <div
+                className="
+                  flex
+                  items-center
+                  justify-between
+                  mb-2
+                "
+              >
 
-                <td
-                  style={{
-                    fontWeight:600
-                  }}
+                <div
+                  className="
+                    text-xs
+                    font-bold
+                    truncate
+                    pr-2
+                  "
                 >
-                  {r.product}
-                </td>
+                  {product}
+                </div>
+
+                <div
+                  className="
+                    text-xs
+                    font-black
+                  "
+                >
+                  {money(line)}
+                </div>
+
+              </div>
 
 
-                <td>
+              <div
+                className="
+                  grid
+                  grid-cols-2
+                  gap-2
+                "
+              >
+
+                <div>
+
+                  <div
+                    className="
+                      text-[9px]
+                      text-[#99958d]
+                      mb-1
+                    "
+                  >
+                    ADET
+                  </div>
 
                   <input
                     type="number"
                     min="0"
                     value={r.qty}
-                    placeholder="0"
-                    disabled={
-                      locked &&
-                      !isAdmin
-                    }
-                    onChange={e =>
-                      update(
-                        r.product,
+                    disabled={locked && !admin}
+                    onChange={
+                      e=>update(
+                        product,
                         "qty",
                         e.target.value
                       )
                     }
-                    style={{
-                      textAlign:"right"
-                    }}
+                    placeholder="0"
+                    className="
+                      w-full
+                      p-2.5
+                      rounded-xl
+                      border border-[#e2dfd7]
+                      bg-[#faf9f6]
+                      text-sm
+                      text-right
+                    "
                   />
 
-                </td>
+                </div>
 
 
-                <td>
+                <div>
+
+                  <div
+                    className="
+                      text-[9px]
+                      text-[#99958d]
+                      mb-1
+                    "
+                  >
+                    BİRİM FİYAT
+                  </div>
 
                   <input
                     type="number"
                     min="0"
                     step="0.01"
-                    value={r.unitPrice}
-                    placeholder="0"
-                    disabled={
-                      locked &&
-                      !isAdmin
-                    }
-                    onChange={e =>
-                      update(
-                        r.product,
-                        "unitPrice",
+                    value={r.price}
+                    disabled={locked && !admin}
+                    onChange={
+                      e=>update(
+                        product,
+                        "price",
                         e.target.value
                       )
                     }
-                    style={{
-                      textAlign:"right"
-                    }}
+                    placeholder="₺"
+                    className="
+                      w-full
+                      p-2.5
+                      rounded-xl
+                      border border-[#e2dfd7]
+                      bg-[#faf9f6]
+                      text-sm
+                      text-right
+                    "
                   />
 
-                </td>
+                </div>
 
+              </div>
 
-                <td
-                  style={{
-                    textAlign:"right",
-                    fontWeight:800
-                  }}
-                >
-                  {money(r.total)}
-                </td>
+            </div>
 
-              </tr>
+          );
 
-            ))}
-
-          </tbody>
-
-        </table>
+        })}
 
       </div>
 
 
-      {!locked &&
-        !isAdmin &&
-        hasEntry && (
+      {locked && admin && (
 
-        <div
-          style={{
-            marginTop:13,
-            padding:14,
-            background:"#fff9ec",
-            border:"1px solid #e9ddb8",
-            borderRadius:12
-          }}
+        <button
+          onClick={unlock}
+          className="
+            w-full
+            mt-3
+            bg-white
+            border border-[#e2dfd7]
+            rounded-2xl
+            py-3
+            font-bold
+            text-sm
+          "
         >
+          🔓 Kilidi Kaldır
+        </button>
 
-          <label
-            style={{
-              display:"flex",
-              gap:8,
-              fontSize:12,
-              color:"#7a6a2e"
-            }}
-          >
-
-            <input
-              type="checkbox"
-              checked={confirm}
-              onChange={e =>
-                setConfirm(
-                  e.target.checked
-                )
-              }
-            />
-
-            Bu kayıt onaylandıktan sonra
-            değiştirilemeyecek. Onaylıyor
-            musunuz?
-
-          </label>
+      )}
 
 
-          <button
-            disabled={!confirm}
-            onClick={lock}
-            style={{
-              width:"100%",
-              marginTop:11,
-              padding:11,
-              border:0,
-              borderRadius:9,
-              background:
-                confirm
-                  ? "#1c1b19"
-                  : "#d8d4c8",
-              color:"white",
-              fontWeight:800,
-              fontSize:12
-            }}
-          >
+      {!locked && !admin && hasData && (
 
-            Kaydet ve Onayla
-
-          </button>
-
-        </div>
+        <button
+          onClick={lock}
+          className="
+            w-full
+            mt-3
+            bg-[#b4432e]
+            text-white
+            border-0
+            rounded-2xl
+            py-3.5
+            font-black
+            text-sm
+          "
+        >
+          ✓ Satışları Kaydet ve Onayla
+        </button>
 
       )}
 
@@ -2706,171 +2184,209 @@ function Satis({
 }
 
 
-/* =========================
+/* =========================================================
    MALİYET
-========================= */
+========================================================= */
 
-function Maliyet({
+function Costs({
   data,
   save
-}) {
+}){
+
+  const costs =
+    data.costs || {};
+
 
   function update(
     product,
     field,
     value
-  ) {
+  ){
 
-    const next =
-      cloneData(data);
+    const old =
+      costs[product] || {};
 
-    if(!next.costs[product])
-      next.costs[product] = {
-        cost:"",
-        price:""
-      };
+    save({
 
+      ...data,
 
-    next.costs[product][field] =
-      value;
+      costs:{
+        ...costs,
 
-    save(next);
+        [product]:{
+          ...old,
+          [field]:value
+        }
+
+      }
+
+    });
 
   }
 
 
   return (
 
-    <div>
+    <div className="space-y-2">
 
-      <div
-        className="card table-wrap"
-      >
+      {PRODUCTS.map(product=>{
 
-        <table className="sales-table">
+        const c =
+          costs[product] || {
+            cost:"",
+            price:""
+          };
 
-          <thead>
+        const cost =
+          Number(c.cost)||0;
 
-            <tr>
+        const price =
+          Number(c.price)||0;
 
-              <th>Ürün</th>
+        const profit =
+          price-cost;
 
-              <th>Maliyet</th>
-
-              <th>Satış</th>
-
-              <th>Kâr</th>
-
-              <th>%</th>
-
-            </tr>
-
-          </thead>
+        const margin =
+          price>0
+            ? profit/price*100
+            : 0;
 
 
-          <tbody>
+        return (
 
-            {SALE_PRODUCTS.map(p => {
+          <div
+            key={product}
+            className="
+              bg-white
+              border border-[#e2dfd7]
+              rounded-2xl
+              p-3
+            "
+          >
 
-              const c =
-                data.costs[p]
-                || {
-                  cost:"",
-                  price:""
-                };
-
-              const cost =
-                Number(c.cost) || 0;
-
-              const price =
-                Number(c.price) || 0;
-
-              const profit =
-                price - cost;
-
-              const pct =
-                price > 0
-                  ? profit / price * 100
-                  : 0;
+            <div
+              className="
+                font-bold
+                text-xs
+                mb-3
+              "
+            >
+              {product}
+            </div>
 
 
-              return (
+            <div
+              className="
+                grid
+                grid-cols-2
+                gap-2
+              "
+            >
 
-                <tr key={p}>
+              <div>
 
-                  <td
-                    style={{
-                      fontWeight:700
-                    }}
-                  >
-                    {p}
-                  </td>
+                <div
+                  className="
+                    text-[9px]
+                    text-[#99958d]
+                    mb-1
+                  "
+                >
+                  MALİYET
+                </div>
 
-                  <td>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={c.cost}
+                  onChange={
+                    e=>update(
+                      product,
+                      "cost",
+                      e.target.value
+                    )
+                  }
+                  className="
+                    w-full
+                    p-2.5
+                    border border-[#e2dfd7]
+                    rounded-xl
+                    bg-[#faf9f6]
+                    text-sm
+                    text-right
+                  "
+                />
 
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={c.cost}
-                      onChange={e =>
-                        update(
-                          p,
-                          "cost",
-                          e.target.value
-                        )
-                      }
-                    />
+              </div>
 
-                  </td>
 
-                  <td>
+              <div>
 
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={c.price}
-                      onChange={e =>
-                        update(
-                          p,
-                          "price",
-                          e.target.value
-                        )
-                      }
-                    />
+                <div
+                  className="
+                    text-[9px]
+                    text-[#99958d]
+                    mb-1
+                  "
+                >
+                  SATIŞ
+                </div>
 
-                  </td>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={c.price}
+                  onChange={
+                    e=>update(
+                      product,
+                      "price",
+                      e.target.value
+                    )
+                  }
+                  className="
+                    w-full
+                    p-2.5
+                    border border-[#e2dfd7]
+                    rounded-xl
+                    bg-[#faf9f6]
+                    text-sm
+                    text-right
+                  "
+                />
 
-                  <td
-                    style={{
-                      fontWeight:800,
-                      color:"#1c6b4e"
-                    }}
-                  >
-                    {money(profit)}
-                  </td>
+              </div>
 
-                  <td
-                    style={{
-                      fontWeight:800,
-                      color:"#1c6b4e"
-                    }}
-                  >
-                    {pct.toFixed(0)}%
-                  </td>
+            </div>
 
-                </tr>
 
-              );
+            <div
+              className="
+                mt-3
+                flex
+                justify-between
+                text-xs
+              "
+            >
 
-            })}
+              <span className="text-[#77736b]">
+                Birim kâr
+              </span>
 
-          </tbody>
+              <strong>
+                {money(profit)}
+                {" "}
+                ({margin.toFixed(0)}%)
+              </strong>
 
-        </table>
+            </div>
 
-      </div>
+          </div>
+
+        );
+
+      })}
 
     </div>
 
@@ -2879,86 +2395,80 @@ function Maliyet({
 }
 
 
-/* =========================
+/* =========================================================
    KAR ZARAR
-========================= */
+========================================================= */
 
-function KarZarar({
+function Profit({
   data
-}) {
+}){
 
   const [month,setMonth] =
-    useState(monthISO());
+    useState(monthNow());
 
 
   const stats =
-    useMemo(() => {
+    useMemo(()=>{
 
-      let purchases = 0;
+      let sales=0;
+
+      let purchases=0;
+
 
       Object.entries(
-        data.purchaseEntries || {}
-      ).forEach(
-        ([date,stores]) => {
+        data.sales || {}
+      ).forEach(([date,rows])=>{
 
-          if(
-            !date.startsWith(month)
-          ) return;
+        if(!date.startsWith(month))
+          return;
 
-          Object.values(
-            stores || {}
-          ).forEach(items => {
-
-            (items || [])
-              .forEach(item => {
-
-                purchases +=
-                  Number(item.qty || 0) *
-                  Number(item.unitPrice || 0);
-
-              });
-
-          });
-
-        }
-      );
-
-
-      let sales = 0;
-
-      Object.entries(
-        data.salesEntries || {}
-      ).forEach(
-        ([date,products]) => {
-
-          if(
-            !date.startsWith(month)
-          ) return;
-
-          Object.values(
-            products || {}
-          ).forEach(row => {
+        Object.values(rows)
+          .forEach(r=>{
 
             sales +=
-              Number(row.qty || 0) *
-              Number(row.unitPrice || 0);
+              (Number(r.qty)||0) *
+              (Number(r.price)||0);
 
           });
 
-        }
-      );
+      });
+
+
+      Object.entries(
+        data.purchases || {}
+      ).forEach(([date,stores])=>{
+
+        if(!date.startsWith(month))
+          return;
+
+        Object.values(stores)
+          .forEach(items=>{
+
+            items.forEach(item=>{
+
+              purchases +=
+                (Number(item.qty)||0) *
+                (Number(item.price)||0);
+
+            });
+
+          });
+
+      });
 
 
       return {
-        purchases,
+
         sales,
-        net:sales-purchases
+
+        purchases,
+
+        net:
+          sales-purchases
+
       };
 
-    },[
-      data,
-      month
-    ]);
+    },[data,month]);
 
 
   return (
@@ -2966,100 +2476,109 @@ function KarZarar({
     <div>
 
       <div
-        className="card"
-        style={{
-          padding:13,
-          marginBottom:13,
-          display:"flex",
-          alignItems:"center",
-          gap:9
-        }}
+        className="
+          bg-white
+          border border-[#e2dfd7]
+          rounded-2xl
+          p-3
+          mb-3
+        "
       >
 
-        <Icon
-          name="calendar"
-          size={17}
-        />
+        <div
+          className="
+            text-[10px]
+            text-[#99958d]
+            mb-1
+          "
+        >
+          RAPOR DÖNEMİ
+        </div>
 
         <input
           type="month"
           value={month}
-          onChange={e =>
-            setMonth(
-              e.target.value
-            )
+          onChange={
+            e=>setMonth(e.target.value)
           }
-          style={{
-            border:0,
-            outline:0,
-            background:"transparent",
-            flex:1,
-            fontSize:12
-          }}
+          className="
+            border-0
+            text-sm
+            font-black
+            w-full
+          "
         />
-
-        <span
-          style={{
-            color:"#77736b",
-            fontSize:11
-          }}
-        >
-          {monthLabel(month)}
-        </span>
 
       </div>
 
 
       <div
-        className="mobile-grid-2"
-        style={{
-          display:"grid",
-          gridTemplateColumns:
-            "1fr 1fr",
-          gap:10
-        }}
+        className="
+          grid
+          grid-cols-1
+          sm:grid-cols-3
+          gap-2
+          mb-3
+        "
       >
 
-        <Stat
+        <Card
           title="Toplam Satış"
           value={money(stats.sales)}
-          icon="trending-up"
+          icon="📈"
         />
 
-        <Stat
+        <Card
           title="Toplam Alış"
           value={money(stats.purchases)}
-          icon="shopping-bag"
+          icon="🛒"
+        />
+
+        <Card
+          title="Net"
+          value={money(stats.net)}
+          icon="💰"
         />
 
       </div>
 
 
       <div
-        className="dark-card"
-        style={{
-          marginTop:10,
-          padding:18
-        }}
+        className="
+          bg-[#1c1b19]
+          text-white
+          rounded-2xl
+          p-5
+        "
       >
 
         <div
-          style={{
-            color:"#aaa69d",
-            fontSize:11,
-            marginBottom:5
-          }}
+          className="
+            text-[10px]
+            text-[#aaa69d]
+            mb-2
+          "
         >
-          Net Kâr / Nakit Akışı
+          {monthText(month)}
         </div>
 
         <div
-          style={{
-            fontSize:24,
-            fontWeight:900
-          }}
+          className="
+            text-2xl
+            font-black
+          "
         >
           {money(stats.net)}
+        </div>
+
+        <div
+          className="
+            text-xs
+            text-[#aaa69d]
+            mt-1
+          "
+        >
+          Satış − Alış
         </div>
 
       </div>
@@ -3071,14 +2590,71 @@ function KarZarar({
 }
 
 
-/* =========================
-   YÖNETİCİ
-========================= */
+/* =========================================================
+   CARD
+========================================================= */
 
-function Yonetici({
+function Card({
+  title,
+  value,
+  icon
+}){
+
+  return (
+
+    <div
+      className="
+        bg-white
+        border border-[#e2dfd7]
+        rounded-2xl
+        p-4
+      "
+    >
+
+      <div
+        className="
+          flex
+          justify-between
+          items-center
+          mb-3
+        "
+      >
+
+        <span
+          className="
+            text-[10px]
+            text-[#77736b]
+            font-bold
+          "
+        >
+          {title}
+        </span>
+
+        <span>
+          {icon}
+        </span>
+
+      </div>
+
+      <strong className="text-base">
+        {value}
+      </strong>
+
+    </div>
+
+  );
+
+}
+
+
+/* =========================================================
+   YÖNETİM
+========================================================= */
+
+function Management({
   data,
   save
-}) {
+}){
 
   const [username,setUsername] =
     useState("");
@@ -3086,38 +2662,44 @@ function Yonetici({
   const [password,setPassword] =
     useState("");
 
+  const users =
+    data.users || {};
 
-  function createUser(e) {
+
+  function addUser(e){
 
     e.preventDefault();
 
-    const u =
+    const name =
       username.trim();
 
-    const p =
+    const pass =
       password.trim();
 
-    if(!u || !p) return;
-
-    if(data.users[u]) {
-
-      alert(
-        "Bu kullanıcı zaten var."
-      );
-
-      return;
-    }
+    if(
+      !name ||
+      !pass ||
+      users[name]
+    ) return;
 
 
-    const next =
-      cloneData(data);
+    save({
 
-    next.users[u] = {
-      password:p,
-      role:"user"
-    };
+      ...data,
 
-    save(next);
+      users:{
+
+        ...users,
+
+        [name]:{
+          password:pass,
+          role:"user"
+        }
+
+      }
+
+    });
+
 
     setUsername("");
 
@@ -3126,18 +2708,25 @@ function Yonetici({
   }
 
 
-  function deleteUser(name) {
+  function removeUser(name){
 
-    if(!confirm(
-      `"${name}" kullanıcısı silinsin mi?`
-    )) return;
+    if(name===ADMIN_USERNAME)
+      return;
 
-    const next =
-      cloneData(data);
 
-    delete next.users[name];
+    const copy =
+      {...users};
 
-    save(next);
+    delete copy[name];
+
+
+    save({
+
+      ...data,
+
+      users:copy
+
+    });
 
   }
 
@@ -3147,410 +2736,167 @@ function Yonetici({
     <div>
 
       <form
-        onSubmit={createUser}
-        className="card"
-        style={{
-          padding:15,
-          marginBottom:13
-        }}
+        onSubmit={addUser}
+        className="
+          bg-white
+          border border-[#e2dfd7]
+          rounded-2xl
+          p-4
+          mb-3
+        "
       >
 
         <div
-          style={{
-            fontWeight:800,
-            fontSize:13,
-            marginBottom:11
-          }}
+          className="
+            font-black
+            text-sm
+            mb-3
+          "
         >
-
-          <Icon
-            name="user-plus"
-            size={16}
-          />
-
-          Yeni Kullanıcı
-
+          👤 Yeni Kullanıcı
         </div>
 
 
         <div
-          className="mobile-grid-1"
-          style={{
-            display:"grid",
-            gridTemplateColumns:
-              "1fr 1fr",
-            gap:9
-          }}
+          className="
+            grid
+            grid-cols-1
+            sm:grid-cols-2
+            gap-2
+          "
         >
 
           <input
+            placeholder="Kullanıcı adı"
             value={username}
             autoCapitalize="none"
-            placeholder="Kullanıcı adı"
-            onChange={e =>
-              setUsername(
-                e.target.value
-              )
+            onChange={
+              e=>setUsername(e.target.value)
             }
-            style={{
-              border:"1px solid #e4e1d8",
-              borderRadius:9,
-              padding:11,
-              outline:"none",
-              fontSize:12
-            }}
+            className="
+              p-3
+              rounded-xl
+              border border-[#e2dfd7]
+              bg-[#faf9f6]
+            "
           />
 
           <input
-            value={password}
             placeholder="Şifre"
-            onChange={e =>
-              setPassword(
-                e.target.value
-              )
+            value={password}
+            onChange={
+              e=>setPassword(e.target.value)
             }
-            style={{
-              border:"1px solid #e4e1d8",
-              borderRadius:9,
-              padding:11,
-              outline:"none",
-              fontSize:12
-            }}
+            className="
+              p-3
+              rounded-xl
+              border border-[#e2dfd7]
+              bg-[#faf9f6]
+            "
           />
 
         </div>
 
 
         <button
-          type="submit"
-          style={{
-            width:"100%",
-            marginTop:10,
-            padding:11,
-            border:0,
-            borderRadius:9,
-            background:"#1c1b19",
-            color:"white",
-            fontWeight:800,
-            fontSize:12
-          }}
+          className="
+            w-full
+            mt-2
+            bg-[#1c1b19]
+            text-white
+            border-0
+            rounded-xl
+            py-3
+            font-bold
+            text-xs
+          "
         >
-          Kullanıcı Oluştur
+          + Kullanıcı Oluştur
         </button>
 
       </form>
 
 
-      <div
-        style={{
-          display:"flex",
-          flexDirection:"column",
-          gap:8
-        }}
-      >
+      <div className="space-y-2">
 
-        {Object.entries(
-          data.users || {}
-        ).map(
-          ([name,u]) => (
+        {Object.entries(users).map(
+          ([name,u])=>(
 
-          <div
-            key={name}
-            className="card"
-            style={{
-              padding:13,
-              display:"flex",
-              justifyContent:"space-between",
-              alignItems:"center"
-            }}
-          >
+            <div
+              key={name}
+              className="
+                bg-white
+                border border-[#e2dfd7]
+                rounded-2xl
+                p-4
+                flex
+                justify-between
+                items-center
+              "
+            >
 
-            <div>
+              <div>
 
-              <div
-                style={{
-                  fontSize:12,
-                  fontWeight:800
-                }}
-              >
-                {name}
+                <div className="font-bold text-sm">
+                  {name}
+                </div>
+
+                <div
+                  className="
+                    text-[10px]
+                    text-[#77736b]
+                    mt-1
+                  "
+                >
+                  {u.role==="admin"
+                    ? "Yönetici"
+                    : "Personel"}
+                </div>
+
               </div>
 
-              <div
-                style={{
-                  marginTop:3,
-                  fontSize:10,
-                  color:"#6b6862"
-                }}
-              >
-                {u.role === "admin"
-                  ? "Yönetici"
-                  : "Kullanıcı"}
-              </div>
+
+              {u.role!=="admin" && (
+
+                <button
+                  onClick={()=>
+                    removeUser(name)
+                  }
+                  className="
+                    w-9 h-9
+                    rounded-xl
+                    border-0
+                    bg-[#f5f3ee]
+                  "
+                >
+                  🗑
+                </button>
+
+              )}
 
             </div>
 
-
-            {u.role !== "admin" && (
-
-              <button
-                onClick={() =>
-                  deleteUser(name)
-                }
-                style={{
-                  border:0,
-                  background:"transparent",
-                  color:"#a8a49a"
-                }}
-              >
-
-                <Icon
-                  name="trash-2"
-                  size={17}
-                />
-
-              </button>
-
-            )}
-
-          </div>
-
-        ))}
-
-      </div>
-
-    </div>
-
-  );
-
-}
-
-
-/* =========================
-   COMPONENTS
-========================= */
-
-function Field({
-  label,
-  value,
-  onChange,
-  type="text",
-  placeholder=""
-}) {
-
-  return (
-
-    <label>
-
-      <span
-        style={{
-          display:"block",
-          color:"#6b6862",
-          fontSize:10,
-          marginBottom:4
-        }}
-      >
-        {label}
-      </span>
-
-      <input
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        min={
-          type === "number"
-            ? "0"
-            : undefined
-        }
-        step={
-          type === "number"
-            ? "0.01"
-            : undefined
-        }
-        onChange={e =>
-          onChange(
-            e.target.value
           )
-        }
-        style={{
-          width:"100%",
-          border:"1px solid #e4e1d8",
-          background:"#fcfcfa",
-          borderRadius:8,
-          padding:9,
-          outline:"none",
-          fontSize:12
-        }}
-      />
-
-    </label>
-
-  );
-
-}
-
-
-function DateSelector({
-  value,
-  onChange
-}) {
-
-  return (
-
-    <div
-      className="card"
-      style={{
-        padding:11,
-        marginBottom:13,
-        display:"flex",
-        alignItems:"center",
-        gap:8
-      }}
-    >
-
-      <Icon
-        name="calendar"
-        size={16}
-      />
-
-      <input
-        type="date"
-        value={value}
-        onChange={e =>
-          onChange(
-            e.target.value
-          )
-        }
-        style={{
-          border:0,
-          outline:0,
-          background:"transparent",
-          fontSize:12,
-          flex:1,
-          minWidth:0
-        }}
-      />
-
-      <span
-        className="desktop-only"
-        style={{
-          color:"#aaa69d",
-          fontSize:11
-        }}
-      >
-        {dateLabel(value)}
-      </span>
-
-    </div>
-
-  );
-
-}
-
-
-function Stat({
-  title,
-  value,
-  icon
-}) {
-
-  return (
-
-    <div
-      className="card"
-      style={{
-        padding:14
-      }}
-    >
-
-      <div
-        style={{
-          display:"flex",
-          alignItems:"center",
-          gap:6,
-          color:"#6b6862",
-          fontSize:10,
-          marginBottom:7
-        }}
-      >
-
-        <Icon
-          name={icon}
-          size={14}
-        />
-
-        {title}
-
-      </div>
-
-      <div
-        className="stat-number"
-        style={{
-          fontWeight:900,
-          fontSize:17
-        }}
-      >
-        {value}
-      </div>
-
-    </div>
-
-  );
-
-}
-
-
-/* =========================
-   START
-========================= */
-
-try {
-
-  ReactDOM.createRoot(
-    document.getElementById("root")
-  ).render(
-    <App />
-  );
-
-} catch(error) {
-
-  console.error(error);
-
-  document.getElementById(
-    "root"
-  ).innerHTML = `
-
-    <div style="
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:#1c1b19;
-      color:white;
-      padding:30px;
-      text-align:center;
-      font-family:Arial;
-    ">
-
-      <div>
-
-        <h2>Mano Pizza</h2>
-
-        <p style="color:#aaa">
-          Uygulama başlatılamadı.
-        </p>
-
-        <small style="color:#b4432e">
-          ${error.message}
-        </small>
+        )}
 
       </div>
 
     </div>
 
-  `;
+  );
 
 }
+
+
+/* =========================================================
+   BAŞLAT
+========================================================= */
+
+ReactDOM.createRoot(
+  document.getElementById("root")
+).render(
+  <App/>
+);
 
 </script>
 
