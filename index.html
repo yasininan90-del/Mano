@@ -3,635 +3,3316 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mano Pizza</title>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <title>Mano Pizza | İşletme Yönetim Paneli</title>
+
+  <!-- React -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+  <!-- Babel -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Tailwind -->
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <!-- Lucide -->
   <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body,
+    #root {
+      margin: 0;
+      min-height: 100%;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: #f7f6f2;
+    }
+
+    input,
+    select,
+    button {
+      font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1efe9;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #c8c4bb;
+      border-radius: 20px;
+    }
+
+    .fade-in {
+      animation: fadeIn .2s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
 </head>
-<body class="bg-[#F7F6F2] text-[#1C1B19] m-0">
-  <div id="root"></div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    window.firebaseModules = { initializeApp, getFirestore, doc, setDoc, onSnapshot };
-  </script>
+<body>
 
-  <script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
-    
-    const firebaseConfig = {
-      apiKey: "AIzaSyBLXwi0r4QrMlpA7PxYEFwy5ADr_Q9nPqk",
-      authDomain: "mano-pizza.firebaseapp.com",
-      projectId: "mano-pizza",
-      storageBucket: "mano-pizza.firebasestorage.app",
-      messagingSenderId: "558530166779",
-      appId: "1:558530166779:web:fe990140b59ad5dd1e155e"
-    };
+<div id="root"></div>
 
-    const app = window.firebaseModules.initializeApp(firebaseConfig);
-    const db = window.firebaseModules.getFirestore(app);
-    const DOC_REF = window.firebaseModules.doc(db, "mano_pizza", "veri");
-    const { setDoc, onSnapshot } = window.firebaseModules;
+<script type="module">
+  import { initializeApp }
+    from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 
-    const DEFAULT_STORES = ["Metro Market", "File Market"];
-    const ADMIN_USERNAME = "mathrew";
-    const ADMIN_PASSWORD = "01102022";
-    const SALE_PRODUCTS = ["Margarita Pizza", ...Array.from({ length: 20 }, (_, i) => `Pizza No:${i + 1}`)];
+  import {
+    getFirestore,
+    doc,
+    setDoc,
+    onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    function formatTL(n) {
-      return new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 2 }).format(n || 0);
+  window.firebaseModules = {
+    initializeApp,
+    getFirestore,
+    doc,
+    setDoc,
+    onSnapshot
+  };
+</script>
+
+<script type="text/babel">
+
+const {
+  useState,
+  useEffect,
+  useMemo
+} = React;
+
+
+/* =========================================================
+   FIREBASE
+========================================================= */
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBLXwi0r4QrMlpA7PxYEFwy5ADr_Q9nPqk",
+  authDomain: "mano-pizza.firebaseapp.com",
+  projectId: "mano-pizza",
+  storageBucket: "mano-pizza.firebasestorage.app",
+  messagingSenderId: "558530166779",
+  appId: "1:558530166779:web:fe990140b59ad5dd1e155e"
+};
+
+const firebaseApp =
+  window.firebaseModules.initializeApp(firebaseConfig);
+
+const db =
+  window.firebaseModules.getFirestore(firebaseApp);
+
+const DATA_REF =
+  window.firebaseModules.doc(
+    db,
+    "mano_pizza",
+    "veri"
+  );
+
+const {
+  setDoc,
+  onSnapshot
+} = window.firebaseModules;
+
+
+/* =========================================================
+   SABİTLER
+========================================================= */
+
+const ADMIN_USERNAME = "mathrew";
+const ADMIN_PASSWORD = "01102022";
+
+const DEFAULT_STORES = [
+  "Metro Market",
+  "File Market"
+];
+
+const PRODUCTS = [
+  "Margarita Pizza",
+  ...Array.from(
+    { length: 20 },
+    (_, i) => `Pizza No:${i + 1}`
+  )
+];
+
+const DEFAULT_DATA = {
+  stores: DEFAULT_STORES,
+
+  purchaseEntries: {},
+  purchaseLocks: {},
+
+  salesEntries: {},
+  salesLocks: {},
+
+  costs: {},
+
+  expenses: {},
+
+  users: {
+    [ADMIN_USERNAME]: {
+      password: ADMIN_PASSWORD,
+      role: "admin"
     }
-    function todayISO() { return new Date().toISOString().slice(0, 10); }
-    function thisMonthISO() { return new Date().toISOString().slice(0, 7); }
-    function formatDateLabel(iso) {
-      return new Date(iso + "T00:00:00").toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric", weekday: "long" });
+  }
+};
+
+
+/* =========================================================
+   YARDIMCI FONKSİYONLAR
+========================================================= */
+
+function todayISO() {
+  return new Date()
+    .toISOString()
+    .slice(0, 10);
+}
+
+function monthISO() {
+  return new Date()
+    .toISOString()
+    .slice(0, 7);
+}
+
+function formatTL(value) {
+
+  return new Intl.NumberFormat(
+    "tr-TR",
+    {
+      style: "currency",
+      currency: "TRY",
+      maximumFractionDigits: 2
     }
-    function formatMonthLabel(iso) {
-      return new Date(iso + "-01T00:00:00").toLocaleDateString("tr-TR", { month: "long", year: "numeric" });
+  ).format(Number(value) || 0);
+
+}
+
+function formatNumber(value) {
+
+  return new Intl.NumberFormat(
+    "tr-TR",
+    {
+      maximumFractionDigits: 2
     }
+  ).format(Number(value) || 0);
 
-    const EMPTY_DATA = {
-      stores: DEFAULT_STORES,
-      purchaseEntries: {},
-      purchaseLocks: {},
-      salesEntries: {},
-      salesLocks: {},
-      costs: {},
-      lastActiveStore: null,
-      users: { [ADMIN_USERNAME]: { password: ADMIN_PASSWORD, role: "admin" } },
-    };
+}
 
-    function ManoPizza() {
-      const [data, setData] = useState(EMPTY_DATA);
-      const [loading, setLoading] = useState(true);
-      const [error, setError] = useState("");
-      const [currentUser, setCurrentUser] = useState(null);
-      const [date, setDate] = useState(todayISO());
-      const [tab, setTab] = useState("alis");
+function formatDate(iso) {
 
-      useEffect(() => {
-        const unsubscribe = onSnapshot(DOC_REF, (docSnap) => {
-          if (docSnap.exists()) {
-            const parsed = docSnap.data();
-            const merged = parsed && parsed.stores ? { ...EMPTY_DATA, ...parsed } : EMPTY_DATA;
-            merged.users = { ...EMPTY_DATA.users, ...(parsed?.users || {}) };
-            setData(merged);
-          } else {
-            setDoc(DOC_REF, EMPTY_DATA);
-            setData(EMPTY_DATA);
-          }
-          setLoading(false);
-        }, (err) => {
-          console.error(err);
-          setError("Veriler yüklenirken hata oluştu.");
-          setLoading(false);
-        });
-        return () => unsubscribe();
-      }, []);
+  if (!iso) return "";
 
-      async function persist(next) {
-        setData(next);
-        try {
-          await setDoc(DOC_REF, next);
-          setError("");
-        } catch (err) {
-          setError("Kaydedilemedi, bağlantını kontrol et.");
-        }
-      }
+  return new Date(
+    iso + "T00:00:00"
+  ).toLocaleDateString(
+    "tr-TR",
+    {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    }
+  );
+}
 
-      if (loading) {
-        return (
-          <div className="bg-[#1C1B19] min-h-screen flex items-center justify-center">
-            <p className="text-[#9C9890] text-sm">Yükleniyor…</p>
-          </div>
-        );
-      }
+function formatMonth(iso) {
 
-      if (!currentUser) {
-        return <LoginScreen users={data.users} onSuccess={setCurrentUser} />;
-      }
+  if (!iso) return "";
 
-      const isAdmin = currentUser.role === "admin";
-      const tabs = isAdmin
-        ? [
-            { id: "alis", label: "Alış", icon: "shopping-bag" },
-            { id: "satis", label: "Satış", icon: "trending-up" },
-            { id: "maliyet", label: "Maliyetler", icon: "percent" },
-            { id: "karzarar", label: "Kâr / Zarar", icon: "trending-down" },
-            { id: "yonetici", label: "Yönetici", icon: "shield-check" },
-          ]
-        : [
-            { id: "alis", label: "Alış", icon: "shopping-bag" },
-            { id: "satis", label: "Satış", icon: "trending-up" },
-          ];
+  return new Date(
+    iso + "-01T00:00:00"
+  ).toLocaleDateString(
+    "tr-TR",
+    {
+      month: "long",
+      year: "numeric"
+    }
+  );
+}
 
-      return (
-        <div className="bg-[#F7F6F2] min-h-screen text-[#1C1B19] pb-16">
-          <div className="max-w-[780px] mx-auto p-4 sm:p-6">
-            <header className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-lg bg-[#B4432E] flex items-center justify-center text-[#F7F6F2] shrink-0">
-                  <i data-lucide="pizza" className="w-5 h-5"></i>
-                </div>
-                <div>
-                  <h1 className="text-lg font-bold m-0 tracking-tight">Mano Pizza</h1>
-                  <p className="text-xs text-[#6B6862] m-0">{currentUser.username} · {isAdmin ? "Yönetici" : "Kullanıcı"}</p>
-                </div>
-              </div>
-              <button onClick={() => setCurrentUser(null)} className="flex items-center gap-1.5 border border-[#E4E1D8] bg-white text-[#6B6862] rounded-lg px-2.5 py-1.5 text-xs cursor-pointer">
-                <i data-lucide="log-out" className="w-3.5 h-3.5"></i> Çıkış
-              </button>
-            </header>
+function mergeData(remote) {
 
-            {(tab === "alis" || tab === "satis") && (
-              <div className="flex items-center gap-2.5 bg-white border border-[#E4E1D8] rounded-xl p-2.5 mb-3.5">
-                <i data-lucide="calendar" className="w-4 h-4 text-[#6B6862] shrink-0"></i>
-                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="border-none bg-transparent text-sm text-[#1C1B19] flex-1 outline-none" />
-                <span className="text-xs text-[#A8A49A] hidden sm:inline">{formatDateLabel(date)}</span>
-              </div>
-            )}
+  return {
+    ...DEFAULT_DATA,
+    ...(remote || {}),
 
-            <div className="flex flex-wrap gap-1.5 mb-4">
-              {tabs.map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => setTab(t.id)}
-                  className={`flex-1 min-w-[28%] flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl border text-xs font-semibold cursor-pointer transition-all ${
-                    tab === t.id ? "bg-[#1C1B19] text-[#F7F6F2] border-[#1C1B19]" : "bg-white text-[#6B6862] border-[#E4E1D8]"
-                  }`}
-                >
-                  <i data-lucide={t.icon} className="w-3.5 h-3.5"></i>
-                  {t.label}
-                </button>
-              ))}
-            </div>
+    stores:
+      remote?.stores?.length
+        ? remote.stores
+        : DEFAULT_STORES,
 
-            {tab === "alis" && <AlisTab data={data} date={date} persist={persist} error={error} isAdmin={isAdmin} />}
-            {tab === "satis" && <SatisTab data={data} date={date} persist={persist} error={error} isAdmin={isAdmin} />}
-            {tab === "maliyet" && isAdmin && <MaliyetlerTab data={data} persist={persist} error={error} />}
-            {tab === "karzarar" && isAdmin && <KarZararTab data={data} />}
-            {tab === "yonetici" && isAdmin && <YoneticiTab data={data} persist={persist} error={error} />}
-          </div>
-        </div>
-      );
+    users: {
+      ...DEFAULT_DATA.users,
+      ...(remote?.users || {})
+    },
+
+    purchaseEntries:
+      remote?.purchaseEntries || {},
+
+    purchaseLocks:
+      remote?.purchaseLocks || {},
+
+    salesEntries:
+      remote?.salesEntries || {},
+
+    salesLocks:
+      remote?.salesLocks || {},
+
+    costs:
+      remote?.costs || {},
+
+    expenses:
+      remote?.expenses || {}
+  };
+}
+
+
+/* =========================================================
+   ICON
+========================================================= */
+
+function Icon({
+  name,
+  size = 18,
+  className = ""
+}) {
+
+  useEffect(() => {
+
+    if (window.lucide) {
+      window.lucide.createIcons();
     }
 
-    function LoginScreen({ users, onSuccess }) {
-      const [stage, setStage] = useState("splash");
-      const [username, setUsername] = useState("");
-      const [password, setPassword] = useState("");
-      const [err, setErr] = useState("");
+  });
 
-      function submit(e) {
-        e.preventDefault();
-        const u = users[username.trim()];
-        if (u && u.password === password) {
-          onSuccess({ username: username.trim(), role: u.role });
-        } else {
-          setErr("Kullanıcı adı veya şifre hatalı.");
-          setPassword("");
-        }
+  return (
+    <i
+      data-lucide={name}
+      className={className}
+      style={{
+        width: size,
+        height: size
+      }}
+    />
+  );
+}
+
+
+/* =========================================================
+   STAT CARD
+========================================================= */
+
+function StatCard({
+  title,
+  value,
+  subtitle,
+  icon,
+  tone = "dark"
+}) {
+
+  const tones = {
+
+    dark:
+      "bg-[#1C1B19] text-white",
+
+    green:
+      "bg-[#EAF3EE] text-[#185C42]",
+
+    red:
+      "bg-[#FBEDEA] text-[#9E3928]",
+
+    yellow:
+      "bg-[#FFF6DF] text-[#806923]"
+  };
+
+  return (
+
+    <div
+      className={
+        "rounded-2xl p-4 " +
+        tones[tone]
       }
+    >
 
-      return (
-        <div className="bg-[#1C1B19] min-h-screen flex items-center justify-center p-6 text-center">
-          <div className="w-full max-w-[320px]">
-            <div className="w-16 h-16 rounded-2xl bg-[#B4432E] flex items-center justify-center mx-auto mb-4 text-[#F7F6F2]">
-              <i data-lucide="pizza" className="w-8 h-8"></i>
-            </div>
-            <h1 className="text-[#F7F6F2] text-2xl font-bold mb-1">Mano Pizza</h1>
-            <p className="text-[#9C9890] text-sm mb-8">Gelir Gider</p>
+      <div className="flex justify-between gap-3">
 
-            {stage === "splash" ? (
-              <button onClick={() => setStage("login")} className="w-full py-3.5 rounded-xl border-none bg-[#F7F6F2] text-[#1C1B19] font-bold text-sm cursor-pointer">
-                Giriş Yap
-              </button>
-            ) : (
-              <form onSubmit={submit} className="text-left">
-                <span className="text-[11px] text-[#9C9890] block mb-1">Kullanıcı Adı</span>
-                <input autoFocus type="text" autoCapitalize="none" value={username} onChange={(e) => setUsername(e.target.value)} className="w-full p-3 rounded-xl border border-[#3A3934] bg-[#2A2926] text-[#F7F6F2] text-sm outline-none mb-3" />
-                <span className="text-[11px] text-[#9C9890] block mb-1">Şifre</span>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-3 rounded-xl border border-[#3A3934] bg-[#2A2926] text-[#F7F6F2] text-sm outline-none" />
-                {err && <p className="text-[#E08A75] text-xs mt-2">{err}</p>}
-                <button type="submit" className="w-full py-3.5 rounded-xl border-none bg-[#F7F6F2] text-[#1C1B19] font-bold text-sm cursor-pointer mt-5">
-                  Giriş Yap
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      );
-    }
-
-    function AlisTab({ data, date, persist, error, isAdmin }) {
-      const [activeStore, setActiveStore] = useState(data.lastActiveStore || null);
-      const [newStoreName, setNewStoreName] = useState("");
-      const [showAddStore, setShowAddStore] = useState(false);
-      const [itemForm, setItemForm] = useState({ product: "", qty: "1", unitPrice: "" });
-      const [confirmChecked, setConfirmChecked] = useState(false);
-
-      const dayEntries = data.purchaseEntries[date] || {};
-      const dayLocks = data.purchaseLocks[date] || {};
-      const storeTotal = (st) => (dayEntries[st] || []).reduce((s, it) => s + it.qty * it.unitPrice, 0);
-      const dayTotal = useMemo(() => data.stores.reduce((s, st) => s + storeTotal(st), 0), [data, date]);
-
-      function openStore(st) {
-        setActiveStore(st);
-        setConfirmChecked(false);
-        persist({ ...data, lastActiveStore: st });
-      }
-
-      function addStore() {
-        const name = newStoreName.trim();
-        if (!name || data.stores.includes(name)) return;
-        persist({ ...data, stores: [...data.stores, name] });
-        setNewStoreName("");
-        setShowAddStore(false);
-      }
-
-      function removeStore(name) {
-        const { [name]: _r, ...restToday } = dayEntries;
-        const { [name]: _l, ...restLocks } = dayLocks;
-        persist({
-          ...data,
-          stores: data.stores.filter((s) => s !== name),
-          purchaseEntries: { ...data.purchaseEntries, [date]: restToday },
-          purchaseLocks: { ...data.purchaseLocks, [date]: restLocks },
-          lastActiveStore: data.lastActiveStore === name ? null : data.lastActiveStore,
-        });
-        if (activeStore === name) setActiveStore(null);
-      }
-
-      function addItem(e) {
-        e.preventDefault();
-        const qty = parseFloat(itemForm.qty);
-        const unitPrice = parseFloat(itemForm.unitPrice);
-        const product = itemForm.product.trim();
-        if (!product || !qty || qty <= 0 || isNaN(unitPrice) || unitPrice < 0) return;
-        const item = { id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, product, qty, unitPrice };
-        const storeItems = dayEntries[activeStore] || [];
-        const nextDay = { ...dayEntries, [activeStore]: [...storeItems, item] };
-        persist({ ...data, purchaseEntries: { ...data.purchaseEntries, [date]: nextDay } });
-        setItemForm({ product: "", qty: "1", unitPrice: "" });
-      }
-
-      function removeItem(id) {
-        const storeItems = (dayEntries[activeStore] || []).filter((it) => it.id !== id);
-        const nextDay = { ...dayEntries, [activeStore]: storeItems };
-        persist({ ...data, purchaseEntries: { ...data.purchaseEntries, [date]: nextDay } });
-      }
-
-      function setLock(st, locked) {
-        const nextLocks = { ...dayLocks, [st]: locked };
-        persist({ ...data, purchaseLocks: { ...data.purchaseLocks, [date]: nextLocks } });
-      }
-
-      if (activeStore && data.stores.includes(activeStore)) {
-        const locked = !!dayLocks[activeStore];
-        const storeItems = dayEntries[activeStore] || [];
-        return (
-          <div>
-            <button onClick={() => setActiveStore(null)} className="flex items-center gap-1 border-none bg-transparent text-[#6B6862] text-xs cursor-pointer p-0 mb-3">
-              <i data-lucide="chevron-left" className="w-4 h-4"></i> Mağazalara dön
-            </button>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-bold m-0 flex items-center gap-1.5">
-                {activeStore} {locked && <i data-lucide="lock" className="w-3.5 h-3.5 text-[#A8A49A]"></i>}
-              </h2>
-              {isAdmin && (
-                <div className="flex gap-2">
-                  {locked && (
-                    <button onClick={() => setLock(activeStore, false)} className="flex items-center gap-1 border-none bg-transparent text-[#1C6B4E] font-semibold text-xs cursor-pointer">
-                      <i data-lucide="unlock" className="w-3.5 h-3.5"></i> Kilidi Kaldır
-                    </button>
-                  )}
-                  <button onClick={() => removeStore(activeStore)} className="border-none bg-transparent text-[#A8A49A] text-xs cursor-pointer">Sil</button>
-                </div>
-              )}
-            </div>
-
-            {locked && !isAdmin ? (
-              <div className="bg-[#F1EFE9] border border-[#E4E1D8] rounded-xl p-3 mb-3 flex items-center gap-2">
-                <i data-lucide="lock" className="w-4 h-4 text-[#6B6862]"></i>
-                <span className="text-xs text-[#6B6862]">Bu kayıt onaylandı, değiştirilemez.</span>
-              </div>
-            ) : (
-              <form onSubmit={addItem} className="bg-white border border-[#E4E1D8] rounded-xl p-3.5 mb-4">
-                <div className="grid grid-cols-[2fr_1fr_1fr] gap-2 mb-2.5">
-                  <label>
-                    <span className="text-[11px] text-[#6B6862] block mb-1">Ürün</span>
-                    <input type="text" placeholder="Örn. Un" value={itemForm.product} onChange={(e) => setItemForm((f) => ({ ...f, product: e.target.value }))} className="w-full p-2 rounded-lg border border-[#E4E1D8] text-xs bg-[#FCFCFA] outline-none" />
-                  </label>
-                  <label>
-                    <span className="text-[11px] text-[#6B6862] block mb-1">Miktar</span>
-                    <input type="number" min="0" step="0.01" value={itemForm.qty} onChange={(e) => setItemForm((f) => ({ ...f, qty: e.target.value }))} className="w-full p-2 rounded-lg border border-[#E4E1D8] text-xs bg-[#FCFCFA] outline-none" />
-                  </label>
-                  <label>
-                    <span className="text-[11px] text-[#6B6862] block mb-1">Birim Fiyat</span>
-                    <input type="number" min="0" step="0.01" placeholder="0" value={itemForm.unitPrice} onChange={(e) => setItemForm((f) => ({ ...f, unitPrice: e.target.value }))} className="w-full p-2 rounded-lg border border-[#E4E1D8] text-xs bg-[#FCFCFA] outline-none" />
-                  </label>
-                </div>
-                <button type="submit" className="w-full py-2 rounded-lg border-none bg-[#1C1B19] text-[#F7F6F2] font-semibold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
-                  <i data-lucide="plus" className="w-4 h-4"></i> Ürün Ekle
-                </button>
-              </form>
-            )}
-
-            <div className="flex flex-col gap-2 mb-3">
-              {storeItems.length === 0 && <p className="text-[#6B6862] text-xs text-center py-4">Henüz ürün girilmedi.</p>}
-              {storeItems.map((it) => (
-                <div key={it.id} className="flex items-center justify-between bg-white border border-[#E4E1D8] rounded-xl p-3">
-                  <div>
-                    <div className="text-xs font-semibold">{it.product}</div>
-                    <div className="text-[11px] text-[#6B6862]">{it.qty} × {formatTL(it.unitPrice)}</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold">{formatTL(it.qty * it.unitPrice)}</span>
-                    {!locked && <button onClick={() => removeItem(it.id)} className="border-none bg-transparent text-[#A8A49A] cursor-pointer p-1"><i data-lucide="trash-2" className="w-4 h-4"></i></button>}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="bg-[#1C1B19] rounded-xl p-3 flex justify-between items-center text-[#F7F6F2] mb-4">
-              <span className="text-xs text-[#C7C4BB]">{activeStore} Toplamı</span>
-              <span className="text-sm font-bold">{formatTL(storeTotal(activeStore))}</span>
-            </div>
-
-            {!locked && !isAdmin && storeItems.length > 0 && (
-              <div className="bg-[#FFF9EC] border border-[#E9DDB8] rounded-xl p-3.5">
-                <label className="flex items-start gap-2 text-xs text-[#7A6A2E] cursor-pointer">
-                  <input type="checkbox" checked={confirmChecked} onChange={(e) => setConfirmChecked(e.target.checked)} className="mt-0.5" />
-                  Bu kayıt onaylandıktan sonra değiştirilemeyecek. Onaylıyor musunuz?
-                </label>
-                <button
-                  disabled={!confirmChecked}
-                  onClick={() => setLock(activeStore, true)}
-                  className={`mt-2.5 w-full py-2.5 rounded-lg border-none text-[#F7F6F2] font-bold text-xs flex items-center justify-center gap-1.5 ${confirmChecked ? "bg-[#1C1B19] cursor-pointer" : "bg-[#D8D4C8] cursor-not-allowed"}`}
-                >
-                  <i data-lucide="check-circle-2" className="w-4 h-4"></i> Kaydet ve Onayla
-                </button>
-              </div>
-            )}
-          </div>
-        );
-      }
-
-      return (
         <div>
-          <div className="bg-[#1C1B19] rounded-xl p-3.5 mb-4 flex justify-between items-center text-[#F7F6F2]">
-            <span className="text-xs text-[#C7C4BB]">Günün Alış Toplamı</span>
-            <span className="text-base font-bold">{formatTL(dayTotal)}</span>
+
+          <div className="text-xs opacity-70">
+            {title}
           </div>
 
-          <div className="flex flex-col gap-2 mb-3">
-            {data.stores.map((store) => {
-              const items = dayEntries[store] || [];
-              const total = storeTotal(store);
-              const locked = !!dayLocks[store];
-              return (
-                <button key={store} onClick={() => openStore(store)} className="flex items-center justify-between bg-white border border-[#E4E1D8] rounded-xl p-3.5 cursor-pointer text-left">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#EAF3EE] flex items-center justify-center text-[#1C6B4E]">
-                      <i data-lucide="store" className="w-4 h-4"></i>
-                    </div>
-                    <div>
-                      <div className="text-xs font-semibold flex items-center gap-1.5">{store} {locked && <i data-lucide="lock" className="w-3 h-3 text-[#A8A49A]"></i>}</div>
-                      <div className="text-[11px] text-[#6B6862]">{items.length === 0 ? "Ürün yok" : `${items.length} ürün`}</div>
-                    </div>
-                  </div>
-                  <div className="text-xs font-bold">{formatTL(total)}</div>
-                </button>
-              );
-            })}
+          <div className="text-xl font-black mt-1">
+            {value}
           </div>
 
-          {isAdmin && (
-            showAddStore ? (
-              <div className="flex gap-2">
-                <input autoFocus type="text" placeholder="Mağaza adı" value={newStoreName} onChange={(e) => setNewStoreName(e.target.value)} className="flex-1 p-2.5 rounded-xl border border-[#E4E1D8] text-xs bg-white outline-none" />
-                <button onClick={addStore} className="px-4 rounded-xl border-none bg-[#1C1B19] text-[#F7F6F2] font-semibold text-xs cursor-pointer">Ekle</button>
-                <button onClick={() => setShowAddStore(false)} className="w-10 rounded-xl border border-[#E4E1D8] bg-white flex items-center justify-center cursor-pointer"><i data-lucide="x" className="w-4 h-4"></i></button>
-              </div>
-            ) : (
-              <button onClick={() => setShowAddStore(true)} className="w-full py-2.5 rounded-xl border border-[#E4E1D8] bg-white text-[#1C1B19] font-semibold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
-                <i data-lucide="plus" className="w-4 h-4"></i> Yeni Mağaza Ekle
-              </button>
-            )
+          {subtitle && (
+
+            <div className="text-[10px] opacity-60 mt-1">
+              {subtitle}
+            </div>
+
           )}
+
         </div>
-      );
-    }
 
-    function SatisTab({ data, date, persist, error, isAdmin }) {
-      const [confirmChecked, setConfirmChecked] = useState(false);
-      const dayRow = data.salesEntries[date] || {};
-      const locked = !!data.salesLocks[date];
-      const readOnly = locked && !isAdmin;
+        <Icon
+          name={icon}
+          size={20}
+          className="opacity-70"
+        />
 
-      function updateRow(product, field, value) {
-        const current = dayRow[product] || { qty: "", unitPrice: "" };
-        const nextRow = { ...current, [field]: value };
-        persist({ ...data, salesEntries: { ...data.salesEntries, [date]: { ...dayRow, [product]: nextRow } } });
-      }
+      </div>
 
-      function setLock(value) {
-        persist({ ...data, salesLocks: { ...data.salesLocks, [date]: value } });
-      }
+    </div>
 
-      const rows = SALE_PRODUCTS.map((product) => {
-        const r = dayRow[product] || { qty: "", unitPrice: "" };
-        const qty = parseFloat(r.qty) || 0;
-        const unitPrice = parseFloat(r.unitPrice) || 0;
-        return { product, qty: r.qty ?? "", unitPrice: r.unitPrice ?? "", total: qty * unitPrice };
+  );
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+function Login({
+  users,
+  onLogin
+}) {
+
+  const [username, setUsername] =
+    useState("");
+
+  const [password, setPassword] =
+    useState("");
+
+  const [error, setError] =
+    useState("");
+
+  function submit(e) {
+
+    e.preventDefault();
+
+    const clean =
+      username.trim();
+
+    const user =
+      users[clean];
+
+    if (
+      user &&
+      user.password === password
+    ) {
+
+      onLogin({
+        username: clean,
+        role: user.role
       });
 
-      const grandTotal = rows.reduce((s, r) => s + r.total, 0);
-      const hasAnyEntry = rows.some((r) => (parseFloat(r.qty) || 0) > 0);
+      return;
+    }
 
-      return (
-        <div>
-          <div className="bg-[#1C1B19] rounded-xl p-3.5 mb-3 flex justify-between items-center text-[#F7F6F2]">
-            <span className="text-xs text-[#C7C4BB]">Günün Satış Toplamı</span>
-            <span className="text-base font-bold">{formatTL(grandTotal)}</span>
+    setError(
+      "Kullanıcı adı veya şifre hatalı."
+    );
+
+    setPassword("");
+  }
+
+  return (
+
+    <div className="min-h-screen bg-[#1C1B19] flex items-center justify-center p-5">
+
+      <div className="w-full max-w-[390px]">
+
+        <div className="text-center mb-8">
+
+          <div className="w-20 h-20 mx-auto rounded-3xl bg-[#B4432E] flex items-center justify-center text-white mb-5 shadow-xl">
+
+            <Icon
+              name="pizza"
+              size={38}
+            />
+
           </div>
 
-          {isAdmin && locked && (
-            <button onClick={() => setLock(false)} className="flex items-center gap-1 border-none bg-transparent text-[#1C6B4E] font-semibold text-xs cursor-pointer mb-2.5">
-              <i data-lucide="unlock" className="w-3.5 h-3.5"></i> Kilidi Kaldır
+          <h1 className="text-3xl font-black text-white">
+            Mano Pizza
+          </h1>
+
+          <p className="text-[#9C9890] text-sm mt-1">
+            İşletme Yönetim Paneli
+          </p>
+
+        </div>
+
+        <form
+          onSubmit={submit}
+          className="bg-[#292824] border border-[#3C3A35] rounded-3xl p-5 shadow-2xl"
+        >
+
+          <label className="text-xs text-[#AAA69D]">
+            Kullanıcı Adı
+          </label>
+
+          <input
+            autoFocus
+            autoCapitalize="none"
+            value={username}
+            onChange={e =>
+              setUsername(e.target.value)
+            }
+            className="mt-1 mb-4 w-full p-3.5 rounded-xl bg-[#1F1E1B] border border-[#45433D] text-white text-sm outline-none focus:border-[#B4432E]"
+          />
+
+          <label className="text-xs text-[#AAA69D]">
+            Şifre
+          </label>
+
+          <input
+            type="password"
+            value={password}
+            onChange={e =>
+              setPassword(e.target.value)
+            }
+            className="mt-1 w-full p-3.5 rounded-xl bg-[#1F1E1B] border border-[#45433D] text-white text-sm outline-none focus:border-[#B4432E]"
+          />
+
+          {error && (
+
+            <div className="mt-3 p-3 rounded-xl bg-[#432A25] text-[#E69A88] text-xs">
+              {error}
+            </div>
+
+          )}
+
+          <button
+            className="mt-5 w-full py-3.5 rounded-xl bg-[#F7F6F2] text-[#1C1B19] font-black text-sm hover:opacity-90"
+          >
+            Giriş Yap
+          </button>
+
+        </form>
+
+        <div className="text-center text-[10px] text-[#68645D] mt-5">
+          Mano Pizza Management System
+        </div>
+
+      </div>
+
+    </div>
+
+  );
+}
+
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+function Dashboard({
+  data,
+  month
+}) {
+
+  const stats = useMemo(() => {
+
+    let sales = 0;
+    let purchases = 0;
+    let expenses = 0;
+
+    const products = {};
+
+    const stores = {};
+
+    Object.entries(
+      data.salesEntries || {}
+    ).forEach(
+      ([date, rows]) => {
+
+        if (!date.startsWith(month))
+          return;
+
+        Object.entries(rows || {})
+          .forEach(
+            ([product, row]) => {
+
+              const qty =
+                Number(row.qty) || 0;
+
+              const price =
+                Number(row.unitPrice) || 0;
+
+              const total =
+                qty * price;
+
+              sales += total;
+
+              products[product] =
+                (products[product] || 0)
+                + total;
+
+            }
+          );
+
+      }
+    );
+
+    Object.entries(
+      data.purchaseEntries || {}
+    ).forEach(
+      ([date, storeRows]) => {
+
+        if (!date.startsWith(month))
+          return;
+
+        Object.entries(
+          storeRows || {}
+        ).forEach(
+          ([store, items]) => {
+
+            let total = 0;
+
+            (items || []).forEach(
+              item => {
+
+                total +=
+                  (Number(item.qty) || 0)
+                  *
+                  (Number(item.unitPrice) || 0);
+
+              }
+            );
+
+            purchases += total;
+
+            stores[store] =
+              (stores[store] || 0)
+              + total;
+
+          }
+        );
+
+      }
+    );
+
+    Object.entries(
+      data.expenses || {}
+    ).forEach(
+      ([date, items]) => {
+
+        if (!date.startsWith(month))
+          return;
+
+        (items || []).forEach(
+          item => {
+
+            expenses +=
+              Number(item.amount) || 0;
+
+          }
+        );
+
+      }
+    );
+
+    const ranking =
+      Object.entries(products)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6);
+
+    return {
+
+      sales,
+      purchases,
+      expenses,
+
+      gross:
+        sales - purchases,
+
+      net:
+        sales - purchases - expenses,
+
+      ranking,
+
+      stores
+
+    };
+
+  }, [data, month]);
+
+
+  const margin =
+    stats.sales
+      ? (
+          stats.net /
+          stats.sales
+        ) * 100
+      : 0;
+
+
+  return (
+
+    <div className="space-y-4 fade-in">
+
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+
+        <StatCard
+          title="Aylık Ciro"
+          value={formatTL(stats.sales)}
+          subtitle={formatMonth(month)}
+          icon="trending-up"
+          tone="green"
+        />
+
+        <StatCard
+          title="Toplam Alış"
+          value={formatTL(stats.purchases)}
+          icon="shopping-bag"
+          tone="red"
+        />
+
+        <StatCard
+          title="İşletme Giderleri"
+          value={formatTL(stats.expenses)}
+          icon="receipt"
+          tone="yellow"
+        />
+
+        <StatCard
+          title="Net Kâr"
+          value={formatTL(stats.net)}
+          subtitle={`Marj %${margin.toFixed(1)}`}
+          icon="circle-dollar-sign"
+          tone="dark"
+        />
+
+      </div>
+
+
+      <div className="grid lg:grid-cols-2 gap-4">
+
+        <section className="bg-white border border-[#E4E1D8] rounded-2xl p-4">
+
+          <div className="flex justify-between items-center mb-5">
+
+            <div>
+              <h3 className="font-black text-sm">
+                En Çok Ciro Getirenler
+              </h3>
+
+              <p className="text-[11px] text-[#77736B]">
+                {formatMonth(month)}
+              </p>
+            </div>
+
+            <Icon
+              name="bar-chart-3"
+              size={18}
+              className="text-[#77736B]"
+            />
+
+          </div>
+
+          {stats.ranking.length === 0 && (
+
+            <div className="py-8 text-center text-xs text-[#77736B]">
+              Bu ay satış verisi bulunmuyor.
+            </div>
+
+          )}
+
+          <div className="space-y-4">
+
+            {stats.ranking.map(
+              ([name, value], index) => {
+
+                const max =
+                  stats.ranking[0]?.[1] || 1;
+
+                const width =
+                  Math.max(
+                    8,
+                    (value / max) * 100
+                  );
+
+                return (
+
+                  <div key={name}>
+
+                    <div className="flex justify-between text-xs mb-1.5">
+
+                      <span className="font-semibold">
+                        {index + 1}. {name}
+                      </span>
+
+                      <span className="font-bold">
+                        {formatTL(value)}
+                      </span>
+
+                    </div>
+
+                    <div className="h-2 bg-[#F0EEE8] rounded-full overflow-hidden">
+
+                      <div
+                        className="h-full bg-[#B4432E] rounded-full"
+                        style={{
+                          width: `${width}%`
+                        }}
+                      />
+
+                    </div>
+
+                  </div>
+
+                );
+
+              }
+            )}
+
+          </div>
+
+        </section>
+
+
+        <section className="bg-white border border-[#E4E1D8] rounded-2xl p-4">
+
+          <h3 className="font-black text-sm mb-4">
+            Finansal Özet
+          </h3>
+
+          <div className="space-y-1">
+
+            <SummaryRow
+              label="Toplam Satış"
+              value={formatTL(stats.sales)}
+              green
+            />
+
+            <SummaryRow
+              label="Toplam Alış"
+              value={formatTL(stats.purchases)}
+              red
+            />
+
+            <SummaryRow
+              label="Brüt Kâr"
+              value={formatTL(stats.gross)}
+            />
+
+            <SummaryRow
+              label="İşletme Giderleri"
+              value={formatTL(stats.expenses)}
+            />
+
+            <div className="border-t border-[#EEEAE2] mt-3 pt-3">
+
+              <SummaryRow
+                label="Net Kâr"
+                value={formatTL(stats.net)}
+                bold
+              />
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+
+
+      <section className="bg-white border border-[#E4E1D8] rounded-2xl p-4">
+
+        <div className="flex items-center justify-between mb-4">
+
+          <div>
+            <h3 className="font-black text-sm">
+              Mağaza Alış Dağılımı
+            </h3>
+
+            <p className="text-[11px] text-[#77736B]">
+              Aylık alış tutarları
+            </p>
+          </div>
+
+          <Icon
+            name="store"
+            size={18}
+            className="text-[#77736B]"
+          />
+
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+
+          {Object.entries(stats.stores)
+            .map(
+              ([store, value]) => (
+
+                <div
+                  key={store}
+                  className="bg-[#F8F7F3] rounded-xl p-3 flex justify-between"
+                >
+
+                  <span className="text-xs font-semibold">
+                    {store}
+                  </span>
+
+                  <span className="text-xs font-black">
+                    {formatTL(value)}
+                  </span>
+
+                </div>
+
+              )
+            )}
+
+        </div>
+
+      </section>
+
+    </div>
+
+  );
+}
+
+
+/* =========================================================
+   SUMMARY ROW
+========================================================= */
+
+function SummaryRow({
+  label,
+  value,
+  green,
+  red,
+  bold
+}) {
+
+  return (
+
+    <div className="flex justify-between items-center py-2 text-xs">
+
+      <span className={bold ? "font-black" : ""}>
+        {label}
+      </span>
+
+      <span
+        className={
+          "font-bold " +
+          (green
+            ? "text-[#185C42]"
+            : red
+            ? "text-[#9E3928]"
+            : "")
+        }
+      >
+        {value}
+      </span>
+
+    </div>
+
+  );
+}
+
+
+/* =========================================================
+   SALES
+========================================================= */
+
+function Sales({
+  data,
+  persist,
+  date,
+  isAdmin
+}) {
+
+  const rows =
+    PRODUCTS.map(product => {
+
+      const row =
+        data.salesEntries?.[date]?.[product]
+        || {
+          qty: "",
+          unitPrice: ""
+        };
+
+      const qty =
+        Number(row.qty) || 0;
+
+      const price =
+        Number(row.unitPrice) || 0;
+
+      return {
+
+        product,
+
+        qty:
+          row.qty ?? "",
+
+        unitPrice:
+          row.unitPrice ?? "",
+
+        total:
+          qty * price
+
+      };
+
+    });
+
+
+  const locked =
+    !!data.salesLocks?.[date];
+
+
+  const total =
+    rows.reduce(
+      (sum, row) =>
+        sum + row.total,
+      0
+    );
+
+
+  function update(
+    product,
+    field,
+    value
+  ) {
+
+    if (
+      locked &&
+      !isAdmin
+    ) return;
+
+    const current =
+      data.salesEntries?.[date]?.[product]
+      || {};
+
+    persist({
+
+      ...data,
+
+      salesEntries: {
+
+        ...data.salesEntries,
+
+        [date]: {
+
+          ...(data.salesEntries?.[date] || {}),
+
+          [product]: {
+
+            ...current,
+
+            [field]: value
+
+          }
+
+        }
+
+      }
+
+    });
+
+  }
+
+
+  function toggleLock() {
+
+    persist({
+
+      ...data,
+
+      salesLocks: {
+
+        ...data.salesLocks,
+
+        [date]: !locked
+
+      }
+
+    });
+
+  }
+
+
+  return (
+
+    <div className="fade-in">
+
+      <div className="bg-[#1C1B19] text-white rounded-2xl p-4 mb-4 flex justify-between items-center">
+
+        <div>
+
+          <div className="text-[11px] text-[#A8A49A]">
+            Günlük Satış
+          </div>
+
+          <div className="text-[10px] text-[#77736B] mt-1">
+            {formatDate(date)}
+          </div>
+
+        </div>
+
+        <div className="text-lg font-black">
+          {formatTL(total)}
+        </div>
+
+      </div>
+
+
+      {locked && (
+
+        <div className="mb-3 bg-[#F1EFE9] border border-[#E4E1D8] rounded-xl p-3 flex items-center gap-2 text-xs">
+
+          <Icon name="lock" size={15} />
+
+          <span>
+            Bu günün satışları onaylandı.
+          </span>
+
+          {isAdmin && (
+
+            <button
+              onClick={toggleLock}
+              className="ml-auto text-[#185C42] font-bold"
+            >
+              Kilidi Aç
             </button>
+
           )}
 
-          {readOnly && (
-            <div className="bg-[#F1EFE9] border border-[#E4E1D8] rounded-xl p-3 mb-3 flex items-center gap-2">
-              <i data-lucide="lock" className="w-4 h-4 text-[#6B6862]"></i>
-              <span className="text-xs text-[#6B6862]">Bu günün satışları onaylandı, değiştirilemez.</span>
-            </div>
-          )}
+        </div>
 
-          <div className="bg-white border border-[#E4E1D8] rounded-xl overflow-x-auto mb-4">
-            <div className="min-w-[480px]">
-              <div className="grid grid-cols-[2fr_1fr_1fr_1.2fr] gap-1 p-2.5 bg-[#F1EFE9] text-[11px] text-[#6B6862] font-semibold">
-                <span>Ürün</span>
-                <span className="text-right">Adet</span>
-                <span className="text-right">Birim F.</span>
-                <span className="text-right">Toplam</span>
-              </div>
-              {rows.map((r, i) => (
-                <div key={r.product} className={`grid grid-cols-[2fr_1fr_1fr_1.2fr] gap-1 items-center p-2 border-t border-[#EFEDE6] ${i % 2 === 0 ? "bg-white" : "bg-[#FBFAF7]"}`}>
-                  <span className="text-xs font-medium truncate">{r.product}</span>
-                  <input type="number" min="0" placeholder="0" value={r.qty} disabled={readOnly} onChange={(e) => updateRow(r.product, "qty", e.target.value)} className="p-1 rounded border border-[#E4E1D8] text-xs text-right bg-[#FCFCFA] outline-none" />
-                  <input type="number" min="0" step="0.01" placeholder="0" value={r.unitPrice} disabled={readOnly} onChange={(e) => updateRow(r.product, "unitPrice", e.target.value)} className="p-1 rounded border border-[#E4E1D8] text-xs text-right bg-[#FCFCFA] outline-none" />
-                  <span className="text-xs font-bold text-right">{formatTL(r.total)}</span>
-                </div>
-              ))}
-            </div>
+      )}
+
+
+      <div className="bg-white border border-[#E4E1D8] rounded-2xl overflow-x-auto">
+
+        <div className="min-w-[650px]">
+
+          <div className="grid grid-cols-[2fr_1fr_1.2fr_1.2fr] bg-[#F1EFE9] p-3 text-[11px] text-[#6B6862] font-black">
+
+            <span>Ürün</span>
+
+            <span className="text-right">
+              Adet
+            </span>
+
+            <span className="text-right">
+              Birim Fiyat
+            </span>
+
+            <span className="text-right">
+              Toplam
+            </span>
+
           </div>
 
-          {!readOnly && !isAdmin && hasAnyEntry && (
-            <div className="bg-[#FFF9EC] border border-[#E9DDB8] rounded-xl p-3.5">
-              <label className="flex items-start gap-2 text-xs text-[#7A6A2E] cursor-pointer">
-                <input type="checkbox" checked={confirmChecked} onChange={(e) => setConfirmChecked(e.target.checked)} className="mt-0.5" />
-                Bu kayıt onaylandıktan sonra değiştirilemeyecek. Onaylıyor musunuz?
-              </label>
-              <button
-                disabled={!confirmChecked}
-                onClick={() => setLock(true)}
-                className={`mt-2.5 w-full py-2.5 rounded-lg border-none text-[#F7F6F2] font-bold text-xs flex items-center justify-center gap-1.5 ${confirmChecked ? "bg-[#1C1B19] cursor-pointer" : "bg-[#D8D4C8] cursor-not-allowed"}`}
+
+          {rows.map(
+            (row, index) => (
+
+              <div
+                key={row.product}
+                className={
+                  "grid grid-cols-[2fr_1fr_1.2fr_1.2fr] gap-2 items-center p-2 border-t border-[#EFECE5] " +
+                  (index % 2
+                    ? "bg-[#FCFBF8]"
+                    : "bg-white")
+                }
               >
-                <i data-lucide="check-circle-2" className="w-4 h-4"></i> Kaydet ve Onayla
-              </button>
-            </div>
-          )}
-        </div>
-      );
-    }
 
-    function MaliyetlerTab({ data, persist }) {
-      const costs = data.costs || {};
-      function updateCost(product, field, value) {
-        const current = costs[product] || { cost: "", price: "" };
-        persist({ ...data, costs: { ...costs, [product]: { ...current, [field]: value } } });
-      }
-      return (
-        <div className="bg-white border border-[#E4E1D8] rounded-xl overflow-x-auto">
-          <div className="min-w-[500px]">
-            <div className="grid grid-cols-[1.6fr_1fr_1fr_1fr_0.8fr] gap-1 p-2.5 bg-[#F1EFE9] text-[11px] text-[#6B6862] font-semibold">
-              <span>Ürün</span>
-              <span className="text-right">Maliyet</span>
-              <span className="text-right">Satış</span>
-              <span className="text-right">Kâr</span>
-              <span className="text-right">%</span>
-            </div>
-            {SALE_PRODUCTS.map((p, i) => {
-              const c = costs[p] || { cost: "", price: "" };
-              const cost = parseFloat(c.cost) || 0;
-              const price = parseFloat(c.price) || 0;
-              const margin = price - cost;
-              const marginPct = price > 0 ? (margin / price) * 100 : 0;
-              return (
-                <div key={p} className={`grid grid-cols-[1.6fr_1fr_1fr_1fr_0.8fr] gap-1 items-center p-2 border-t border-[#EFEDE6] ${i % 2 === 0 ? "bg-white" : "bg-[#FBFAF7]"}`}>
-                  <span className="text-xs font-medium truncate">{p}</span>
-                  <input type="number" min="0" step="0.01" placeholder="0" value={c.cost} onChange={(e) => updateCost(p, "cost", e.target.value)} className="p-1 rounded border border-[#E4E1D8] text-xs text-right bg-[#FCFCFA] outline-none" />
-                  <input type="number" min="0" step="0.01" placeholder="0" value={c.price} onChange={(e) => updateCost(p, "price", e.target.value)} className="p-1 rounded border border-[#E4E1D8] text-xs text-right bg-[#FCFCFA] outline-none" />
-                  <span className="text-xs font-bold text-right text-[#1C6B4E]">{formatTL(margin)}</span>
-                  <span className="text-[11px] font-semibold text-right text-[#1C6B4E]">{marginPct.toFixed(0)}%</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      );
-    }
+                <span className="text-xs font-semibold truncate">
+                  {row.product}
+                </span>
 
-    function KarZararTab({ data }) {
-      const [month, setMonth] = useState(thisMonthISO());
-      const stats = useMemo(() => {
-        let purchaseTotal = 0;
-        Object.entries(data.purchaseEntries).forEach(([d, stores]) => {
-          if (!d.startsWith(month)) return;
-          Object.values(stores).forEach((items) => items.forEach((it) => (purchaseTotal += it.qty * it.unitPrice)));
-        });
-        let salesTotal = 0;
-        Object.entries(data.salesEntries).forEach(([d, row]) => {
-          if (!d.startsWith(month)) return;
-          Object.values(row).forEach((r) => { salesTotal += (parseFloat(r.qty) || 0) * (parseFloat(r.unitPrice) || 0); });
-        });
-        return { purchaseTotal, salesTotal, net: salesTotal - purchaseTotal };
-      }, [data, month]);
+                <input
+                  type="number"
+                  min="0"
+                  value={row.qty}
+                  disabled={
+                    locked && !isAdmin
+                  }
+                  onChange={e =>
+                    update(
+                      row.product,
+                      "qty",
+                      e.target.value
+                    )
+                  }
+                  className="p-2 border border-[#E4E1D8] rounded-lg text-xs text-right bg-[#FCFCFA] outline-none"
+                />
 
-      return (
-        <div>
-          <div className="flex items-center gap-2 bg-white border border-[#E4E1D8] rounded-xl p-2.5 mb-3">
-            <i data-lucide="calendar" className="w-4 h-4 text-[#6B6862] shrink-0"></i>
-            <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className="border-none bg-transparent text-xs text-[#1C1B19] flex-1 outline-none" />
-            <span className="text-xs text-[#A8A49A]">{formatMonthLabel(month)}</span>
-          </div>
-          <div className="grid grid-cols-2 gap-2.5 mb-3">
-            <div className="bg-white border border-[#E4E1D8] rounded-xl p-3">
-              <span className="text-[11px] text-[#6B6862] block mb-1">Toplam Satış</span>
-              <span className="text-sm font-bold text-[#1C6B4E]">{formatTL(stats.salesTotal)}</span>
-            </div>
-            <div className="bg-white border border-[#E4E1D8] rounded-xl p-3">
-              <span className="text-[11px] text-[#6B6862] block mb-1">Toplam Alış</span>
-              <span className="text-sm font-bold text-[#B4432E]">{formatTL(stats.purchaseTotal)}</span>
-            </div>
-          </div>
-          <div className="bg-white border border-[#E4E1D8] rounded-xl p-3.5">
-            <span className="text-[11px] text-[#6B6862] block mb-1">Net Kâr / Nakit Akışı</span>
-            <span className="text-base font-bold">{formatTL(stats.net)}</span>
-          </div>
-        </div>
-      );
-    }
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={row.unitPrice}
+                  disabled={
+                    locked && !isAdmin
+                  }
+                  onChange={e =>
+                    update(
+                      row.product,
+                      "unitPrice",
+                      e.target.value
+                    )
+                  }
+                  className="p-2 border border-[#E4E1D8] rounded-lg text-xs text-right bg-[#FCFCFA] outline-none"
+                />
 
-    function YoneticiTab({ data, persist }) {
-      const [form, setForm] = useState({ username: "", password: "" });
-      const users = data.users || {};
-      function createUser(e) {
-        e.preventDefault();
-        const u = form.username.trim();
-        const p = form.password.trim();
-        if (!u || !p || users[u]) return;
-        persist({ ...data, users: { ...users, [u]: { password: p, role: "user" } } });
-        setForm({ username: "", password: "" });
-      }
-      function deleteUser(username) {
-        const { [username]: _, ...rest } = users;
-        persist({ ...data, users: rest });
-      }
-      return (
-        <div>
-          <form onSubmit={createUser} className="bg-white border border-[#E4E1D8] rounded-xl p-3.5 mb-4">
-            <h3 className="text-xs font-bold mb-2.5 flex items-center gap-1.5"><i data-lucide="user-plus" className="w-4 h-4"></i> Yeni Kullanıcı Oluştur</h3>
-            <div className="grid grid-cols-2 gap-2 mb-2.5">
-              <input type="text" placeholder="Kullanıcı Adı" autoCapitalize="none" value={form.username} onChange={(e) => setForm(f => ({...f, username: e.target.value}))} className="p-2 border border-[#E4E1D8] rounded-lg text-xs bg-[#FCFCFA] outline-none" />
-              <input type="text" placeholder="Şifre" value={form.password} onChange={(e) => setForm(f => ({...f, password: e.target.value}))} className="p-2 border border-[#E4E1D8] rounded-lg text-xs bg-[#FCFCFA] outline-none" />
-            </div>
-            <button type="submit" className="w-full py-2 bg-[#1C1B19] text-[#F7F6F2] font-semibold text-xs rounded-lg border-none cursor-pointer">Oluştur</button>
-          </form>
-          <div className="flex flex-col gap-2">
-            {Object.entries(users).map(([username, u]) => (
-              <div key={username} className="flex items-center justify-between bg-white border border-[#E4E1D8] rounded-xl p-3">
-                <div>
-                  <div className="text-xs font-semibold">{username}</div>
-                  <div className="text-[11px] text-[#6B6862]">{u.role === "admin" ? "Yönetici" : "Kullanıcı"}</div>
-                </div>
-                {u.role !== "admin" && (
-                  <button onClick={() => deleteUser(username)} className="border-none bg-transparent text-[#A8A49A] cursor-pointer"><i data-lucide="trash-2" className="w-4 h-4"></i></button>
-                )}
+                <span className="text-xs font-black text-right">
+                  {formatTL(row.total)}
+                </span>
+
               </div>
-            ))}
-          </div>
+
+            )
+          )}
+
         </div>
+
+      </div>
+
+
+      {!locked && !isAdmin && (
+
+        <button
+          onClick={toggleLock}
+          className="mt-3 w-full py-3 bg-[#1C1B19] text-white rounded-xl text-xs font-black"
+        >
+
+          <Icon
+            name="check-circle-2"
+            size={15}
+            className="inline mr-1"
+          />
+
+          Günlük Satışı Onayla
+
+        </button>
+
+      )}
+
+    </div>
+
+  );
+}
+
+
+/* =========================================================
+   PURCHASES
+========================================================= */
+
+function Purchases({
+  data,
+  persist,
+  date,
+  isAdmin
+}) {
+
+  const [activeStore, setActiveStore] =
+    useState(null);
+
+  const [form, setForm] =
+    useState({
+      product: "",
+      qty: "1",
+      unitPrice: ""
+    });
+
+
+  const day =
+    data.purchaseEntries?.[date] || {};
+
+  const locks =
+    data.purchaseLocks?.[date] || {};
+
+
+  if (activeStore) {
+
+    const items =
+      day[activeStore] || [];
+
+    const locked =
+      !!locks[activeStore];
+
+
+    const total =
+      items.reduce(
+        (sum, item) =>
+          sum +
+          Number(item.qty) *
+          Number(item.unitPrice),
+        0
       );
+
+
+    function addItem(e) {
+
+      e.preventDefault();
+
+      if (
+        locked &&
+        !isAdmin
+      ) return;
+
+      if (
+        !form.product.trim()
+      ) return;
+
+      const item = {
+
+        id:
+          Date.now() +
+          "-" +
+          Math.random()
+            .toString(36)
+            .slice(2),
+
+        product:
+          form.product.trim(),
+
+        qty:
+          Number(form.qty) || 0,
+
+        unitPrice:
+          Number(form.unitPrice) || 0
+
+      };
+
+
+      persist({
+
+        ...data,
+
+        purchaseEntries: {
+
+          ...data.purchaseEntries,
+
+          [date]: {
+
+            ...day,
+
+            [activeStore]: [
+              ...items,
+              item
+            ]
+
+          }
+
+        }
+
+      });
+
+
+      setForm({
+        product: "",
+        qty: "1",
+        unitPrice: ""
+      });
+
     }
 
-    ReactDOM.render(<ManoPizza />, document.getElementById("root"));
-    setTimeout(() => { lucide.createIcons(); }, 100);
-  </script>
+
+    function removeItem(id) {
+
+      if (
+        locked &&
+        !isAdmin
+      ) return;
+
+      persist({
+
+        ...data,
+
+        purchaseEntries: {
+
+          ...data.purchaseEntries,
+
+          [date]: {
+
+            ...day,
+
+            [activeStore]:
+              items.filter(
+                item =>
+                  item.id !== id
+              )
+
+          }
+
+        }
+
+      });
+
+    }
+
+
+    function toggleLock() {
+
+      persist({
+
+        ...data,
+
+        purchaseLocks: {
+
+          ...data.purchaseLocks,
+
+          [date]: {
+
+            ...locks,
+
+            [activeStore]:
+              !locked
+
+          }
+
+        }
+
+      });
+
+    }
+
+
+    return (
+
+      <div className="fade-in">
+
+        <button
+          onClick={() =>
+            setActiveStore(null)
+          }
+          className="flex items-center gap-1 text-xs text-[#6B6862] mb-4"
+        >
+
+          <Icon
+            name="chevron-left"
+            size={15}
+          />
+
+          Mağazalara Dön
+
+        </button>
+
+
+        <div className="flex justify-between items-center mb-4">
+
+          <div>
+
+            <h2 className="font-black">
+              {activeStore}
+            </h2>
+
+            <div className="text-[11px] text-[#77736B]">
+              {formatDate(date)}
+            </div>
+
+          </div>
+
+          {locked && (
+
+            <div className="flex items-center gap-1 text-xs text-[#77736B]">
+              <Icon name="lock" size={14} />
+              Onaylandı
+            </div>
+
+          )}
+
+        </div>
+
+
+        {!locked && (
+
+          <form
+            onSubmit={addItem}
+            className="bg-white border border-[#E4E1D8] rounded-2xl p-4 mb-4"
+          >
+
+            <div className="grid sm:grid-cols-[2fr_1fr_1fr] gap-2">
+
+              <input
+                placeholder="Ürün adı"
+                value={form.product}
+                onChange={e =>
+                  setForm({
+                    ...form,
+                    product:
+                      e.target.value
+                  })
+                }
+                className="p-2.5 border border-[#E4E1D8] rounded-xl text-xs bg-[#FCFCFA] outline-none"
+              />
+
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="Miktar"
+                value={form.qty}
+                onChange={e =>
+                  setForm({
+                    ...form,
+                    qty:
+                      e.target.value
+                  })
+                }
+                className="p-2.5 border border-[#E4E1D8] rounded-xl text-xs bg-[#FCFCFA] outline-none"
+              />
+
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="Birim fiyat"
+                value={form.unitPrice}
+                onChange={e =>
+                  setForm({
+                    ...form,
+                    unitPrice:
+                      e.target.value
+                  })
+                }
+                className="p-2.5 border border-[#E4E1D8] rounded-xl text-xs bg-[#FCFCFA] outline-none"
+              />
+
+            </div>
+
+
+            <button
+              className="mt-3 w-full py-2.5 bg-[#1C1B19] text-white rounded-xl text-xs font-black"
+            >
+
+              <Icon
+                name="plus"
+                size={15}
+                className="inline mr-1"
+              />
+
+              Ürün Ekle
+
+            </button>
+
+          </form>
+
+        )}
+
+
+        <div className="space-y-2">
+
+          {items.length === 0 && (
+
+            <div className="text-center py-8 text-xs text-[#77736B]">
+              Henüz alış kaydı yok.
+            </div>
+
+          )}
+
+          {items.map(
+            item => (
+
+              <div
+                key={item.id}
+                className="bg-white border border-[#E4E1D8] rounded-xl p-3 flex justify-between items-center"
+              >
+
+                <div>
+
+                  <b className="text-xs">
+                    {item.product}
+                  </b>
+
+                  <div className="text-[11px] text-[#77736B] mt-1">
+                    {formatNumber(item.qty)}
+                    {" × "}
+                    {formatTL(item.unitPrice)}
+                  </div>
+
+                </div>
+
+
+                <div className="flex items-center gap-3">
+
+                  <b className="text-xs">
+                    {formatTL(
+                      Number(item.qty) *
+                      Number(item.unitPrice)
+                    )}
+                  </b>
+
+                  {!locked && (
+
+                    <button
+                      onClick={() =>
+                        removeItem(item.id)
+                      }
+                    >
+                      <Icon
+                        name="trash-2"
+                        size={15}
+                        className="text-[#A39E94]"
+                      />
+                    </button>
+
+                  )}
+
+                </div>
+
+              </div>
+
+            )
+          )}
+
+        </div>
+
+
+        <div className="mt-3 bg-[#1C1B19] text-white rounded-xl p-3 flex justify-between">
+
+          <span className="text-xs text-[#C6C1B7]">
+            Mağaza Toplamı
+          </span>
+
+          <b className="text-sm">
+            {formatTL(total)}
+          </b>
+
+        </div>
+
+
+        {!locked && !isAdmin && items.length > 0 && (
+
+          <button
+            onClick={toggleLock}
+            className="mt-3 w-full py-3 bg-[#1C1B19] text-white rounded-xl text-xs font-black"
+          >
+
+            <Icon
+              name="check-circle-2"
+              size={15}
+              className="inline mr-1"
+            />
+
+            Alışı Onayla
+
+          </button>
+
+        )}
+
+
+        {locked && isAdmin && (
+
+          <button
+            onClick={toggleLock}
+            className="mt-3 w-full py-3 border border-[#E4E1D8] bg-white rounded-xl text-xs font-bold text-[#185C42]"
+          >
+
+            <Icon
+              name="unlock"
+              size={15}
+              className="inline mr-1"
+            />
+
+            Kilidi Aç
+
+          </button>
+
+        )}
+
+      </div>
+
+    );
+  }
+
+
+  const dayTotal =
+    data.stores.reduce(
+      (sum, store) => {
+
+        const items =
+          day[store] || [];
+
+        return (
+          sum +
+          items.reduce(
+            (s, item) =>
+              s +
+              Number(item.qty) *
+              Number(item.unitPrice),
+            0
+          )
+        );
+
+      },
+      0
+    );
+
+
+  return (
+
+    <div className="fade-in">
+
+      <div className="bg-[#1C1B19] text-white rounded-2xl p-4 mb-4 flex justify-between items-center">
+
+        <div>
+
+          <div className="text-[11px] text-[#A8A49A]">
+            Günün Alış Toplamı
+          </div>
+
+          <div className="text-[10px] text-[#77736B] mt-1">
+            {formatDate(date)}
+          </div>
+
+        </div>
+
+        <b className="text-lg">
+          {formatTL(dayTotal)}
+        </b>
+
+      </div>
+
+
+      <div className="space-y-2">
+
+        {data.stores.map(
+          store => {
+
+            const items =
+              day[store] || [];
+
+            const total =
+              items.reduce(
+                (sum, item) =>
+                  sum +
+                  Number(item.qty) *
+                  Number(item.unitPrice),
+                0
+              );
+
+            const locked =
+              !!locks[store];
+
+            return (
+
+              <button
+                key={store}
+                onClick={() =>
+                  setActiveStore(store)
+                }
+                className="w-full bg-white border border-[#E4E1D8] rounded-2xl p-4 flex justify-between items-center text-left hover:border-[#C8C3B8]"
+              >
+
+                <div className="flex items-center gap-3">
+
+                  <div className="w-10 h-10 rounded-xl bg-[#EAF3EE] text-[#185C42] flex items-center justify-center">
+
+                    <Icon
+                      name="store"
+                      size={18}
+                    />
+
+                  </div>
+
+                  <div>
+
+                    <div className="flex items-center gap-1.5">
+
+                      <b className="text-xs">
+                        {store}
+                      </b>
+
+                      {locked && (
+
+                        <Icon
+                          name="lock"
+                          size={12}
+                          className="text-[#A39E94]"
+                        />
+
+                      )}
+
+                    </div>
+
+                    <div className="text-[11px] text-[#77736B] mt-1">
+                      {items.length} ürün
+                      {locked
+                        ? " · Onaylandı"
+                        : ""}
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <b className="text-xs">
+                  {formatTL(total)}
+                </b>
+
+              </button>
+
+            );
+
+          }
+        )}
+
+      </div>
+
+    </div>
+
+  );
+}
+
+
+/* =========================================================
+   COSTS
+========================================================= */
+
+function Costs({
+  data,
+  persist
+}) {
+
+  return (
+
+    <div className="fade-in">
+
+      <div className="bg-[#FFF6DF] border border-[#E9DDB8] rounded-2xl p-4 mb-4">
+
+        <div className="flex gap-2">
+
+          <Icon
+            name="circle-help"
+            size={17}
+            className="text-[#806923]"
+          />
+
+          <div>
+
+            <b className="text-xs text-[#6F5B1F]">
+              Food Cost
+            </b>
+
+            <p className="text-[11px] text-[#806923] mt-1">
+              Maliyet / satış fiyatı oranıdır.
+              Daha düşük oran, ürün başına daha yüksek brüt marj anlamına gelir.
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div className="bg-white border border-[#E4E1D8] rounded-2xl overflow-x-auto">
+
+        <div className="min-w-[700px]">
+
+          <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] bg-[#F1EFE9] p-3 text-[11px] text-[#6B6862] font-black">
+
+            <span>Ürün</span>
+
+            <span className="text-right">
+              Maliyet
+            </span>
+
+            <span className="text-right">
+              Satış
+            </span>
+
+            <span className="text-right">
+              Brüt Kâr
+            </span>
+
+            <span className="text-right">
+              Food Cost
+            </span>
+
+          </div>
+
+
+          {PRODUCTS.map(
+            (product, index) => {
+
+              const current =
+                data.costs?.[product]
+                || {
+                  cost: "",
+                  price: ""
+                };
+
+              const cost =
+                Number(current.cost) || 0;
+
+              const price =
+                Number(current.price) || 0;
+
+              const profit =
+                price - cost;
+
+              const foodCost =
+                price
+                  ? (cost / price) * 100
+                  : 0;
+
+
+              function update(
+                field,
+                value
+              ) {
+
+                persist({
+
+                  ...data,
+
+                  costs: {
+
+                    ...data.costs,
+
+                    [product]: {
+
+                      ...current,
+
+                      [field]: value
+
+                    }
+
+                  }
+
+                });
+
+              }
+
+
+              return (
+
+                <div
+                  key={product}
+                  className={
+                    "grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-2 p-2 items-center border-t border-[#EFECE5] " +
+                    (index % 2
+                      ? "bg-[#FCFBF8]"
+                      : "bg-white")
+                  }
+                >
+
+                  <span className="text-xs font-semibold truncate">
+                    {product}
+                  </span>
+
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={current.cost}
+                    onChange={e =>
+                      update(
+                        "cost",
+                        e.target.value
+                      )
+                    }
+                    className="p-2 border border-[#E4E1D8] rounded-lg text-xs text-right bg-[#FCFCFA]"
+                  />
+
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={current.price}
+                    onChange={e =>
+                      update(
+                        "price",
+                        e.target.value
+                      )
+                    }
+                    className="p-2 border border-[#E4E1D8] rounded-lg text-xs text-right bg-[#FCFCFA]"
+                  />
+
+                  <span className="text-xs font-black text-right text-[#185C42]">
+                    {formatTL(profit)}
+                  </span>
+
+                  <span
+                    className={
+                      "text-xs font-black text-right " +
+                      (
+                        foodCost > 35
+                          ? "text-[#B4432E]"
+                          : "text-[#185C42]"
+                      )
+                    }
+                  >
+                    %{foodCost.toFixed(1)}
+                  </span>
+
+                </div>
+
+              );
+
+            }
+          )}
+
+        </div>
+
+      </div>
+
+    </div>
+
+  );
+}
+
+
+/* =========================================================
+   EXPENSES
+========================================================= */
+
+function Expenses({
+  data,
+  persist,
+  date
+}) {
+
+  const [form, setForm] =
+    useState({
+      title: "",
+      amount: "",
+      category: "Genel"
+    });
+
+
+  const items =
+    data.expenses?.[date] || [];
+
+
+  const total =
+    items.reduce(
+      (sum, item) =>
+        sum +
+        Number(item.amount),
+      0
+    );
+
+
+  function add(e) {
+
+    e.preventDefault();
+
+    if (
+      !form.title.trim() ||
+      !Number(form.amount)
+    ) return;
+
+
+    const item = {
+
+      id:
+        Date.now() +
+        "-" +
+        Math.random()
+          .toString(36)
+          .slice(2),
+
+      title:
+        form.title.trim(),
+
+      amount:
+        Number(form.amount),
+
+      category:
+        form.category
+
+    };
+
+
+    persist({
+
+      ...data,
+
+      expenses: {
+
+        ...data.expenses,
+
+        [date]: [
+          ...items,
+          item
+        ]
+
+      }
+
+    });
+
+
+    setForm({
+      title: "",
+      amount: "",
+      category: "Genel"
+    });
+
+  }
+
+
+  function remove(id) {
+
+    persist({
+
+      ...data,
+
+      expenses: {
+
+        ...data.expenses,
+
+        [date]:
+          items.filter(
+            item =>
+              item.id !== id
+          )
+
+      }
+
+    });
+
+  }
+
+
+  return (
+
+    <div className="fade-in">
+
+      <form
+        onSubmit={add}
+        className="bg-white border border-[#E4E1D8] rounded-2xl p-4 mb-4"
+      >
+
+        <h3 className="font-black text-sm mb-3">
+          Yeni Gider Ekle
+        </h3>
+
+        <div className="grid sm:grid-cols-2 gap-2">
+
+          <input
+            placeholder="Gider adı"
+            value={form.title}
+            onChange={e =>
+              setForm({
+                ...form,
+                title:
+                  e.target.value
+              })
+            }
+            className="p-2.5 border border-[#E4E1D8] rounded-xl text-xs bg-[#FCFCFA]"
+          />
+
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="Tutar"
+            value={form.amount}
+            onChange={e =>
+              setForm({
+                ...form,
+                amount:
+                  e.target.value
+              })
+            }
+            className="p-2.5 border border-[#E4E1D8] rounded-xl text-xs bg-[#FCFCFA]"
+          />
+
+        </div>
+
+
+        <select
+          value={form.category}
+          onChange={e =>
+            setForm({
+              ...form,
+              category:
+                e.target.value
+            })
+          }
+          className="mt-2 w-full p-2.5 border border-[#E4E1D8] rounded-xl text-xs bg-[#FCFCFA]"
+        >
+
+          <option>Genel</option>
+          <option>Kira</option>
+          <option>Maaş</option>
+          <option>Elektrik</option>
+          <option>Su</option>
+          <option>Doğalgaz</option>
+          <option>Reklam</option>
+          <option>Vergi</option>
+          <option>Diğer</option>
+
+        </select>
+
+
+        <button
+          className="mt-3 w-full py-2.5 bg-[#1C1B19] text-white rounded-xl text-xs font-black"
+        >
+
+          <Icon
+            name="plus"
+            size={15}
+            className="inline mr-1"
+          />
+
+          Gider Kaydet
+
+        </button>
+
+      </form>
+
+
+      <div className="bg-[#1C1B19] text-white rounded-2xl p-4 mb-4 flex justify-between">
+
+        <div>
+
+          <div className="text-[11px] text-[#A8A49A]">
+            Günlük Gider
+          </div>
+
+          <div className="text-[10px] text-[#77736B]">
+            {formatDate(date)}
+          </div>
+
+        </div>
+
+        <b>
+          {formatTL(total)}
+        </b>
+
+      </div>
+
+
+      <div className="space-y-2">
+
+        {items.length === 0 && (
+
+          <div className="bg-white border border-[#E4E1D8] rounded-2xl p-8 text-center text-xs text-[#77736B]">
+            Bu gün için gider kaydı yok.
+          </div>
+
+        )}
+
+        {items.map(
+          item => (
+
+            <div
+              key={item.id}
+              className="bg-white border border-[#E4E1D8] rounded-xl p-3 flex justify-between items-center"
+            >
+
+              <div>
+
+                <b className="text-xs">
+                  {item.title}
+                </b>
+
+                <div className="text-[11px] text-[#77736B] mt-1">
+                  {item.category}
+                </div>
+
+              </div>
+
+              <div className="flex items-center gap-3">
+
+                <b className="text-xs">
+                  {formatTL(item.amount)}
+                </b>
+
+                <button
+                  onClick={() =>
+                    remove(item.id)
+                  }
+                >
+
+                  <Icon
+                    name="trash-2"
+                    size={15}
+                    className="text-[#A39E94]"
+                  />
+
+                </button>
+
+              </div>
+
+            </div>
+
+          )
+        )}
+
+      </div>
+
+    </div>
+
+  );
+}
+
+
+/* =========================================================
+   PROFIT LOSS
+========================================================= */
+
+function ProfitLoss({
+  data,
+  month
+}) {
+
+  const result =
+    useMemo(() => {
+
+      let sales = 0;
+      let purchases = 0;
+      let expenses = 0;
+
+
+      Object.entries(
+        data.salesEntries || {}
+      ).forEach(
+        ([date, rows]) => {
+
+          if (
+            !date.startsWith(month)
+          ) return;
+
+          Object.values(
+            rows || {}
+          ).forEach(
+            row => {
+
+              sales +=
+                (Number(row.qty) || 0)
+                *
+                (Number(row.unitPrice) || 0);
+
+            }
+          );
+
+        }
+      );
+
+
+      Object.entries(
+        data.purchaseEntries || {}
+      ).forEach(
+        ([date, stores]) => {
+
+          if (
+            !date.startsWith(month)
+          ) return;
+
+          Object.values(
+            stores || {}
+          ).forEach(
+            items => {
+
+              (items || [])
+                .forEach(
+                  item => {
+
+                    purchases +=
+                      (Number(item.qty) || 0)
+                      *
+                      (Number(item.unitPrice) || 0);
+
+                  }
+                );
+
+            }
+          );
+
+        }
+      );
+
+
+      Object.entries(
+        data.expenses || {}
+      ).forEach(
+        ([date, items]) => {
+
+          if (
+            !date.startsWith(month)
+          ) return;
+
+          (items || [])
+            .forEach(
+              item => {
+
+                expenses +=
+                  Number(item.amount) || 0;
+
+              }
+            );
+
+        }
+      );
+
+
+      const gross =
+        sales - purchases;
+
+      const net =
+        gross - expenses;
+
+      const margin =
+        sales
+          ? (net / sales) * 100
+          : 0;
+
+
+      return {
+        sales,
+        purchases,
+        expenses,
+        gross,
+        net,
+        margin
+      };
+
+    }, [data, month]);
+
+
+  return (
+
+    <div className="fade-in space-y-4">
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+
+        <StatCard
+          title="Ciro"
+          value={formatTL(result.sales)}
+          icon="trending-up"
+          tone="green"
+        />
+
+        <StatCard
+          title="Alış"
+          value={formatTL(result.purchases)}
+          icon="shopping-bag"
+          tone="red"
+        />
+
+        <StatCard
+          title="Brüt Kâr"
+          value={formatTL(result.gross)}
+          icon="percent"
+          tone="yellow"
+        />
+
+        <StatCard
+          title="Net Kâr"
+          value={formatTL(result.net)}
+          subtitle={`Marj %${result.margin.toFixed(1)}`}
+          icon="circle-dollar-sign"
+          tone="dark"
+        />
+
+      </div>
+
+
+      <div className="bg-white border border-[#E4E1D8] rounded-2xl p-4">
+
+        <h3 className="font-black text-sm mb-4">
+          {formatMonth(month)} Kâr / Zarar
+        </h3>
+
+        <div className="space-y-1">
+
+          <SummaryRow
+            label="Toplam Ciro"
+            value={formatTL(result.sales)}
+            green
+          />
+
+          <SummaryRow
+            label="Toplam Alış"
+            value={formatTL(result.purchases)}
+            red
+          />
+
+          <SummaryRow
+            label="Brüt Kâr"
+            value={formatTL(result.gross)}
+          />
+
+          <SummaryRow
+            label="İşletme Giderleri"
+            value={formatTL(result.expenses)}
+          />
+
+          <div className="border-t border-[#EEEAE2] mt-3 pt-3">
+
+            <SummaryRow
+              label="NET KÂR"
+              value={formatTL(result.net)}
+              bold
+            />
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  );
+}
+
+
+/* =========================================================
+   ADMIN
+========================================================= */
+
+function Admin({
+  data,
+  persist
+}) {
+
+  const [form, setForm] =
+    useState({
+      username: "",
+      password: ""
+    });
+
+
+  function addUser(e) {
+
+    e.preventDefault();
+
+    const username =
+      form.username.trim();
+
+    if (
+      !username ||
+      !form.password ||
+      data.users[username]
+    ) return;
+
+
+    persist({
+
+      ...data,
+
+      users: {
+
+        ...data.users,
+
+        [username]: {
+
+          password:
+            form.password,
+
+          role:
+            "user"
+
+        }
+
+      }
+
+    });
+
+
+    setForm({
+      username: "",
+      password: ""
+    });
+
+  }
+
+
+  function deleteUser(username) {
+
+    if (
+      data.users[username]?.role ===
+      "admin"
+    ) return;
+
+    const users =
+      { ...data.users };
+
+    delete users[username];
+
+    persist({
+      ...data,
+      users
+    });
+
+  }
+
+
+  return (
+
+    <div className="fade-in space-y-4">
+
+      <form
+        onSubmit={addUser}
+        className="bg-white border border-[#E4E1D8] rounded-2xl p-4"
+      >
+
+        <h3 className="font-black text-sm flex items-center gap-2 mb-4">
+
+          <Icon
+            name="user-plus"
+            size={17}
+          />
+
+          Yeni Kullanıcı
+
+        </h3>
+
+
+        <div className="grid sm:grid-cols-2 gap-2">
+
+          <input
+            placeholder="Kullanıcı adı"
+            autoCapitalize="none"
+            value={form.username}
+            onChange={e =>
+              setForm({
+                ...form,
+                username:
+                  e.target.value
+              })
+            }
+            className="p-2.5 border border-[#E4E1D8] rounded-xl text-xs bg-[#FCFCFA]"
+          />
+
+          <input
+            type="password"
+            placeholder="Şifre"
+            value={form.password}
+            onChange={e =>
+              setForm({
+                ...form,
+                password:
+                  e.target.value
+              })
+            }
+            className="p-2.5 border border-[#E4E1D8] rounded-xl text-xs bg-[#FCFCFA]"
+          />
+
+        </div>
+
+
+        <button
+          className="mt-3 w-full py-2.5 bg-[#1C1B19] text-white rounded-xl text-xs font-black"
+        >
+          Kullanıcı Oluştur
+        </button>
+
+      </form>
+
+
+      <div className="bg-white border border-[#E4E1D8] rounded-2xl p-4">
+
+        <h3 className="font-black text-sm mb-3">
+          Kullanıcılar
+        </h3>
+
+        <div className="space-y-2">
+
+          {Object.entries(
+            data.users || {}
+          ).map(
+            ([username, user]) => (
+
+              <div
+                key={username}
+                className="flex justify-between items-center p-3 rounded-xl bg-[#F8F7F3]"
+              >
+
+                <div className="flex items-center gap-3">
+
+                  <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
+
+                    <Icon
+                      name={
+                        user.role === "admin"
+                          ? "shield-check"
+                          : "user"
+                      }
+                      size={15}
+                    />
+
+                  </div>
+
+                  <div>
+
+                    <b className="text-xs">
+                      {username}
+                    </b>
+
+                    <div className="text-[10px] text-[#77736B]">
+                      {user.role === "admin"
+                        ? "Yönetici"
+                        : "Kullanıcı"}
+                    </div>
+
+                  </div>
+
+                </div>
+
+
+                {user.role !== "admin" && (
+
+                  <button
+                    onClick={() =>
+                      deleteUser(username)
+                    }
+                  >
+
+                    <Icon
+                      name="trash-2"
+                      size={15}
+                      className="text-[#A39E94]"
+                    />
+
+                  </button>
+
+                )}
+
+              </div>
+
+            )
+          )}
+
+        </div>
+
+      </div>
+
+    </div>
+
+  );
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+const NAV_ITEMS = [
+
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    icon: "layout-dashboard"
+  },
+
+  {
+    id: "alis",
+    label: "Alış Yönetimi",
+    icon: "shopping-bag"
+  },
+
+  {
+    id: "satis",
+    label: "Satış Yönetimi",
+    icon: "trending-up"
+  },
+
+  {
+    id: "maliyet",
+    label: "Maliyetler",
+    icon: "percent"
+  },
+
+  {
+    id: "gider",
+    label: "Giderler",
+    icon: "receipt"
+  },
+
+  {
+    id: "karzarar",
+    label: "Kâr / Zarar",
+    icon: "trending-down"
+  },
+
+  {
+    id: "yonetici",
+    label: "Yönetici",
+    icon: "shield-check"
+  }
+
+];
+
+
+/* =========================================================
+   APP
+========================================================= */
+
+function App() {
+
+  const [data, setData] =
+    useState(DEFAULT_DATA);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+  const [user, setUser] =
+    useState(null);
+
+  const [page, setPage] =
+    useState("dashboard");
+
+  const [date, setDate] =
+    useState(todayISO());
+
+  const [month, setMonth] =
+    useState(monthISO());
+
+  const [mobileMenu, setMobileMenu] =
+    useState(false);
+
+
+  useEffect(() => {
+
+    const unsubscribe =
+      onSnapshot(
+        DATA_REF,
+
+        snapshot => {
+
+          if (
+            snapshot.exists()
+          ) {
+
+            setData(
+              mergeData(
+                snapshot.data()
+              )
+            );
+
+          } else {
+
+            setDoc(
+              DATA_REF,
+              DEFAULT_DATA
+            );
+
+            setData(
+              DEFAULT_DATA
+            );
+
+          }
+
+          setLoading(false);
+
+        },
+
+        err => {
+
+          console.error(err);
+
+          setError(
+            "Firebase bağlantısında sorun oluştu."
+          );
+
+          setLoading(false);
+
+        }
+      );
+
+
+    return unsubscribe;
+
+  }, []);
+
+
+  async function persist(next) {
+
+    setData(next);
+
+    try {
+
+      await setDoc(
+        DATA_REF,
+        next
+      );
+
+      setError("");
+
+    } catch (err) {
+
+      console.error(err);
+
+      setError(
+        "Veri kaydedilemedi. İnternet bağlantısını kontrol edin."
+      );
+
+    }
+
+  }
+
+
+  if (loading) {
+
+    return (
+
+      <div className="min-h-screen bg-[#1C1B19] flex items-center justify-center">
+
+        <div className="text-center">
+
+          <div className="w-14 h-14 rounded-2xl bg-[#B4432E] text-white flex items-center justify-center mx-auto mb-4">
+
+            <Icon
+              name="pizza"
+              size={28}
+            />
+
+          </div>
+
+          <div className="text-white font-bold text-sm">
+            Mano Pizza
+          </div>
+
+          <div className="text-[#77736B] text-xs mt-1">
+            Sistem yükleniyor...
+          </div>
+
+        </div>
+
+      </div>
+
+    );
+
+  }
+
+
+  if (!user) {
+
+    return (
+
+      <Login
+        users={data.users}
+        onLogin={setUser}
+      />
+
+    );
+
+  }
+
+
+  const isAdmin =
+    user.role === "admin";
+
+
+  const visibleNav =
+    isAdmin
+      ? NAV_ITEMS
+      : NAV_ITEMS.filter(
+          item =>
+            [
+              "dashboard",
+              "alis",
+              "satis"
+            ].includes(item.id)
+        );
+
+
+  const active =
+    visibleNav.find(
+      item =>
+        item.id === page
+    )
+    || visibleNav[0];
+
+
+  function navigate(id) {
+
+    setPage(id);
+    setMobileMenu(false);
+
+  }
+
+
+  return (
+
+    <div className="min-h-screen bg-[#F7F6F2] text-[#1C1B19]">
+
+      <div className="max-w-[1400px] mx-auto min-h-screen flex">
+
+
+        {/* SIDEBAR */}
+
+        <aside
+          className={
+            "fixed lg:sticky top-0 left-0 z-50 w-[250px] h-screen bg-[#1C1B19] text-white p-4 transition-transform " +
+            (
+              mobileMenu
+                ? "translate-x-0"
+                : "-translate-x-full lg:translate-x-0"
+            )
+          }
+        >
+
+          <div className="flex items-center gap-3 px-2 mb-8">
+
+            <div className="w-10 h-10 rounded-xl bg-[#B4432E] flex items-center justify-center">
+
+              <Icon
+                name="pizza"
+                size={21}
+              />
+
+            </div>
+
+            <div>
+
+              <div className="font-black">
+                Mano Pizza
+              </div>
+
+              <div className="text-[10px] text-[#858078]">
+                İşletme Yönetim Paneli
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div className="space-y-1">
+
+            {visibleNav.map(
+              item => (
+
+                <button
+                  key={item.id}
+                  onClick={() =>
+                    navigate(item.id)
+                  }
+                  className={
+                    "w-full flex items-center gap-3 px-3 py-3 rounded-xl text-xs font-bold text-left transition " +
+                    (
+                      page === item.id
+                        ? "bg-white text-[#1C1B19]"
+                        : "text-[#AAA69D] hover:bg-[#2A2926]"
+                    )
+                  }
+                >
+
+                  <Icon
+                    name={item.icon}
+                    size={17}
+                  />
+
+                  {item.label}
+
+                </button>
+
+              )
+            )}
+
+          </div>
+
+
+          <div className="absolute left-4 right-4 bottom-4 border-t border-[#383631] pt-3">
+
+            <div className="flex justify-between items-center">
+
+              <div>
+
+                <div className="text-xs font-bold">
+                  {user.username}
+                </div>
+
+                <div className="text-[10px] text-[#77736B]">
+                  {isAdmin
+                    ? "Yönetici"
+                    : "Kullanıcı"}
+                </div>
+
+              </div>
+
+
+              <button
+                onClick={() =>
+                  setUser(null)
+                }
+                className="text-[#969188]"
+              >
+
+                <Icon
+                  name="log-out"
+                  size={17}
+                />
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </aside>
+
+
+        {mobileMenu && (
+
+          <div
+            onClick={() =>
+              setMobileMenu(false)
+            }
+            className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+          />
+
+        )}
+
+
+        {/* MAIN */}
+
+        <main className="flex-1 min-w-0">
+
+          {/* HEADER */}
+
+          <header className="sticky top-0 z-30 bg-[#F7F6F2]/95 backdrop-blur border-b border-[#E5E1D8]">
+
+            <div className="px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
+
+              <div className="flex items-center gap-3">
+
+                <button
+                  onClick={() =>
+                    setMobileMenu(true)
+                  }
+                  className="lg:hidden"
+                >
+
+                  <Icon
+                    name="menu"
+                    size={21}
+                  />
+
+                </button>
+
+
+                <div>
+
+                  <div className="flex items-center gap-2">
+
+                    <Icon
+                      name={active.icon}
+                      size={18}
+                    />
+
+                    <h1 className="text-lg font-black">
+                      {active.label}
+                    </h1>
+
+                  </div>
+
+                  <div className="text-[10px] text-[#77736B] mt-0.5">
+                    Mano Pizza · {user.username}
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              {[
+                "alis",
+                "satis",
+                "gider"
+              ].includes(page) && (
+
+                <input
+                  type="date"
+                  value={date}
+                  onChange={e =>
+                    setDate(e.target.value)
+                  }
+                  className="bg-white border border-[#E2DED5] rounded-xl px-2.5 py-2 text-xs outline-none"
+                />
+
+              )}
+
+
+              {[
+                "dashboard",
+                "karzarar"
+              ].includes(page) && (
+
+                <input
+                  type="month"
+                  value={month}
+                  onChange={e =>
+                    setMonth(e.target.value)
+                  }
+                  className="bg-white border border-[#E2DED5] rounded-xl px-2.5 py-2 text-xs outline-none"
+                />
+
+              )}
+
+            </div>
+
+          </header>
+
+
+          {/* CONTENT */}
+
+          <div className="p-4 sm:p-6">
+
+            {error && (
+
+              <div className="mb-4 p-3 rounded-xl bg-[#FBEDEA] text-[#9E3928] text-xs flex items-center gap-2">
+
+                <Icon
+                  name="triangle-alert"
+                  size={15}
+                />
+
+                {error}
+
+              </div>
+
+            )}
+
+
+            {page === "dashboard" && (
+
+              <Dashboard
+                data={data}
+                month={month}
+              />
+
+            )}
+
+
+            {page === "alis" && (
+
+              <Purchases
+                data={data}
+                persist={persist}
+                date={date}
+                isAdmin={isAdmin}
+              />
+
+            )}
+
+
+            {page === "satis" && (
+
+              <Sales
+                data={data}
+                persist={persist}
+                date={date}
+                isAdmin={isAdmin}
+              />
+
+            )}
+
+
+            {page === "maliyet" &&
+              isAdmin && (
+
+                <Costs
+                  data={data}
+                  persist={persist}
+                />
+
+              )}
+
+
+            {page === "gider" &&
+              isAdmin && (
+
+                <Expenses
+                  data={data}
+                  persist={persist}
+                  date={date}
+                />
+
+              )}
+
+
+            {page === "karzarar" &&
+              isAdmin && (
+
+                <ProfitLoss
+                  data={data}
+                  month={month}
+                />
+
+              )}
+
+
+            {page === "yonetici" &&
+              isAdmin && (
+
+                <Admin
+                  data={data}
+                  persist={persist}
+                />
+
+              )}
+
+          </div>
+
+        </main>
+
+      </div>
+
+    </div>
+
+  );
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+ReactDOM
+  .createRoot(
+    document.getElementById("root")
+  )
+  .render(
+    <App />
+  );
+
+</script>
+
 </body>
 </html>
