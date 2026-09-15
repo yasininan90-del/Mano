@@ -4,21 +4,772 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<title>Mano Pizza | İşletme Paneli</title>
+<title>Mano Pizza Yönetim Paneli</title>
 
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc,
-  onSnapshot,
-  runTransaction
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+html,body,#root{
+  margin:0;
+  min-height:100%;
+  width:100%;
+}
+
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  background:#f7f6f2;
+  color:#1c1b19;
+}
+
+button,input{
+  font:inherit;
+}
+
+button{
+  -webkit-tap-highlight-color:transparent;
+}
+
+input{
+  min-width:0;
+}
+
+::-webkit-scrollbar{
+  width:5px;
+  height:5px;
+}
+
+::-webkit-scrollbar-thumb{
+  background:#cfcac0;
+  border-radius:20px;
+}
+
+.app{
+  min-height:100vh;
+  background:#f7f6f2;
+}
+
+.topbar{
+  height:64px;
+  background:#fff;
+  border-bottom:1px solid #e4e1d8;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 14px;
+  position:sticky;
+  top:0;
+  z-index:50;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.logo{
+  width:38px;
+  height:38px;
+  border-radius:11px;
+  background:#b4432e;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.brand-title{
+  font-size:16px;
+  font-weight:800;
+}
+
+.brand-sub{
+  color:#77736b;
+  font-size:11px;
+  margin-top:2px;
+}
+
+.menu-btn{
+  width:40px;
+  height:40px;
+  border:1px solid #e4e1d8;
+  background:#fff;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.page{
+  width:100%;
+  max-width:850px;
+  margin:auto;
+  padding:16px 14px 100px;
+}
+
+.drawer-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.35);
+  z-index:100;
+}
+
+.drawer{
+  position:fixed;
+  left:0;
+  top:0;
+  bottom:0;
+  width:min(300px,86vw);
+  background:#fff;
+  z-index:101;
+  box-shadow:12px 0 35px rgba(0,0,0,.18);
+  padding:18px 14px;
+  animation:slideIn .18s ease-out;
+}
+
+@keyframes slideIn{
+  from{transform:translateX(-100%)}
+  to{transform:translateX(0)}
+}
+
+.drawer-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:22px;
+}
+
+.drawer-brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.drawer-menu{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.drawer-item{
+  width:100%;
+  border:0;
+  background:#fff;
+  color:#6b6862;
+  border-radius:12px;
+  padding:13px 12px;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  text-align:left;
+  font-size:13px;
+  font-weight:700;
+}
+
+.drawer-item.active{
+  background:#1c1b19;
+  color:#fff;
+}
+
+.drawer-bottom{
+  position:absolute;
+  bottom:18px;
+  left:14px;
+  right:14px;
+}
+
+.card{
+  background:#fff;
+  border:1px solid #e4e1d8;
+  border-radius:15px;
+  padding:14px;
+  margin-bottom:12px;
+}
+
+.section-title{
+  font-size:15px;
+  font-weight:800;
+  margin:0 0 12px;
+}
+
+.date-card{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  background:#fff;
+  border:1px solid #e4e1d8;
+  border-radius:13px;
+  padding:11px 12px;
+  margin-bottom:12px;
+}
+
+.date-card input{
+  border:0;
+  outline:0;
+  background:transparent;
+  flex:1;
+  font-size:13px;
+}
+
+.date-label{
+  color:#8b877f;
+  font-size:11px;
+  display:none;
+}
+
+@media(min-width:600px){
+  .date-label{
+    display:block;
+  }
+}
+
+.total-card{
+  background:#1c1b19;
+  color:#fff;
+  border-radius:15px;
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.total-label{
+  color:#c7c4bb;
+  font-size:11px;
+}
+
+.total-value{
+  font-size:17px;
+  font-weight:800;
+}
+
+.store-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.store-button{
+  width:100%;
+  border:1px solid #e4e1d8;
+  background:#fff;
+  border-radius:14px;
+  padding:13px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  text-align:left;
+}
+
+.store-left{
+  display:flex;
+  align-items:center;
+  gap:11px;
+}
+
+.store-icon{
+  width:38px;
+  height:38px;
+  border-radius:11px;
+  background:#eaf3ee;
+  color:#1c6b4e;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.store-name{
+  font-size:13px;
+  font-weight:800;
+}
+
+.store-meta{
+  color:#77736b;
+  font-size:11px;
+  margin-top:3px;
+}
+
+.store-total{
+  font-size:12px;
+  font-weight:800;
+}
+
+.back-btn{
+  border:0;
+  background:transparent;
+  color:#6b6862;
+  display:flex;
+  align-items:center;
+  gap:3px;
+  font-size:12px;
+  padding:0;
+  margin-bottom:12px;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:9px;
+}
+
+@media(min-width:600px){
+  .form-grid{
+    grid-template-columns:2fr 1fr 1fr;
+  }
+}
+
+.field label{
+  display:block;
+  color:#6b6862;
+  font-size:10px;
+  margin-bottom:5px;
+  font-weight:700;
+}
+
+.field input{
+  width:100%;
+  border:1px solid #e4e1d8;
+  background:#fcfcfa;
+  border-radius:9px;
+  padding:11px;
+  outline:none;
+  font-size:13px;
+}
+
+.field input:focus{
+  border-color:#9d988e;
+}
+
+.primary-btn{
+  width:100%;
+  border:0;
+  border-radius:10px;
+  background:#1c1b19;
+  color:#fff;
+  padding:12px;
+  font-size:12px;
+  font-weight:800;
+  margin-top:10px;
+}
+
+.secondary-btn{
+  border:1px solid #e4e1d8;
+  background:#fff;
+  color:#1c1b19;
+  border-radius:10px;
+  padding:10px 12px;
+  font-size:12px;
+  font-weight:700;
+}
+
+.danger-btn{
+  border:0;
+  background:transparent;
+  color:#a8a49a;
+  padding:5px;
+}
+
+.entry-list{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  margin-bottom:12px;
+}
+
+.entry{
+  background:#fff;
+  border:1px solid #e4e1d8;
+  border-radius:13px;
+  padding:12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.entry-product{
+  font-size:12px;
+  font-weight:800;
+}
+
+.entry-meta{
+  color:#6b6862;
+  font-size:10px;
+  margin-top:3px;
+}
+
+.entry-price{
+  font-size:12px;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.confirm-box{
+  background:#fff9ec;
+  border:1px solid #e9ddb8;
+  border-radius:14px;
+  padding:13px;
+}
+
+.confirm-box label{
+  color:#7a6a2e;
+  font-size:11px;
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  line-height:1.4;
+}
+
+.lock-info{
+  background:#f1efe9;
+  border:1px solid #e4e1d8;
+  border-radius:13px;
+  padding:12px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#6b6862;
+  font-size:11px;
+  margin-bottom:12px;
+}
+
+.sale-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.sale-card{
+  background:#fff;
+  border:1px solid #e4e1d8;
+  border-radius:13px;
+  padding:11px;
+}
+
+.sale-name{
+  font-size:12px;
+  font-weight:800;
+  margin-bottom:8px;
+}
+
+.sale-fields{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+
+.sale-field label{
+  color:#77736b;
+  font-size:9px;
+  display:block;
+  margin-bottom:4px;
+}
+
+.sale-field input{
+  width:100%;
+  padding:9px;
+  border:1px solid #e4e1d8;
+  border-radius:8px;
+  background:#fcfcfa;
+  text-align:right;
+  outline:none;
+  font-size:12px;
+}
+
+.sale-total{
+  text-align:right;
+  margin-top:8px;
+  font-size:12px;
+  font-weight:800;
+}
+
+.stat-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-bottom:10px;
+}
+
+.stat{
+  background:#fff;
+  border:1px solid #e4e1d8;
+  border-radius:14px;
+  padding:13px;
+}
+
+.stat-label{
+  font-size:10px;
+  color:#6b6862;
+  margin-bottom:5px;
+}
+
+.stat-value{
+  font-size:15px;
+  font-weight:800;
+}
+
+.green{
+  color:#1c6b4e;
+}
+
+.red{
+  color:#b4432e;
+}
+
+.cost-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.cost-card{
+  background:#fff;
+  border:1px solid #e4e1d8;
+  border-radius:13px;
+  padding:12px;
+}
+
+.cost-name{
+  font-size:12px;
+  font-weight:800;
+  margin-bottom:8px;
+}
+
+.cost-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+
+.cost-grid label{
+  font-size:9px;
+  color:#77736b;
+  display:block;
+  margin-bottom:4px;
+}
+
+.cost-grid input{
+  width:100%;
+  border:1px solid #e4e1d8;
+  border-radius:8px;
+  padding:9px;
+  font-size:12px;
+  text-align:right;
+  background:#fcfcfa;
+}
+
+.cost-result{
+  display:flex;
+  justify-content:space-between;
+  margin-top:9px;
+  padding-top:8px;
+  border-top:1px solid #efede6;
+  font-size:11px;
+  font-weight:800;
+}
+
+.user-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  border:1px solid #e4e1d8;
+  border-radius:13px;
+  background:#fff;
+  margin-bottom:7px;
+}
+
+.user-name{
+  font-size:12px;
+  font-weight:800;
+}
+
+.user-role{
+  font-size:10px;
+  color:#77736b;
+  margin-top:3px;
+}
+
+.status{
+  position:fixed;
+  right:12px;
+  bottom:12px;
+  z-index:80;
+  background:#1c1b19;
+  color:#fff;
+  border-radius:12px;
+  padding:9px 12px;
+  font-size:10px;
+  box-shadow:0 6px 20px rgba(0,0,0,.18);
+}
+
+.status.error{
+  background:#b4432e;
+}
+
+.status.ok{
+  background:#1c6b4e;
+}
+
+.login{
+  min-height:100vh;
+  background:#1c1b19;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+}
+
+.login-box{
+  width:100%;
+  max-width:350px;
+}
+
+.login-logo{
+  width:68px;
+  height:68px;
+  background:#b4432e;
+  color:#fff;
+  border-radius:19px;
+  margin:auto auto 16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.login h1{
+  color:#fff;
+  text-align:center;
+  margin:0;
+  font-size:24px;
+}
+
+.login-sub{
+  text-align:center;
+  color:#9c9890;
+  font-size:12px;
+  margin:5px 0 28px;
+}
+
+.login-field{
+  margin-bottom:12px;
+}
+
+.login-field span{
+  display:block;
+  color:#9c9890;
+  font-size:10px;
+  margin-bottom:5px;
+}
+
+.login-field input{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #3a3934;
+  background:#2a2926;
+  color:#fff;
+  outline:none;
+}
+
+.login-btn{
+  width:100%;
+  border:0;
+  background:#f7f6f2;
+  color:#1c1b19;
+  padding:13px;
+  border-radius:11px;
+  font-weight:800;
+  font-size:12px;
+  margin-top:8px;
+}
+
+.login-error{
+  color:#e08a75;
+  font-size:11px;
+  margin-top:6px;
+}
+
+.loading{
+  min-height:100vh;
+  background:#1c1b19;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+}
+
+.spinner{
+  width:30px;
+  height:30px;
+  border:3px solid #3b3934;
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+  margin-bottom:12px;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+.empty{
+  text-align:center;
+  padding:25px 10px;
+  color:#77736b;
+  font-size:11px;
+}
+
+.add-store-row{
+  display:flex;
+  gap:7px;
+}
+
+.add-store-row input{
+  flex:1;
+  border:1px solid #e4e1d8;
+  background:#fff;
+  border-radius:10px;
+  padding:10px;
+  outline:none;
+  font-size:12px;
+}
+
+.toast-space{
+  height:2px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel">
+
+const {
+  useState,
+  useEffect,
+  useMemo
+} = React;
+
+
+/* =========================================================
+   FIREBASE
+========================================================= */
 
 const firebaseConfig = {
   apiKey: "AIzaSyBLXwi0r4QrMlpA7PxYEFwy5ADr_Q9nPqk",
@@ -29,1057 +780,25 @@ const firebaseConfig = {
   appId: "1:558530166779:web:fe990140b59ad5dd1e155e"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
 
-window.MANO_FIREBASE = {
-  db,
-  doc,
-  getDoc,
-  setDoc,
-  onSnapshot,
-  runTransaction
-};
+const db = firebase.firestore();
 
-window.dispatchEvent(new Event("firebase-ready"));
-</script>
 
-<style>
-* {
-  box-sizing: border-box;
-}
+/* =========================================================
+   FIRESTORE COLLECTIONS
+========================================================= */
 
-html,
-body,
-#root {
-  margin: 0;
-  min-height: 100%;
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    Arial,
-    sans-serif;
-}
+const CONFIG_REF = db.collection("mano_pizza").doc("config");
 
-body {
-  background: #f6f5f1;
-  color: #1c1b19;
-}
+const PURCHASES = db.collection("mano_pizza_purchases");
+const SALES = db.collection("mano_pizza_sales");
+const COSTS = db.collection("mano_pizza_costs");
 
-button,
-input,
-select {
-  font: inherit;
-}
 
-button {
-  -webkit-tap-highlight-color: transparent;
-}
-
-input {
-  min-width: 0;
-}
-
-.app {
-  min-height: 100vh;
-  background: #f6f5f1;
-}
-
-/* =========================
-   LOGIN
-========================= */
-
-.login-screen {
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at top, #36332f 0%, #1c1b19 45%, #121210 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 22px;
-}
-
-.login-box {
-  width: 100%;
-  max-width: 380px;
-}
-
-.logo-big {
-  width: 76px;
-  height: 76px;
-  border-radius: 24px;
-  background: #b4432e;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 18px;
-  box-shadow: 0 18px 40px rgba(0,0,0,.28);
-}
-
-.logo-pizza {
-  font-size: 38px;
-}
-
-.login-title {
-  color: #fff;
-  text-align: center;
-  font-size: 29px;
-  font-weight: 800;
-  margin: 0;
-}
-
-.login-subtitle {
-  color: #aaa69d;
-  text-align: center;
-  margin: 6px 0 30px;
-  font-size: 13px;
-}
-
-.login-card {
-  background: rgba(255,255,255,.055);
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 22px;
-  padding: 20px;
-  backdrop-filter: blur(20px);
-}
-
-.login-label {
-  color: #aaa69d;
-  font-size: 11px;
-  margin: 0 0 7px;
-  display: block;
-}
-
-.login-input {
-  width: 100%;
-  height: 48px;
-  background: #292824;
-  border: 1px solid #41403a;
-  border-radius: 13px;
-  color: white;
-  padding: 0 14px;
-  outline: none;
-  margin-bottom: 14px;
-}
-
-.login-input:focus {
-  border-color: #b4432e;
-}
-
-.login-button {
-  width: 100%;
-  height: 49px;
-  border: 0;
-  border-radius: 13px;
-  background: #f7f6f2;
-  color: #1c1b19;
-  font-weight: 800;
-  cursor: pointer;
-  margin-top: 5px;
-}
-
-.login-error {
-  color: #ef9a88;
-  background: rgba(180,67,46,.12);
-  border: 1px solid rgba(180,67,46,.25);
-  padding: 10px;
-  border-radius: 10px;
-  font-size: 12px;
-  margin-bottom: 12px;
-}
-
-/* =========================
-   HEADER
-========================= */
-
-.header {
-  height: 66px;
-  background: #1c1b19;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 18px;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.brand-logo {
-  width: 38px;
-  height: 38px;
-  border-radius: 11px;
-  background: #b4432e;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.brand-logo span {
-  font-size: 20px;
-}
-
-.brand-name {
-  font-weight: 800;
-  font-size: 15px;
-}
-
-.brand-user {
-  color: #99958d;
-  font-size: 10px;
-  margin-top: 2px;
-}
-
-.logout {
-  border: 1px solid #3d3b37;
-  background: transparent;
-  color: #ccc8c0;
-  border-radius: 10px;
-  height: 36px;
-  padding: 0 12px;
-  cursor: pointer;
-  font-size: 11px;
-}
-
-/* =========================
-   LAYOUT
-========================= */
-
-.layout {
-  display: flex;
-  min-height: calc(100vh - 66px);
-}
-
-/* SIDE MENU */
-
-.sidebar {
-  width: 235px;
-  flex-shrink: 0;
-  background: #fff;
-  border-right: 1px solid #e5e2da;
-  padding: 18px 13px;
-  position: sticky;
-  top: 66px;
-  height: calc(100vh - 66px);
-}
-
-.menu-title {
-  color: #aaa69d;
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 1.1px;
-  padding: 0 10px;
-  margin: 4px 0 9px;
-}
-
-.menu-item {
-  width: 100%;
-  border: 0;
-  background: transparent;
-  color: #6c6962;
-  border-radius: 12px;
-  padding: 12px 11px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-align: left;
-  cursor: pointer;
-  margin-bottom: 3px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.menu-item:hover {
-  background: #f5f3ed;
-}
-
-.menu-item.active {
-  background: #1c1b19;
-  color: white;
-}
-
-.menu-icon {
-  width: 25px;
-  height: 25px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f1efe9;
-  font-size: 13px;
-}
-
-.menu-item.active .menu-icon {
-  background: #b4432e;
-}
-
-.content {
-  flex: 1;
-  min-width: 0;
-  padding: 22px;
-}
-
-.content-inner {
-  max-width: 980px;
-  margin: 0 auto;
-}
-
-.page-title {
-  font-size: 22px;
-  font-weight: 800;
-  margin: 0;
-}
-
-.page-description {
-  font-size: 11px;
-  color: #77736b;
-  margin: 4px 0 18px;
-}
-
-/* =========================
-   MOBILE MENU
-========================= */
-
-.mobile-menu {
-  display: none;
-}
-
-.mobile-nav {
-  display: none;
-}
-
-/* =========================
-   CARDS
-========================= */
-
-.card {
-  background: white;
-  border: 1px solid #e5e2da;
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: 0 2px 10px rgba(28,27,25,.025);
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.stat-card {
-  background: white;
-  border: 1px solid #e5e2da;
-  border-radius: 15px;
-  padding: 15px;
-}
-
-.stat-label {
-  color: #77736b;
-  font-size: 10px;
-  margin-bottom: 7px;
-}
-
-.stat-value {
-  font-size: 17px;
-  font-weight: 800;
-}
-
-.green {
-  color: #1c6b4e;
-}
-
-.red {
-  color: #b4432e;
-}
-
-/* =========================
-   DATE BAR
-========================= */
-
-.date-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: white;
-  border: 1px solid #e5e2da;
-  border-radius: 14px;
-  padding: 11px 13px;
-  margin-bottom: 14px;
-}
-
-.date-bar input {
-  border: 0;
-  background: transparent;
-  outline: none;
-  font-size: 12px;
-  flex: 1;
-  color: #1c1b19;
-}
-
-.date-text {
-  font-size: 10px;
-  color: #aaa69d;
-}
-
-/* =========================
-   STORE
-========================= */
-
-.store-list {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-
-.store-card {
-  background: white;
-  border: 1px solid #e5e2da;
-  border-radius: 16px;
-  padding: 15px;
-  cursor: pointer;
-  text-align: left;
-  transition: .15s;
-}
-
-.store-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 5px 18px rgba(0,0,0,.05);
-}
-
-.store-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.store-icon {
-  width: 38px;
-  height: 38px;
-  background: #edf5f0;
-  color: #1c6b4e;
-  border-radius: 11px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-}
-
-.store-name {
-  font-weight: 750;
-  font-size: 13px;
-  margin-top: 12px;
-}
-
-.store-info {
-  font-size: 10px;
-  color: #77736b;
-  margin-top: 3px;
-}
-
-.store-total {
-  font-size: 14px;
-  font-weight: 800;
-  margin-top: 13px;
-}
-
-/* =========================
-   FORMS
-========================= */
-
-.form-card {
-  background: white;
-  border: 1px solid #e5e2da;
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 14px;
-}
-
-.form-title {
-  font-size: 12px;
-  font-weight: 800;
-  margin-bottom: 13px;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: 9px;
-}
-
-.field label {
-  display: block;
-  font-size: 10px;
-  color: #77736b;
-  margin-bottom: 5px;
-}
-
-.field input {
-  width: 100%;
-  height: 40px;
-  border: 1px solid #e2dfd7;
-  background: #fcfbf8;
-  border-radius: 10px;
-  padding: 0 10px;
-  outline: none;
-  font-size: 12px;
-}
-
-.field input:focus {
-  border-color: #b4432e;
-}
-
-.primary-button {
-  width: 100%;
-  height: 42px;
-  background: #1c1b19;
-  color: white;
-  border: 0;
-  border-radius: 11px;
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 750;
-  margin-top: 10px;
-}
-
-.secondary-button {
-  height: 40px;
-  background: white;
-  color: #1c1b19;
-  border: 1px solid #dfdcd4;
-  border-radius: 11px;
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 0 14px;
-}
-
-/* =========================
-   PURCHASE ITEMS
-========================= */
-
-.back-button {
-  background: transparent;
-  border: 0;
-  padding: 0;
-  color: #6d6961;
-  font-size: 11px;
-  cursor: pointer;
-  margin-bottom: 13px;
-}
-
-.section-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 13px;
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: 800;
-  margin: 0;
-}
-
-.item-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.item-card {
-  background: white;
-  border: 1px solid #e5e2da;
-  border-radius: 14px;
-  padding: 13px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.item-product {
-  font-size: 12px;
-  font-weight: 750;
-}
-
-.item-detail {
-  color: #77736b;
-  font-size: 10px;
-  margin-top: 3px;
-}
-
-.item-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.item-price {
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.delete-button {
-  border: 0;
-  background: transparent;
-  color: #aaa69d;
-  cursor: pointer;
-  font-size: 17px;
-  padding: 4px;
-}
-
-/* =========================
-   TOTAL
-========================= */
-
-.dark-total {
-  background: #1c1b19;
-  color: white;
-  border-radius: 15px;
-  padding: 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 13px 0;
-}
-
-.dark-total span:first-child {
-  color: #aaa69d;
-  font-size: 10px;
-}
-
-.dark-total span:last-child {
-  font-size: 16px;
-  font-weight: 800;
-}
-
-/* =========================
-   LOCK
-========================= */
-
-.warning {
-  background: #fff9eb;
-  border: 1px solid #e8ddb9;
-  border-radius: 15px;
-  padding: 14px;
-  margin-top: 13px;
-}
-
-.warning-text {
-  font-size: 11px;
-  color: #76662d;
-  line-height: 1.5;
-}
-
-.check-line {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.check-line input {
-  margin-top: 2px;
-}
-
-.locked {
-  background: #f0eee8;
-  border: 1px solid #dfdcd4;
-  border-radius: 13px;
-  padding: 12px;
-  color: #68645c;
-  font-size: 11px;
-  margin-bottom: 13px;
-}
-
-.admin-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.link-button {
-  border: 0;
-  background: transparent;
-  color: #1c6b4e;
-  cursor: pointer;
-  font-size: 10px;
-  font-weight: 700;
-}
-
-/* =========================
-   SALES
-========================= */
-
-.sales-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-}
-
-.sales-card {
-  background: white;
-  border: 1px solid #e5e2da;
-  border-radius: 14px;
-  padding: 12px;
-}
-
-.sales-name {
-  font-size: 11px;
-  font-weight: 750;
-  margin-bottom: 9px;
-}
-
-.sales-fields {
-  display: grid;
-  grid-template-columns: 1fr 1.3fr;
-  gap: 7px;
-}
-
-.sales-fields label {
-  font-size: 9px;
-  color: #77736b;
-  display: block;
-  margin-bottom: 4px;
-}
-
-.sales-fields input {
-  width: 100%;
-  height: 36px;
-  border: 1px solid #e2dfd7;
-  border-radius: 9px;
-  padding: 0 8px;
-  background: #fcfbf8;
-  outline: none;
-  font-size: 11px;
-}
-
-.sales-result {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid #eeeae1;
-  font-size: 10px;
-}
-
-.sales-result strong {
-  font-size: 11px;
-}
-
-/* =========================
-   COSTS
-========================= */
-
-.cost-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.cost-card {
-  background: white;
-  border: 1px solid #e5e2da;
-  border-radius: 14px;
-  padding: 12px;
-}
-
-.cost-name {
-  font-size: 11px;
-  font-weight: 750;
-  margin-bottom: 9px;
-}
-
-.cost-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.cost-fields label {
-  font-size: 9px;
-  color: #77736b;
-  display: block;
-  margin-bottom: 4px;
-}
-
-.cost-fields input {
-  width: 100%;
-  height: 36px;
-  border: 1px solid #e2dfd7;
-  border-radius: 9px;
-  padding: 0 8px;
-  font-size: 11px;
-  outline: none;
-}
-
-.cost-bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 9px;
-  padding-top: 8px;
-  border-top: 1px solid #eeeae1;
-}
-
-.margin {
-  color: #1c6b4e;
-  font-weight: 800;
-  font-size: 11px;
-}
-
-/* =========================
-   USERS
-========================= */
-
-.user-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.user-card {
-  background: white;
-  border: 1px solid #e5e2da;
-  border-radius: 14px;
-  padding: 13px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.user-name {
-  font-size: 12px;
-  font-weight: 750;
-}
-
-.user-role {
-  font-size: 10px;
-  color: #77736b;
-  margin-top: 3px;
-}
-
-/* =========================
-   STATUS
-========================= */
-
-.save-status {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  z-index: 100;
-  background: #1c1b19;
-  color: white;
-  border-radius: 12px;
-  padding: 9px 13px;
-  font-size: 10px;
-  box-shadow: 0 8px 25px rgba(0,0,0,.18);
-}
-
-.save-status.error {
-  background: #b4432e;
-}
-
-.empty {
-  text-align: center;
-  padding: 30px 15px;
-  color: #99958d;
-  font-size: 11px;
-}
-
-/* =========================
-   MOBILE
-========================= */
-
-@media(max-width: 700px) {
-
-  .header {
-    height: 61px;
-    padding: 0 13px;
-  }
-
-  .brand-logo {
-    width: 35px;
-    height: 35px;
-  }
-
-  .brand-name {
-    font-size: 14px;
-  }
-
-  .logout {
-    padding: 0 9px;
-    height: 34px;
-  }
-
-  .layout {
-    display: block;
-    min-height: calc(100vh - 61px);
-  }
-
-  .sidebar {
-    display: none;
-  }
-
-  .content {
-    padding: 13px;
-    padding-bottom: 86px;
-  }
-
-  .page-title {
-    font-size: 19px;
-  }
-
-  .page-description {
-    margin-bottom: 13px;
-  }
-
-  .mobile-nav {
-    position: fixed;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    left: 9px;
-    right: 9px;
-    bottom: 9px;
-    z-index: 80;
-    background: rgba(28,27,25,.96);
-    border: 1px solid #3a3934;
-    border-radius: 17px;
-    padding: 6px;
-    box-shadow: 0 10px 35px rgba(0,0,0,.28);
-    backdrop-filter: blur(12px);
-  }
-
-  .mobile-nav.admin {
-    grid-template-columns: repeat(5, 1fr);
-  }
-
-  .mobile-nav button {
-    border: 0;
-    background: transparent;
-    color: #96928a;
-    border-radius: 11px;
-    min-height: 50px;
-    font-size: 8px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-  }
-
-  .mobile-nav button.active {
-    background: #b4432e;
-    color: white;
-  }
-
-  .mobile-nav-icon {
-    font-size: 17px;
-    line-height: 17px;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .stats-grid .stat-card:last-child {
-    grid-column: span 2;
-  }
-
-  .stat-card {
-    padding: 13px;
-  }
-
-  .store-list {
-    grid-template-columns: 1fr;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .form-grid .field:first-child {
-    grid-column: span 2;
-  }
-
-  .sales-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .date-text {
-    display: none;
-  }
-
-  .card,
-  .form-card {
-    border-radius: 14px;
-    padding: 13px;
-  }
-
-  .store-card {
-    padding: 14px;
-  }
-}
-
-@media(max-width:390px) {
-  .content {
-    padding: 10px;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .form-grid .field:first-child {
-    grid-column: auto;
-  }
-
-  .mobile-nav {
-    left: 5px;
-    right: 5px;
-  }
-}
-</style>
-</head>
-
-<body>
-
-<div id="root">
-  <div style="
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#1c1b19;
-    color:#aaa69d;
-    font-family:Arial;
-    font-size:13px;
-  ">
-    Mano Pizza hazırlanıyor…
-  </div>
-</div>
-
-<script>
-const {
-  useState,
-  useEffect,
-  useMemo,
-  useRef
-} = React;
-
-/* ==========================================================
+/* =========================================================
    SABİTLER
-========================================================== */
-
-const DOC_PATH = ["mano_pizza", "veri"];
+========================================================= */
 
 const ADMIN_USERNAME = "mathrew";
 const ADMIN_PASSWORD = "01102022";
@@ -1092,1172 +811,1394 @@ const DEFAULT_STORES = [
 const SALE_PRODUCTS = [
   "Margarita Pizza",
   ...Array.from(
-    { length: 20 },
-    (_, i) => `Pizza No:${i + 1}`
+    {length:20},
+    (_,i)=>`Pizza No:${i+1}`
   )
 ];
 
-const EMPTY_DATA = {
-  stores: DEFAULT_STORES,
-  purchaseEntries: {},
-  purchaseLocks: {},
-  salesEntries: {},
-  salesLocks: {},
-  costs: {},
-  users: {
-    [ADMIN_USERNAME]: {
-      password: ADMIN_PASSWORD,
-      role: "admin"
-    }
-  }
-};
 
-/* ==========================================================
+/* =========================================================
    YARDIMCI FONKSİYONLAR
-========================================================== */
+========================================================= */
 
-function todayISO() {
+function todayISO(){
   const d = new Date();
-
   const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
   return `${y}-${m}-${day}`;
 }
 
-function monthISO() {
-  return todayISO().slice(0, 7);
+function monthISO(){
+  return todayISO().slice(0,7);
 }
 
-function formatTL(value) {
-  return new Intl.NumberFormat("tr-TR", {
-    style: "currency",
-    currency: "TRY",
-    maximumFractionDigits: 2
-  }).format(Number(value) || 0);
-}
-
-function formatDate(iso) {
-  if (!iso) return "";
-
-  return new Date(
-    iso + "T00:00:00"
-  ).toLocaleDateString("tr-TR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    weekday: "long"
-  });
-}
-
-function formatMonth(iso) {
-  if (!iso) return "";
-
-  return new Date(
-    iso + "-01T00:00:00"
-  ).toLocaleDateString("tr-TR", {
-    month: "long",
-    year: "numeric"
-  });
-}
-
-function cleanData(raw) {
-
-  const source = raw || {};
-
-  return {
-    ...EMPTY_DATA,
-    ...source,
-
-    stores:
-      Array.isArray(source.stores) && source.stores.length
-        ? source.stores
-        : DEFAULT_STORES,
-
-    purchaseEntries:
-      source.purchaseEntries || {},
-
-    purchaseLocks:
-      source.purchaseLocks || {},
-
-    salesEntries:
-      source.salesEntries || {},
-
-    salesLocks:
-      source.salesLocks || {},
-
-    costs:
-      source.costs || {},
-
-    users: {
-      ...EMPTY_DATA.users,
-      ...(source.users || {})
+function formatTL(n){
+  return new Intl.NumberFormat(
+    "tr-TR",
+    {
+      style:"currency",
+      currency:"TRY",
+      maximumFractionDigits:2
     }
-  };
+  ).format(Number(n)||0);
 }
 
-/* ==========================================================
-   FIREBASE READY
-========================================================== */
-
-function waitForFirebase() {
-
-  return new Promise(resolve => {
-
-    if (window.MANO_FIREBASE) {
-      resolve();
-      return;
-    }
-
-    window.addEventListener(
-      "firebase-ready",
-      resolve,
-      { once: true }
+function formatDateLabel(iso){
+  if(!iso) return "";
+  try{
+    return new Date(
+      iso+"T00:00:00"
+    ).toLocaleDateString(
+      "tr-TR",
+      {
+        day:"numeric",
+        month:"long",
+        year:"numeric",
+        weekday:"long"
+      }
     );
-  });
+  }catch(e){
+    return iso;
+  }
 }
 
-/* ==========================================================
-   FIREBASE DATA HOOK
-========================================================== */
+function formatMonthLabel(iso){
+  if(!iso) return "";
+  try{
+    return new Date(
+      iso+"-01T00:00:00"
+    ).toLocaleDateString(
+      "tr-TR",
+      {
+        month:"long",
+        year:"numeric"
+      }
+    );
+  }catch(e){
+    return iso;
+  }
+}
 
-function useManoData() {
 
-  const [data, setData] = useState(EMPTY_DATA);
-  const [ready, setReady] = useState(false);
-  const [saveState, setSaveState] = useState("idle");
+/* =========================================================
+   ICON
+========================================================= */
 
-  const latestData = useRef(EMPTY_DATA);
+function Icon({name,size=18}){
+  useEffect(()=>{
+    try{
+      lucide.createIcons();
+    }catch(e){}
+  });
 
-  useEffect(() => {
+  return (
+    <i
+      data-lucide={name}
+      style={{
+        width:size,
+        height:size
+      }}
+    />
+  );
+}
 
-    let unsubscribe = null;
-    let alive = true;
 
-    async function start() {
+/* =========================================================
+   ANA UYGULAMA
+========================================================= */
 
-      try {
+function App(){
 
-        await waitForFirebase();
+  const [loading,setLoading] = useState(true);
+  const [error,setError] = useState("");
 
-        if (!alive) return;
+  const [config,setConfig] = useState({
+    stores:DEFAULT_STORES,
+    users:{
+      [ADMIN_USERNAME]:{
+        password:ADMIN_PASSWORD,
+        role:"admin"
+      }
+    }
+  });
 
-        const {
-          db,
-          doc,
-          getDoc,
-          onSnapshot
-        } = window.MANO_FIREBASE;
+  const [currentUser,setCurrentUser] = useState(null);
 
-        const ref = doc(
-          db,
-          DOC_PATH[0],
-          DOC_PATH[1]
-        );
+  const [purchases,setPurchases] = useState({});
+  const [sales,setSales] = useState({});
+  const [costs,setCosts] = useState({});
 
-        /*
-          İlk açılış:
-          Doküman yoksa oluştur.
-        */
+  const [menu,setMenu] = useState(false);
+  const [tab,setTab] = useState("alis");
+  const [date,setDate] = useState(todayISO());
 
-        const first = await getDoc(ref);
+  const [saveState,setSaveState] = useState("");
 
-        if (!first.exists()) {
 
-          await window.MANO_FIREBASE.setDoc(
-            ref,
-            EMPTY_DATA,
-            { merge: false }
+  /* =======================================================
+     FIREBASE ANLIK DİNLEME
+  ======================================================= */
+
+  useEffect(()=>{
+
+    let active = true;
+
+    const unsubConfig = CONFIG_REF.onSnapshot(
+      async snap => {
+
+        try{
+
+          if(!snap.exists){
+
+            const initial = {
+              stores:DEFAULT_STORES,
+              users:{
+                [ADMIN_USERNAME]:{
+                  password:ADMIN_PASSWORD,
+                  role:"admin"
+                }
+              }
+            };
+
+            await CONFIG_REF.set(initial,{merge:true});
+
+            if(active){
+              setConfig(initial);
+            }
+
+          }else{
+
+            const d = snap.data() || {};
+
+            const safeUsers =
+              d.users &&
+              typeof d.users === "object"
+                ? d.users
+                : {};
+
+            const safeStores =
+              Array.isArray(d.stores)
+                ? d.stores
+                : DEFAULT_STORES;
+
+            if(active){
+
+              setConfig({
+                stores:safeStores,
+                users:{
+                  [ADMIN_USERNAME]:{
+                    password:ADMIN_PASSWORD,
+                    role:"admin"
+                  },
+                  ...safeUsers
+                }
+              });
+
+            }
+
+          }
+
+        }catch(err){
+
+          console.error(err);
+
+          if(active){
+            setError(
+              "Firebase bağlantısı kurulamadı."
+            );
+          }
+
+        }
+
+        if(active){
+          setLoading(false);
+        }
+
+      },
+      err => {
+
+        console.error(err);
+
+        if(active){
+
+          setError(
+            "Firebase bağlantı hatası."
           );
 
-          if (alive) {
-            setData(EMPTY_DATA);
-            latestData.current = EMPTY_DATA;
-          }
+          setLoading(false);
 
-        } else {
-
-          const normalized =
-            cleanData(first.data());
-
-          if (alive) {
-            setData(normalized);
-            latestData.current = normalized;
-          }
         }
 
-        /*
-          ANLIK SENKRONİZASYON
-        */
-
-        unsubscribe = onSnapshot(
-          ref,
-          snapshot => {
-
-            if (!snapshot.exists()) return;
-
-            const normalized =
-              cleanData(snapshot.data());
-
-            latestData.current = normalized;
-
-            setData(normalized);
-
-            setSaveState("saved");
-          },
-          error => {
-
-            console.error(
-              "Firestore snapshot error:",
-              error
-            );
-
-            setSaveState("error");
-          }
-        );
-
-        if (alive) {
-          setReady(true);
-        }
-
-      } catch (error) {
-
-        console.error(
-          "Firebase başlatma hatası:",
-          error
-        );
-
-        if (alive) {
-          setReady(true);
-          setSaveState("error");
-        }
       }
-    }
+    );
 
-    start();
 
-    return () => {
-
-      alive = false;
-
-      if (unsubscribe) {
-        unsubscribe();
-      }
+    return ()=>{
+      active=false;
+      unsubConfig();
     };
 
-  }, []);
+  },[]);
 
-  /*
-    KRİTİK KISIM:
 
-    Her değişiklik Firestore'daki EN SON dokümanı
-    transaction ile okur.
+  /* =======================================================
+     TARİHE GÖRE ALIŞ DİNLE
+  ======================================================= */
 
-    Böylece iki farklı telefon aynı anda işlem yaptığında
-    eski React state'i kullanıp yeni veriyi ezme ihtimali
-    ciddi şekilde azaltılır.
-  */
+  useEffect(()=>{
 
-  async function updateData(mutator) {
+    if(!date) return;
 
-    setSaveState("saving");
+    const unsub = PURCHASES
+      .doc(date)
+      .onSnapshot(
+        snap=>{
 
-    try {
+          if(snap.exists){
 
-      await waitForFirebase();
-
-      const {
-        db,
-        doc,
-        runTransaction
-      } = window.MANO_FIREBASE;
-
-      const ref = doc(
-        db,
-        DOC_PATH[0],
-        DOC_PATH[1]
-      );
-
-      await runTransaction(
-        db,
-        async transaction => {
-
-          const snapshot =
-            await transaction.get(ref);
-
-          const current =
-            cleanData(
-              snapshot.exists()
-                ? snapshot.data()
-                : EMPTY_DATA
+            setPurchases(
+              snap.data() || {}
             );
 
-          const next =
-            cleanData(
-              mutator(current)
-            );
+          }else{
 
-          transaction.set(
-            ref,
-            next,
-            { merge: false }
-          );
+            setPurchases({});
 
-          latestData.current = next;
+          }
+
+        },
+        err=>{
+          console.error(err);
+          setError("Alış verileri alınamadı.");
         }
       );
 
-      setSaveState("saved");
+    return ()=>unsub();
 
-    } catch (error) {
+  },[date]);
 
-      console.error(
-        "Kayıt hatası:",
-        error
+
+  /* =======================================================
+     TARİHE GÖRE SATIŞ DİNLE
+  ======================================================= */
+
+  useEffect(()=>{
+
+    if(!date) return;
+
+    const unsub = SALES
+      .doc(date)
+      .onSnapshot(
+        snap=>{
+
+          if(snap.exists){
+
+            setSales(
+              snap.data() || {}
+            );
+
+          }else{
+
+            setSales({});
+
+          }
+
+        },
+        err=>{
+          console.error(err);
+          setError("Satış verileri alınamadı.");
+        }
       );
 
-      setSaveState("error");
-    }
+    return ()=>unsub();
+
+  },[date]);
+
+
+  /* =======================================================
+     MALİYET DİNLE
+  ======================================================= */
+
+  useEffect(()=>{
+
+    const unsub = COSTS
+      .doc("main")
+      .onSnapshot(
+        snap=>{
+
+          if(snap.exists){
+
+            setCosts(
+              snap.data() || {}
+            );
+
+          }else{
+
+            setCosts({});
+
+          }
+
+        },
+        err=>{
+          console.error(err);
+        }
+      );
+
+    return ()=>unsub();
+
+  },[]);
+
+
+  /* =======================================================
+     KAYDETME DURUMU
+  ======================================================= */
+
+  function saved(){
+
+    setSaveState("Kaydedildi");
+
+    setTimeout(()=>{
+      setSaveState("");
+    },1500);
+
   }
 
-  return {
-    data,
-    ready,
-    saveState,
-    updateData
-  };
-}
 
-/* ==========================================================
-   ANA UYGULAMA
-========================================================== */
+  /* =======================================================
+     LOGIN
+  ======================================================= */
 
-function App() {
+  function login(user){
 
-  const {
-    data,
-    ready,
-    saveState,
-    updateData
-  } = useManoData();
+    setCurrentUser(user);
 
-  const [user, setUser] =
-    useState(null);
+  }
 
-  const [tab, setTab] =
-    useState("alis");
 
-  if (!ready) {
+  if(loading){
 
-    return (
-      <div className="login-screen">
+    return(
+      <div className="loading">
 
-        <div style={{
-          color:"#aaa69d",
-          textAlign:"center"
-        }}>
-          <div className="logo-big">
-            <span className="logo-pizza">🍕</span>
-          </div>
+        <div className="spinner"></div>
 
-          <div style={{
-            color:"white",
-            fontWeight:800,
-            fontSize:20
-          }}>
-            Mano Pizza
-          </div>
+        <div>
+          Mano Pizza hazırlanıyor...
+        </div>
 
-          <div style={{
-            marginTop:8,
-            fontSize:12
-          }}>
-            Veritabanına bağlanılıyor…
-          </div>
+        <div
+          style={{
+            color:"#77736b",
+            fontSize:10,
+            marginTop:6
+          }}
+        >
+          Veriler güvenli şekilde yükleniyor
         </div>
 
       </div>
     );
+
   }
 
-  if (!user) {
 
-    return (
+  if(!currentUser){
+
+    return(
       <Login
-        users={data.users}
-        onLogin={setUser}
+        users={config.users}
+        onLogin={login}
       />
     );
+
   }
 
+
   const isAdmin =
-    user.role === "admin";
+    currentUser.role === "admin";
 
-  const tabs = isAdmin
-    ? [
-        {
-          id:"alis",
-          name:"Alış",
-          icon:"🛒"
-        },
-        {
-          id:"satis",
-          name:"Satış",
-          icon:"💰"
-        },
-        {
-          id:"maliyet",
-          name:"Maliyet",
-          icon:"📊"
-        },
-        {
-          id:"karzarar",
-          name:"Kâr / Zarar",
-          icon:"📈"
-        },
-        {
-          id:"yonetici",
-          name:"Yönetici",
-          icon:"👤"
-        }
-      ]
-    : [
-        {
-          id:"alis",
-          name:"Alış",
-          icon:"🛒"
-        },
-        {
-          id:"satis",
-          name:"Satış",
-          icon:"💰"
-        }
-      ];
 
-  return (
+  return(
+
     <div className="app">
 
-      <header className="header">
+      <TopBar
+        user={currentUser}
+        onMenu={()=>setMenu(true)}
+        onLogout={()=>setCurrentUser(null)}
+      />
 
-        <div className="brand">
 
-          <div className="brand-logo">
-            <span>🍕</span>
+      {menu && (
+
+        <>
+          <div
+            className="drawer-overlay"
+            onClick={()=>setMenu(false)}
+          />
+
+          <Drawer
+            tab={tab}
+            setTab={setTab}
+            isAdmin={isAdmin}
+            user={currentUser}
+            close={()=>setMenu(false)}
+            logout={()=>setCurrentUser(null)}
+          />
+        </>
+
+      )}
+
+
+      <main className="page">
+
+        {(tab==="alis" || tab==="satis") && (
+
+          <div className="date-card">
+
+            <Icon name="calendar" size={17}/>
+
+            <input
+              type="date"
+              value={date}
+              onChange={e=>setDate(e.target.value)}
+            />
+
+            <span className="date-label">
+              {formatDateLabel(date)}
+            </span>
+
+          </div>
+
+        )}
+
+
+        {tab==="alis" && (
+
+          <Alis
+            config={config}
+            purchases={purchases}
+            date={date}
+            isAdmin={isAdmin}
+            save={saved}
+            setError={setError}
+          />
+
+        )}
+
+
+        {tab==="satis" && (
+
+          <Satis
+            sales={sales}
+            date={date}
+            isAdmin={isAdmin}
+            save={saved}
+            setError={setError}
+          />
+
+        )}
+
+
+        {tab==="maliyet" && isAdmin && (
+
+          <Maliyet
+            costs={costs}
+            save={saved}
+            setError={setError}
+          />
+
+        )}
+
+
+        {tab==="karzarar" && isAdmin && (
+
+          <KarZarar
+            purchases={purchases}
+            sales={sales}
+            date={date}
+            setDate={setDate}
+          />
+
+        )}
+
+
+        {tab==="yonetici" && isAdmin && (
+
+          <Yonetici
+            config={config}
+            setError={setError}
+            save={saved}
+          />
+
+        )}
+
+      </main>
+
+
+      {saveState && (
+
+        <div className="status ok">
+          ✓ {saveState}
+        </div>
+
+      )}
+
+
+      {error && (
+
+        <div className="status error">
+          {error}
+        </div>
+
+      )}
+
+    </div>
+
+  );
+
+}
+
+
+/* =========================================================
+   TOPBAR
+========================================================= */
+
+function TopBar({
+  user,
+  onMenu,
+  onLogout
+}){
+
+  return(
+
+    <header className="topbar">
+
+      <div className="brand">
+
+        <div className="logo">
+          <Icon name="pizza" size={21}/>
+        </div>
+
+        <div>
+
+          <div className="brand-title">
+            Mano Pizza
+          </div>
+
+          <div className="brand-sub">
+            {user.username} · {user.role==="admin" ? "Yönetici":"Kullanıcı"}
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <button
+        className="menu-btn"
+        onClick={onMenu}
+      >
+        <Icon name="menu" size={20}/>
+      </button>
+
+    </header>
+
+  );
+
+}
+
+
+/* =========================================================
+   DRAWER
+========================================================= */
+
+function Drawer({
+  tab,
+  setTab,
+  isAdmin,
+  user,
+  close,
+  logout
+}){
+
+  const items = [
+
+    {
+      id:"alis",
+      label:"Alış",
+      icon:"shopping-bag"
+    },
+
+    {
+      id:"satis",
+      label:"Satış",
+      icon:"trending-up"
+    },
+
+    ...(isAdmin ? [
+
+      {
+        id:"maliyet",
+        label:"Maliyetler",
+        icon:"percent"
+      },
+
+      {
+        id:"karzarar",
+        label:"Kâr / Zarar",
+        icon:"bar-chart-3"
+      },
+
+      {
+        id:"yonetici",
+        label:"Yönetici",
+        icon:"shield-check"
+      }
+
+    ]:[])
+
+  ];
+
+
+  return(
+
+    <aside className="drawer">
+
+      <div className="drawer-head">
+
+        <div className="drawer-brand">
+
+          <div className="logo">
+            <Icon name="pizza" size={18}/>
           </div>
 
           <div>
-            <div className="brand-name">
+            <div className="brand-title">
               Mano Pizza
             </div>
-
-            <div className="brand-user">
-              {user.username}
-              {" · "}
-              {isAdmin
-                ? "Yönetici"
-                : "Kullanıcı"}
+            <div className="brand-sub">
+              Yönetim Paneli
             </div>
           </div>
 
         </div>
 
         <button
-          className="logout"
-          onClick={() => setUser(null)}
+          className="secondary-btn"
+          style={{
+            padding:"7px"
+          }}
+          onClick={close}
         >
-          Çıkış
+          <Icon name="x" size={16}/>
         </button>
-
-      </header>
-
-      <div className="layout">
-
-        {/* MASAÜSTÜ SOL MENÜ */}
-
-        <aside className="sidebar">
-
-          <div className="menu-title">
-            İşletme Paneli
-          </div>
-
-          {tabs.map(item => (
-
-            <button
-              key={item.id}
-              className={
-                "menu-item " +
-                (tab === item.id
-                  ? "active"
-                  : "")
-              }
-              onClick={() =>
-                setTab(item.id)
-              }
-            >
-
-              <span className="menu-icon">
-                {item.icon}
-              </span>
-
-              {item.name}
-
-            </button>
-
-          ))}
-
-        </aside>
-
-        <main className="content">
-
-          <div className="content-inner">
-
-            {tab === "alis" && (
-              <Alis
-                data={data}
-                updateData={updateData}
-                isAdmin={isAdmin}
-              />
-            )}
-
-            {tab === "satis" && (
-              <Satis
-                data={data}
-                updateData={updateData}
-                isAdmin={isAdmin}
-              />
-            )}
-
-            {tab === "maliyet" &&
-              isAdmin && (
-              <Maliyet
-                data={data}
-                updateData={updateData}
-              />
-            )}
-
-            {tab === "karzarar" &&
-              isAdmin && (
-              <KarZarar
-                data={data}
-              />
-            )}
-
-            {tab === "yonetici" &&
-              isAdmin && (
-              <Yonetici
-                data={data}
-                updateData={updateData}
-              />
-            )}
-
-          </div>
-
-        </main>
 
       </div>
 
-      {/* TELEFON ALT MENÜ */}
 
-      <nav
-        className={
-          "mobile-nav " +
-          (isAdmin ? "admin" : "")
-        }
-      >
+      <div className="drawer-menu">
 
-        {tabs.map(item => (
+        {items.map(item=>(
 
           <button
             key={item.id}
             className={
-              tab === item.id
-                ? "active"
-                : ""
+              "drawer-item "+
+              (tab===item.id ? "active":"")
             }
-            onClick={() =>
-              setTab(item.id)
-            }
+            onClick={()=>{
+
+              setTab(item.id);
+              close();
+
+            }}
           >
 
-            <span className="mobile-nav-icon">
-              {item.icon}
-            </span>
+            <Icon
+              name={item.icon}
+              size={17}
+            />
 
-            {item.name}
+            {item.label}
 
           </button>
 
         ))}
 
-      </nav>
+      </div>
 
-      {saveState === "saving" && (
-        <div className="save-status">
-          Kaydediliyor…
-        </div>
-      )}
 
-      {saveState === "saved" && (
+      <div className="drawer-bottom">
+
         <div
-          className="save-status"
+          className="card"
           style={{
-            background:"#1c6b4e"
+            marginBottom:8,
+            background:"#f7f6f2"
           }}
         >
-          ✓ Veriler kaydedildi
-        </div>
-      )}
 
-      {saveState === "error" && (
-        <div className="save-status error">
-          ⚠ Kayıt hatası
-        </div>
-      )}
+          <div
+            style={{
+              fontSize:12,
+              fontWeight:800
+            }}
+          >
+            {user.username}
+          </div>
 
-    </div>
+          <div
+            style={{
+              fontSize:10,
+              color:"#77736b",
+              marginTop:3
+            }}
+          >
+            {user.role==="admin"
+              ? "Yönetici hesabı"
+              : "Kullanıcı hesabı"}
+          </div>
+
+        </div>
+
+
+        <button
+          className="drawer-item"
+          onClick={logout}
+        >
+
+          <Icon
+            name="log-out"
+            size={17}
+          />
+
+          Çıkış Yap
+
+        </button>
+
+      </div>
+
+    </aside>
+
   );
+
 }
 
-/* ==========================================================
+
+/* =========================================================
    LOGIN
-========================================================== */
+========================================================= */
 
-function Login({ users, onLogin }) {
+function Login({
+  users,
+  onLogin
+}){
 
-  const [username, setUsername] =
-    useState("");
+  const [username,setUsername] = useState("");
+  const [password,setPassword] = useState("");
+  const [error,setError] = useState("");
 
-  const [password, setPassword] =
-    useState("");
-
-  const [error, setError] =
-    useState("");
-
-  function submit(e) {
+  function submit(e){
 
     e.preventDefault();
 
-    const name =
-      username.trim();
+    const name = username.trim();
 
-    const found =
+    const user =
+      users &&
       users[name];
 
-    if (
-      found &&
-      found.password === password
-    ) {
+    if(
+      user &&
+      user.password === password
+    ){
 
       onLogin({
         username:name,
-        role:found.role
+        role:user.role
       });
 
-      setError("");
+      return;
 
-    } else {
-
-      setError(
-        "Kullanıcı adı veya şifre hatalı."
-      );
-
-      setPassword("");
     }
+
+    setError(
+      "Kullanıcı adı veya şifre hatalı."
+    );
+
+    setPassword("");
+
   }
 
-  return (
-    <div className="login-screen">
+
+  return(
+
+    <div className="login">
 
       <div className="login-box">
 
-        <div className="logo-big">
-          <span className="logo-pizza">
-            🍕
-          </span>
+        <div className="login-logo">
+          <Icon name="pizza" size={34}/>
         </div>
 
-        <h1 className="login-title">
+        <h1>
           Mano Pizza
         </h1>
 
-        <p className="login-subtitle">
-          İşletme Yönetim Paneli
-        </p>
+        <div className="login-sub">
+          Gelir · Gider · Satış Yönetimi
+        </div>
 
-        <div className="login-card">
 
-          <form onSubmit={submit}>
+        <form onSubmit={submit}>
 
-            <label className="login-label">
+          <div className="login-field">
+
+            <span>
               Kullanıcı Adı
-            </label>
+            </span>
 
             <input
-              className="login-input"
-              value={username}
-              autoCapitalize="none"
-              autoCorrect="off"
               autoFocus
-              onChange={e =>
-                setUsername(e.target.value)
+              type="text"
+              autoCapitalize="none"
+              value={username}
+              onChange={
+                e=>setUsername(e.target.value)
               }
-              placeholder="Kullanıcı adı"
             />
 
-            <label className="login-label">
+          </div>
+
+
+          <div className="login-field">
+
+            <span>
               Şifre
-            </label>
+            </span>
 
             <input
-              className="login-input"
               type="password"
               value={password}
-              onChange={e =>
-                setPassword(e.target.value)
+              onChange={
+                e=>setPassword(e.target.value)
               }
-              placeholder="Şifre"
             />
 
-            {error && (
-              <div className="login-error">
-                {error}
-              </div>
-            )}
+          </div>
 
-            <button
-              className="login-button"
-              type="submit"
-            >
-              Giriş Yap
-            </button>
 
-          </form>
+          {error && (
 
-        </div>
+            <div className="login-error">
+              {error}
+            </div>
+
+          )}
+
+
+          <button
+            className="login-btn"
+            type="submit"
+          >
+            Giriş Yap
+          </button>
+
+        </form>
 
       </div>
 
     </div>
+
   );
+
 }
 
-/* ==========================================================
+
+/* =========================================================
    ALIŞ
-========================================================== */
+========================================================= */
 
 function Alis({
-  data,
-  updateData,
-  isAdmin
-}) {
+  config,
+  purchases,
+  date,
+  isAdmin,
+  save,
+  setError
+}){
 
-  const [date, setDate] =
-    useState(todayISO());
-
-  const [activeStore, setActiveStore] =
+  const [activeStore,setActiveStore] =
     useState(null);
 
-  const [product, setProduct] =
+  const [product,setProduct] =
     useState("");
 
-  const [qty, setQty] =
+  const [qty,setQty] =
     useState("1");
 
-  const [price, setPrice] =
+  const [price,setPrice] =
     useState("");
 
-  const [newStore, setNewStore] =
+  const [newStore,setNewStore] =
     useState("");
 
-  const [confirm, setConfirm] =
+  const [showAdd,setShowAdd] =
     useState(false);
 
-  const entries =
-    data.purchaseEntries[date] || {};
+  const [checked,setChecked] =
+    useState(false);
 
-  const locks =
-    data.purchaseLocks[date] || {};
 
-  function storeTotal(store) {
+  const stores =
+    Array.isArray(config.stores)
+      ? config.stores
+      : DEFAULT_STORES;
 
-    return (
-      entries[store] || []
-    ).reduce(
-      (sum, item) =>
-        sum +
-        Number(item.qty || 0) *
-        Number(item.unitPrice || 0),
-      0
-    );
+
+  const dayStores =
+    purchases.stores || {};
+
+
+  function storeItems(store){
+
+    return Array.isArray(dayStores[store])
+      ? dayStores[store]
+      : [];
+
   }
 
-  const total =
-    data.stores.reduce(
-      (sum, store) =>
-        sum + storeTotal(store),
+
+  function storeTotal(store){
+
+    return storeItems(store)
+      .reduce(
+        (sum,item)=>
+          sum+
+          (Number(item.qty)||0)*
+          (Number(item.unitPrice)||0),
+        0
+      );
+
+  }
+
+
+  const dayTotal =
+    stores.reduce(
+      (sum,store)=>
+        sum+storeTotal(store),
       0
     );
 
-  function addItem(e) {
+
+  async function addItem(e){
 
     e.preventDefault();
 
-    const p =
-      product.trim();
+    if(!activeStore) return;
 
-    const q =
-      Number(qty);
+    const p = product.trim();
+    const q = Number(qty);
+    const pr = Number(price);
 
-    const pr =
-      Number(price);
-
-    if (
-      !activeStore ||
+    if(
       !p ||
       !q ||
-      q <= 0 ||
+      q<=0 ||
       isNaN(pr) ||
-      pr < 0
-    ) return;
+      pr<0
+    ){
 
-    updateData(current => {
+      setError("Ürün bilgilerini kontrol et.");
+      return;
 
-      const day =
-        current.purchaseEntries[date] || {};
+    }
 
-      const storeItems =
-        day[activeStore] || [];
 
-      return {
-        ...current,
+    const item = {
 
-        purchaseEntries: {
-          ...current.purchaseEntries,
+      id:
+        Date.now()+
+        "-" +
+        Math.random()
+          .toString(36)
+          .slice(2,8),
 
-          [date]: {
-            ...day,
+      product:p,
+      qty:q,
+      unitPrice:pr,
 
-            [activeStore]: [
-              ...storeItems,
+      createdAt:
+        new Date().toISOString()
 
-              {
-                id:
-                  Date.now() +
-                  "-" +
-                  Math.random()
-                    .toString(36)
-                    .slice(2),
+    };
 
-                product:p,
-                qty:q,
-                unitPrice:pr
-              }
-            ]
-          }
-        }
-      };
-    });
 
-    setProduct("");
-    setQty("1");
-    setPrice("");
+    const current =
+      storeItems(activeStore);
+
+    const next = {
+
+      ...purchases,
+
+      stores:{
+        ...dayStores,
+
+        [activeStore]:[
+          ...current,
+          item
+        ]
+      }
+
+    };
+
+
+    try{
+
+      await PURCHASES
+        .doc(date)
+        .set(next,{merge:true});
+
+      save();
+
+      setProduct("");
+      setQty("1");
+      setPrice("");
+
+    }catch(err){
+
+      console.error(err);
+
+      setError(
+        "Alış kaydedilemedi."
+      );
+
+    }
+
   }
 
-  function removeItem(id) {
 
-    updateData(current => {
+  async function removeItem(id){
 
-      const day =
-        current.purchaseEntries[date] || {};
+    if(!activeStore) return;
 
-      const items =
-        day[activeStore] || [];
+    const nextItems =
+      storeItems(activeStore)
+        .filter(x=>x.id!==id);
 
-      return {
-        ...current,
+    const next = {
 
-        purchaseEntries: {
-          ...current.purchaseEntries,
+      ...purchases,
 
-          [date]: {
-            ...day,
+      stores:{
+        ...dayStores,
 
-            [activeStore]:
-              items.filter(
-                x => x.id !== id
-              )
-          }
-        }
-      };
-    });
+        [activeStore]:nextItems
+
+      }
+
+    };
+
+
+    try{
+
+      await PURCHASES
+        .doc(date)
+        .set(next,{merge:true});
+
+      save();
+
+    }catch(err){
+
+      setError(
+        "Ürün silinemedi."
+      );
+
+    }
+
   }
 
-  function lockStore() {
 
-    if (!confirm) return;
-
-    updateData(current => {
-
-      const locks =
-        current.purchaseLocks[date] || {};
-
-      return {
-        ...current,
-
-        purchaseLocks: {
-          ...current.purchaseLocks,
-
-          [date]: {
-            ...locks,
-            [activeStore]:true
-          }
-        }
-      };
-    });
-
-    setConfirm(false);
-  }
-
-  function unlockStore() {
-
-    updateData(current => {
-
-      const locks =
-        current.purchaseLocks[date] || {};
-
-      return {
-        ...current,
-
-        purchaseLocks: {
-          ...current.purchaseLocks,
-
-          [date]: {
-            ...locks,
-            [activeStore]:false
-          }
-        }
-      };
-    });
-  }
-
-  function addStore() {
+  async function addStore(){
 
     const name =
       newStore.trim();
 
-    if (
+    if(
       !name ||
-      data.stores.includes(name)
-    ) return;
+      stores.includes(name)
+    ){
 
-    updateData(current => ({
-      ...current,
-      stores:[
-        ...current.stores,
-        name
-      ]
-    }));
+      setError(
+        "Mağaza adı geçersiz veya zaten mevcut."
+      );
 
-    setNewStore("");
+      return;
+
+    }
+
+
+    try{
+
+      await CONFIG_REF.set({
+
+        stores:[
+          ...stores,
+          name
+        ]
+
+      },{merge:true});
+
+      setNewStore("");
+      setShowAdd(false);
+      save();
+
+    }catch(err){
+
+      setError(
+        "Mağaza kaydedilemedi."
+      );
+
+    }
+
   }
 
-  function deleteStore(name) {
 
-    if (
+  async function deleteStore(store){
+
+    if(
       !confirm(
-        `"${name}" mağazasını listeden kaldırmak istediğine emin misin?`
+        `"${store}" mağazasını silmek istediğinize emin misiniz?`
       )
     ) return;
 
-    updateData(current => ({
-      ...current,
 
-      stores:
-        current.stores.filter(
-          s => s !== name
-        )
-    }));
+    try{
 
-    setActiveStore(null);
+      await CONFIG_REF.set({
+
+        stores:
+          stores.filter(x=>x!==store)
+
+      },{merge:true});
+
+      save();
+
+      setActiveStore(null);
+
+    }catch(err){
+
+      setError(
+        "Mağaza silinemedi."
+      );
+
+    }
+
   }
 
-  if (activeStore) {
+
+  if(activeStore){
 
     const items =
-      entries[activeStore] || [];
+      storeItems(activeStore);
 
-    const locked =
-      !!locks[activeStore];
 
-    return (
-      <>
+    return(
+
+      <div>
 
         <button
-          className="back-button"
-          onClick={() =>
-            setActiveStore(null)
-          }
+          className="back-btn"
+          onClick={()=>{
+
+            setActiveStore(null);
+            setChecked(false);
+
+          }}
         >
-          ← Mağazalara dön
+
+          <Icon
+            name="chevron-left"
+            size={16}
+          />
+
+          Mağazalara Dön
+
         </button>
 
-        <div className="section-head">
+
+        <div
+          style={{
+            display:"flex",
+            justifyContent:"space-between",
+            alignItems:"center",
+            marginBottom:12
+          }}
+        >
 
           <h2 className="section-title">
             {activeStore}
-            {" "}
-            {locked ? "🔒" : ""}
           </h2>
 
           {isAdmin && (
-            <div className="admin-actions">
 
-              {locked && (
-                <button
-                  className="link-button"
-                  onClick={unlockStore}
-                >
-                  Kilidi Aç
-                </button>
-              )}
+            <button
+              className="danger-btn"
+              onClick={()=>
+                deleteStore(activeStore)
+              }
+            >
+              <Icon
+                name="trash-2"
+                size={16}
+              />
+            </button>
 
-              <button
-                className="link-button"
-                style={{
-                  color:"#b4432e"
-                }}
-                onClick={() =>
-                  deleteStore(activeStore)
-                }
-              >
-                Mağazayı Sil
-              </button>
-
-            </div>
           )}
 
         </div>
 
-        {!locked && (
-          <form
-            className="form-card"
-            onSubmit={addItem}
+
+        <div className="card">
+
+          <div className="form-grid">
+
+            <div className="field">
+
+              <label>
+                Ürün
+              </label>
+
+              <input
+                placeholder="Örn. Un"
+                value={product}
+                onChange={
+                  e=>setProduct(e.target.value)
+                }
+              />
+
+            </div>
+
+
+            <div className="field">
+
+              <label>
+                Miktar
+              </label>
+
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={qty}
+                onChange={
+                  e=>setQty(e.target.value)
+                }
+              />
+
+            </div>
+
+
+            <div className="field">
+
+              <label>
+                Birim Fiyat
+              </label>
+
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0"
+                value={price}
+                onChange={
+                  e=>setPrice(e.target.value)
+                }
+              />
+
+            </div>
+
+          </div>
+
+
+          <button
+            className="primary-btn"
+            onClick={addItem}
           >
 
-            <div className="form-title">
-              Yeni Alış Kaydı
-            </div>
+            <Icon
+              name="plus"
+              size={15}
+            />
 
-            <div className="form-grid">
+            Ürün Ekle
 
-              <div className="field">
-                <label>Ürün</label>
+          </button>
 
-                <input
-                  value={product}
-                  onChange={e =>
-                    setProduct(e.target.value)
-                  }
-                  placeholder="Örn. Un"
-                />
-              </div>
+        </div>
 
-              <div className="field">
-                <label>Miktar</label>
 
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={qty}
-                  onChange={e =>
-                    setQty(e.target.value)
-                  }
-                />
-              </div>
+        <div className="entry-list">
 
-              <div className="field">
-                <label>Birim Fiyat</label>
+          {items.length===0 && (
 
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={price}
-                  onChange={e =>
-                    setPrice(e.target.value)
-                  }
-                  placeholder="0"
-                />
-              </div>
-
-            </div>
-
-            <button
-              className="primary-button"
-              type="submit"
-            >
-              + Ürün Ekle
-            </button>
-
-          </form>
-        )}
-
-        {locked && !isAdmin && (
-          <div className="locked">
-            🔒 Bu alış kaydı onaylandı.
-            <br/>
-            Değişiklik yapılamaz.
-          </div>
-        )}
-
-        <div className="item-list">
-
-          {items.length === 0 && (
             <div className="empty">
-              Henüz alış kaydı bulunmuyor.
+              Henüz ürün girilmedi.
             </div>
+
           )}
 
-          {items.map(item => (
+
+          {items.map(item=>(
 
             <div
-              className="item-card"
+              className="entry"
               key={item.id}
             >
 
               <div>
-                <div className="item-product">
+
+                <div className="entry-product">
                   {item.product}
                 </div>
 
-                <div className="item-detail">
-                  {item.qty}
-                  {" × "}
-                  {formatTL(item.unitPrice)}
+                <div className="entry-meta">
+                  {item.qty} × {formatTL(item.unitPrice)}
                 </div>
+
               </div>
 
-              <div className="item-right">
 
-                <div className="item-price">
+              <div
+                style={{
+                  display:"flex",
+                  alignItems:"center",
+                  gap:7
+                }}
+              >
+
+                <div className="entry-price">
                   {formatTL(
-                    Number(item.qty) *
-                    Number(item.unitPrice)
+                    item.qty*item.unitPrice
                   )}
                 </div>
 
-                {!locked && (
-                  <button
-                    className="delete-button"
-                    onClick={() =>
-                      removeItem(item.id)
-                    }
-                  >
-                    ×
-                  </button>
-                )}
+
+                <button
+                  className="danger-btn"
+                  onClick={()=>
+                    removeItem(item.id)
+                  }
+                >
+
+                  <Icon
+                    name="trash-2"
+                    size={15}
+                  />
+
+                </button>
 
               </div>
 
@@ -2267,144 +2208,87 @@ function Alis({
 
         </div>
 
-        <div className="dark-total">
-          <span>
+
+        <div className="total-card">
+
+          <span className="total-label">
             {activeStore} Toplamı
           </span>
 
-          <span>
+          <span className="total-value">
             {formatTL(
               storeTotal(activeStore)
             )}
           </span>
+
         </div>
-
-        {!locked &&
-          !isAdmin &&
-          items.length > 0 && (
-
-          <div className="warning">
-
-            <label className="check-line">
-
-              <input
-                type="checkbox"
-                checked={confirm}
-                onChange={e =>
-                  setConfirm(
-                    e.target.checked
-                  )
-                }
-              />
-
-              <span className="warning-text">
-                Bu kaydı kontrol ettim.
-                Onayladıktan sonra
-                değişiklik yapamayacağımı
-                kabul ediyorum.
-              </span>
-
-            </label>
-
-            <button
-              className="primary-button"
-              disabled={!confirm}
-              style={{
-                opacity:confirm ? 1 : .4
-              }}
-              onClick={lockStore}
-            >
-              ✓ Kaydet ve Onayla
-            </button>
-
-          </div>
-        )}
-
-      </>
-    );
-  }
-
-  return (
-    <>
-
-      <h1 className="page-title">
-        Alış Yönetimi
-      </h1>
-
-      <p className="page-description">
-        Mağazalara göre günlük alış kayıtlarını yönet.
-      </p>
-
-      <div className="date-bar">
-
-        <span>📅</span>
-
-        <input
-          type="date"
-          value={date}
-          onChange={e =>
-            setDate(e.target.value)
-          }
-        />
-
-        <span className="date-text">
-          {formatDate(date)}
-        </span>
 
       </div>
 
-      <div className="dark-total">
+    );
 
-        <span>
+  }
+
+
+  return(
+
+    <div>
+
+      <div className="total-card">
+
+        <span className="total-label">
           Günün Alış Toplamı
         </span>
 
-        <span>
-          {formatTL(total)}
+        <span className="total-value">
+          {formatTL(dayTotal)}
         </span>
 
       </div>
 
+
       <div className="store-list">
 
-        {data.stores.map(store => {
+        {stores.map(store=>{
 
           const items =
-            entries[store] || [];
+            storeItems(store);
 
-          const locked =
-            !!locks[store];
+          return(
 
-          return (
             <button
+              className="store-button"
               key={store}
-              className="store-card"
-              onClick={() =>
+              onClick={()=>
                 setActiveStore(store)
               }
             >
 
-              <div className="store-top">
+              <div className="store-left">
 
                 <div className="store-icon">
-                  🏪
+                  <Icon
+                    name="store"
+                    size={18}
+                  />
                 </div>
 
-                {locked && (
-                  <span>🔒</span>
-                )}
+                <div>
+
+                  <div className="store-name">
+                    {store}
+                  </div>
+
+                  <div className="store-meta">
+                    {items.length
+                      ? `${items.length} ürün`
+                      : "Ürün yok"}
+                  </div>
+
+                </div>
 
               </div>
 
-              <div className="store-name">
-                {store}
-              </div>
-
-              <div className="store-info">
-                {items.length
-                  ? `${items.length} ürün`
-                  : "Ürün yok"}
-              </div>
 
               <div className="store-total">
                 {formatTL(
@@ -2413,318 +2297,266 @@ function Alis({
               </div>
 
             </button>
+
           );
+
         })}
 
       </div>
 
+
       {isAdmin && (
+
         <div
-          className="form-card"
+          className="card"
           style={{
-            marginTop:14
+            marginTop:10
           }}
         >
 
-          <div className="form-title">
-            Yeni Mağaza
-          </div>
-
-          <div
-            style={{
-              display:"flex",
-              gap:8
-            }}
-          >
-
-            <input
-              style={{
-                flex:1,
-                height:40,
-                border:"1px solid #e2dfd7",
-                borderRadius:10,
-                padding:"0 10px",
-                outline:"none",
-                fontSize:12
-              }}
-              value={newStore}
-              onChange={e =>
-                setNewStore(e.target.value)
-              }
-              placeholder="Mağaza adı"
-            />
+          {!showAdd ? (
 
             <button
-              className="secondary-button"
-              onClick={addStore}
+              className="secondary-btn"
+              style={{
+                width:"100%"
+              }}
+              onClick={()=>
+                setShowAdd(true)
+              }
             >
-              Ekle
+
+              <Icon
+                name="plus"
+                size={15}
+              />
+
+              Yeni Mağaza Ekle
+
             </button>
 
-          </div>
+          ): (
+
+            <div className="add-store-row">
+
+              <input
+                autoFocus
+                placeholder="Mağaza adı"
+                value={newStore}
+                onChange={
+                  e=>setNewStore(e.target.value)
+                }
+              />
+
+              <button
+                className="secondary-btn"
+                onClick={addStore}
+              >
+                Ekle
+              </button>
+
+              <button
+                className="secondary-btn"
+                onClick={()=>{
+                  setShowAdd(false);
+                  setNewStore("");
+                }}
+              >
+                <Icon name="x" size={15}/>
+              </button>
+
+            </div>
+
+          )}
 
         </div>
+
       )}
 
-    </>
+    </div>
+
   );
+
 }
 
-/* ==========================================================
+
+/* =========================================================
    SATIŞ
-========================================================== */
+========================================================= */
 
 function Satis({
-  data,
-  updateData,
-  isAdmin
-}) {
+  sales,
+  date,
+  isAdmin,
+  save,
+  setError
+}){
 
-  const [date, setDate] =
-    useState(todayISO());
+  const rows =
+    SALE_PRODUCTS.map(product=>{
 
-  const [confirm, setConfirm] =
-    useState(false);
-
-  const day =
-    data.salesEntries[date] || {};
-
-  const locked =
-    !!data.salesLocks[date];
-
-  const readOnly =
-    locked && !isAdmin;
-
-  function updateProduct(
-    product,
-    field,
-    value
-  ) {
-
-    updateData(current => {
-
-      const sales =
-        current.salesEntries[date] || {};
-
-      const row =
+      const r =
         sales[product] || {
           qty:"",
           unitPrice:""
         };
 
-      return {
-        ...current,
-
-        salesEntries: {
-          ...current.salesEntries,
-
-          [date]: {
-            ...sales,
-
-            [product]: {
-              ...row,
-              [field]:value
-            }
-          }
-        }
-      };
-    });
-  }
-
-  function lockSales() {
-
-    if (!confirm) return;
-
-    updateData(current => ({
-      ...current,
-
-      salesLocks: {
-        ...current.salesLocks,
-        [date]:true
-      }
-    }));
-
-    setConfirm(false);
-  }
-
-  function unlockSales() {
-
-    updateData(current => ({
-      ...current,
-
-      salesLocks: {
-        ...current.salesLocks,
-        [date]:false
-      }
-    }));
-  }
-
-  const rows =
-    SALE_PRODUCTS.map(product => {
-
-      const row =
-        day[product] || {
-          qty:"",
-          unitPrice:""
-        };
-
       const q =
-        Number(row.qty) || 0;
+        Number(r.qty)||0;
 
       const p =
-        Number(row.unitPrice) || 0;
+        Number(r.unitPrice)||0;
 
-      return {
+      return{
         product,
-        qty:row.qty,
-        unitPrice:row.unitPrice,
+        qty:r.qty ?? "",
+        unitPrice:r.unitPrice ?? "",
         total:q*p
       };
+
     });
 
-  const grandTotal =
+
+  const total =
     rows.reduce(
-      (sum,row) =>
-        sum + row.total,
+      (sum,row)=>
+        sum+row.total,
       0
     );
 
-  const hasEntry =
-    rows.some(
-      row =>
-        Number(row.qty) > 0
-    );
 
-  return (
-    <>
+  async function update(
+    product,
+    field,
+    value
+  ){
 
-      <h1 className="page-title">
-        Satış Yönetimi
-      </h1>
+    const current =
+      sales[product] || {
+        qty:"",
+        unitPrice:""
+      };
 
-      <p className="page-description">
-        Günlük pizza satışlarını ve ciroyu gir.
-      </p>
+    const next = {
 
-      <div className="date-bar">
+      ...sales,
 
-        <span>📅</span>
+      [product]:{
+        ...current,
+        [field]:value
+      }
 
-        <input
-          type="date"
-          value={date}
-          onChange={e =>
-            setDate(e.target.value)
-          }
-        />
+    };
 
-        <span className="date-text">
-          {formatDate(date)}
-        </span>
 
-      </div>
+    try{
 
-      <div className="dark-total">
+      await SALES
+        .doc(date)
+        .set(next,{merge:true});
 
-        <span>
+      save();
+
+    }catch(err){
+
+      console.error(err);
+
+      setError(
+        "Satış kaydedilemedi."
+      );
+
+    }
+
+  }
+
+
+  return(
+
+    <div>
+
+      <div className="total-card">
+
+        <span className="total-label">
           Günün Satış Toplamı
         </span>
 
-        <span>
-          {formatTL(grandTotal)}
+        <span className="total-value">
+          {formatTL(total)}
         </span>
 
       </div>
 
-      {isAdmin && locked && (
 
-        <button
-          className="link-button"
-          onClick={unlockSales}
-          style={{
-            marginBottom:12
-          }}
-        >
-          🔓 Kilidi Kaldır
-        </button>
+      <div className="sale-list">
 
-      )}
-
-      {readOnly && (
-
-        <div className="locked">
-          🔒 Bu günün satışları onaylandı.
-          <br/>
-          Değişiklik yapılamaz.
-        </div>
-
-      )}
-
-      <div className="sales-grid">
-
-        {rows.map(row => (
+        {rows.map(row=>(
 
           <div
-            className="sales-card"
+            className="sale-card"
             key={row.product}
           >
 
-            <div className="sales-name">
+            <div className="sale-name">
               {row.product}
             </div>
 
-            <div className="sales-fields">
 
-              <div>
-                <label>Adet</label>
+            <div className="sale-fields">
+
+              <div className="sale-field">
+
+                <label>
+                  Adet
+                </label>
 
                 <input
                   type="number"
                   min="0"
-                  value={row.qty}
-                  disabled={readOnly}
                   placeholder="0"
-                  onChange={e =>
-                    updateProduct(
-                      row.product,
-                      "qty",
-                      e.target.value
-                    )
+                  value={row.qty}
+                  onChange={
+                    e=>
+                      update(
+                        row.product,
+                        "qty",
+                        e.target.value
+                      )
                   }
                 />
+
               </div>
 
-              <div>
-                <label>Birim Fiyat</label>
+
+              <div className="sale-field">
+
+                <label>
+                  Birim Fiyat
+                </label>
 
                 <input
                   type="number"
                   min="0"
                   step="0.01"
-                  value={row.unitPrice}
-                  disabled={readOnly}
                   placeholder="0"
-                  onChange={e =>
-                    updateProduct(
-                      row.product,
-                      "unitPrice",
-                      e.target.value
-                    )
+                  value={row.unitPrice}
+                  onChange={
+                    e=>
+                      update(
+                        row.product,
+                        "unitPrice",
+                        e.target.value
+                      )
                   }
                 />
+
               </div>
 
             </div>
 
-            <div className="sales-result">
 
-              <span>
-                Toplam
-              </span>
+            <div className="sale-total">
 
-              <strong>
-                {formatTL(row.total)}
-              </strong>
+              {formatTL(row.total)}
 
             </div>
 
@@ -2734,128 +2566,106 @@ function Satis({
 
       </div>
 
-      {!readOnly &&
-        !isAdmin &&
-        hasEntry && (
+    </div>
 
-        <div className="warning">
-
-          <label className="check-line">
-
-            <input
-              type="checkbox"
-              checked={confirm}
-              onChange={e =>
-                setConfirm(
-                  e.target.checked
-                )
-              }
-            />
-
-            <span className="warning-text">
-              Günlük satış kayıtlarını
-              kontrol ettim ve
-              onaylıyorum.
-            </span>
-
-          </label>
-
-          <button
-            className="primary-button"
-            disabled={!confirm}
-            style={{
-              opacity:confirm ? 1 : .4
-            }}
-            onClick={lockSales}
-          >
-            ✓ Satışları Onayla
-          </button>
-
-        </div>
-
-      )}
-
-    </>
   );
+
 }
 
-/* ==========================================================
+
+/* =========================================================
    MALİYET
-========================================================== */
+========================================================= */
 
 function Maliyet({
-  data,
-  updateData
-}) {
+  costs,
+  save,
+  setError
+}){
 
-  function updateCost(
+
+  async function update(
     product,
     field,
     value
-  ) {
+  ){
 
-    updateData(current => {
-
-      const costs =
-        current.costs || {};
-
-      const old =
-        costs[product] || {
-          cost:"",
-          price:""
-        };
-
-      return {
-        ...current,
-
-        costs:{
-          ...costs,
-
-          [product]:{
-            ...old,
-            [field]:value
-          }
-        }
+    const current =
+      costs[product] || {
+        cost:"",
+        price:""
       };
-    });
+
+
+    const next = {
+
+      ...costs,
+
+      [product]:{
+        ...current,
+        [field]:value
+      }
+
+    };
+
+
+    try{
+
+      await COSTS
+        .doc("main")
+        .set(next,{merge:true});
+
+      save();
+
+    }catch(err){
+
+      console.error(err);
+
+      setError(
+        "Maliyet kaydedilemedi."
+      );
+
+    }
+
   }
 
-  return (
-    <>
 
-      <h1 className="page-title">
+  return(
+
+    <div>
+
+      <h2 className="section-title">
         Maliyet Yönetimi
-      </h1>
+      </h2>
 
-      <p className="page-description">
-        Ürün maliyetlerini ve satış fiyatlarını takip et.
-      </p>
 
       <div className="cost-list">
 
-        {SALE_PRODUCTS.map(product => {
+        {SALE_PRODUCTS.map(product=>{
 
           const c =
-            data.costs[product] || {
+            costs[product] || {
               cost:"",
               price:""
             };
 
           const cost =
-            Number(c.cost) || 0;
+            Number(c.cost)||0;
 
           const price =
-            Number(c.price) || 0;
+            Number(c.price)||0;
 
           const profit =
-            price - cost;
+            price-cost;
 
-          const margin =
-            price > 0
-              ? profit / price * 100
+          const pct =
+            price>0
+              ? (profit/price)*100
               : 0;
 
-          return (
+
+          return(
+
             <div
               className="cost-card"
               key={product}
@@ -2865,9 +2675,11 @@ function Maliyet({
                 {product}
               </div>
 
-              <div className="cost-fields">
+
+              <div className="cost-grid">
 
                 <div>
+
                   <label>
                     Maliyet
                   </label>
@@ -2876,303 +2688,239 @@ function Maliyet({
                     type="number"
                     min="0"
                     step="0.01"
-                    value={c.cost}
                     placeholder="0"
-                    onChange={e =>
-                      updateCost(
-                        product,
-                        "cost",
-                        e.target.value
-                      )
+                    value={c.cost}
+                    onChange={
+                      e=>
+                        update(
+                          product,
+                          "cost",
+                          e.target.value
+                        )
                     }
                   />
+
                 </div>
 
+
                 <div>
+
                   <label>
-                    Satış Fiyatı
+                    Satış
                   </label>
 
                   <input
                     type="number"
                     min="0"
                     step="0.01"
-                    value={c.price}
                     placeholder="0"
-                    onChange={e =>
-                      updateCost(
-                        product,
-                        "price",
-                        e.target.value
-                      )
+                    value={c.price}
+                    onChange={
+                      e=>
+                        update(
+                          product,
+                          "price",
+                          e.target.value
+                        )
                     }
                   />
+
                 </div>
 
               </div>
 
-              <div className="cost-bottom">
+
+              <div className="cost-result">
 
                 <span>
                   Kâr:{" "}
-                  <strong className="margin">
+                  <span className="green">
                     {formatTL(profit)}
-                  </strong>
+                  </span>
                 </span>
 
-                <span className="margin">
-                  %{margin.toFixed(0)}
+                <span className="green">
+                  %{pct.toFixed(0)}
                 </span>
 
               </div>
 
             </div>
+
           );
 
         })}
 
       </div>
 
-    </>
+    </div>
+
   );
+
 }
 
-/* ==========================================================
+
+/* =========================================================
    KAR ZARAR
-========================================================== */
+========================================================= */
 
 function KarZarar({
-  data
-}) {
+  purchases,
+  sales,
+  date,
+  setDate
+}){
 
-  const [month, setMonth] =
-    useState(monthISO());
+  const month =
+    date.slice(0,7);
 
-  const stats =
-    useMemo(() => {
 
-      let purchase = 0;
-      let sales = 0;
+  const purchaseTotal =
+    Object.values(
+      purchases.stores || {}
+    )
+    .flat()
+    .reduce(
+      (sum,item)=>
+        sum+
+        (Number(item.qty)||0)*
+        (Number(item.unitPrice)||0),
+      0
+    );
 
-      Object.entries(
-        data.purchaseEntries || {}
-      ).forEach(
-        ([date, stores]) => {
 
-          if (
-            !date.startsWith(month)
-          ) return;
-
-          Object.values(
-            stores || {}
-          ).forEach(items => {
-
-            (items || []).forEach(item => {
-
-              purchase +=
-                Number(item.qty || 0) *
-                Number(item.unitPrice || 0);
-
-            });
-
-          });
-        }
+  const salesTotal =
+    Object.values(sales)
+      .reduce(
+        (sum,row)=>
+          sum+
+          (Number(row.qty)||0)*
+          (Number(row.unitPrice)||0),
+        0
       );
 
-      Object.entries(
-        data.salesEntries || {}
-      ).forEach(
-        ([date, products]) => {
 
-          if (
-            !date.startsWith(month)
-          ) return;
+  return(
 
-          Object.values(
-            products || {}
-          ).forEach(row => {
+    <div>
 
-            sales +=
-              Number(row.qty || 0) *
-              Number(row.unitPrice || 0);
+      <div className="date-card">
 
-          });
-        }
-      );
-
-      return {
-        purchase,
-        sales,
-        net:sales-purchase
-      };
-
-    }, [data, month]);
-
-  return (
-    <>
-
-      <h1 className="page-title">
-        Kâr / Zarar
-      </h1>
-
-      <p className="page-description">
-        Aylık satış ve alış hareketlerini karşılaştır.
-      </p>
-
-      <div className="date-bar">
-
-        <span>📅</span>
+        <Icon
+          name="calendar"
+          size={17}
+        />
 
         <input
           type="month"
           value={month}
-          onChange={e =>
-            setMonth(e.target.value)
+          onChange={e=>
+            setDate(
+              e.target.value+
+              "-01"
+            )
           }
         />
 
-        <span className="date-text">
-          {formatMonth(month)}
+        <span className="date-label">
+          {formatMonthLabel(month)}
         </span>
 
       </div>
 
-      <div className="stats-grid">
 
-        <div className="stat-card">
+      <div className="stat-grid">
+
+        <div className="stat">
 
           <div className="stat-label">
-            Toplam Satış
+            Günlük Satış
           </div>
 
           <div className="stat-value green">
-            {formatTL(stats.sales)}
+            {formatTL(salesTotal)}
           </div>
 
         </div>
 
-        <div className="stat-card">
+
+        <div className="stat">
 
           <div className="stat-label">
-            Toplam Alış
+            Günlük Alış
           </div>
 
           <div className="stat-value red">
-            {formatTL(stats.purchase)}
-          </div>
-
-        </div>
-
-        <div className="stat-card">
-
-          <div className="stat-label">
-            Net Kâr / Nakit Akışı
-          </div>
-
-          <div
-            className={
-              "stat-value " +
-              (
-                stats.net >= 0
-                  ? "green"
-                  : "red"
-              )
-            }
-          >
-            {formatTL(stats.net)}
+            {formatTL(purchaseTotal)}
           </div>
 
         </div>
 
       </div>
+
+
+      <div className="total-card">
+
+        <span className="total-label">
+          Net Kâr / Nakit Farkı
+        </span>
+
+        <span className="total-value">
+          {formatTL(
+            salesTotal-purchaseTotal
+          )}
+        </span>
+
+      </div>
+
 
       <div className="card">
 
-        <div style={{
-          fontSize:12,
-          fontWeight:800,
-          marginBottom:12
-        }}>
-          Finansal Özet
-        </div>
-
-        <div style={{
-          display:"flex",
-          justifyContent:"space-between",
-          fontSize:11,
-          padding:"9px 0",
-          borderBottom:"1px solid #eeeae1"
-        }}>
-          <span>
-            Satış
-          </span>
-
-          <strong className="green">
-            {formatTL(stats.sales)}
-          </strong>
-        </div>
-
-        <div style={{
-          display:"flex",
-          justifyContent:"space-between",
-          fontSize:11,
-          padding:"9px 0",
-          borderBottom:"1px solid #eeeae1"
-        }}>
-          <span>
-            Alış
-          </span>
-
-          <strong className="red">
-            - {formatTL(stats.purchase)}
-          </strong>
-        </div>
-
-        <div style={{
-          display:"flex",
-          justifyContent:"space-between",
-          fontSize:12,
-          paddingTop:12
-        }}>
-          <strong>
-            Net
-          </strong>
-
-          <strong
-            className={
-              stats.net >= 0
-                ? "green"
-                : "red"
-            }
-          >
-            {formatTL(stats.net)}
-          </strong>
+        <div
+          style={{
+            color:"#77736b",
+            fontSize:11,
+            lineHeight:1.5
+          }}
+        >
+          Bu ekran seçilen günün satış ve alış
+          kayıtlarını karşılaştırır. Aylık tam
+          raporlama için kayıtlar ayrı tarih
+          belgelerinde tutulduğu için geçmiş
+          günlerin verileri kaybolmaz.
         </div>
 
       </div>
 
-    </>
+    </div>
+
   );
+
 }
 
-/* ==========================================================
+
+/* =========================================================
    YÖNETİCİ
-========================================================== */
+========================================================= */
 
 function Yonetici({
-  data,
-  updateData
-}) {
+  config,
+  save,
+  setError
+}){
 
-  const [username, setUsername] =
+  const [username,setUsername] =
     useState("");
 
-  const [password, setPassword] =
+  const [password,setPassword] =
     useState("");
 
-  function addUser(e) {
 
-    e.preventDefault();
+  const users =
+    config.users || {};
+
+
+  async function create(){
 
     const u =
       username.trim();
@@ -3180,208 +2928,270 @@ function Yonetici({
     const p =
       password.trim();
 
-    if (!u || !p) return;
 
-    updateData(current => {
+    if(!u || !p){
 
-      if (
-        current.users &&
-        current.users[u]
-      ) {
-        return current;
-      }
+      setError(
+        "Kullanıcı adı ve şifre girin."
+      );
 
-      return {
-        ...current,
+      return;
+
+    }
+
+
+    if(users[u]){
+
+      setError(
+        "Bu kullanıcı zaten mevcut."
+      );
+
+      return;
+
+    }
+
+
+    try{
+
+      await CONFIG_REF.set({
 
         users:{
-          ...(current.users || {}),
+          ...users,
 
           [u]:{
             password:p,
             role:"user"
           }
-        }
-      };
-    });
 
-    setUsername("");
-    setPassword("");
+        }
+
+      },{merge:true});
+
+
+      setUsername("");
+      setPassword("");
+
+      save();
+
+    }catch(err){
+
+      console.error(err);
+
+      setError(
+        "Kullanıcı oluşturulamadı."
+      );
+
+    }
+
   }
 
-  function deleteUser(name) {
 
-    if (
+  async function deleteUser(name){
+
+    if(
       !confirm(
         `"${name}" kullanıcısı silinsin mi?`
       )
     ) return;
 
-    updateData(current => {
 
-      const users = {
-        ...(current.users || {})
-      };
+    const next = {
+      ...users
+    };
 
-      delete users[name];
+    delete next[name];
 
-      return {
-        ...current,
-        users
-      };
-    });
+
+    try{
+
+      await CONFIG_REF.set({
+
+        users:next
+
+      },{merge:true});
+
+      save();
+
+    }catch(err){
+
+      setError(
+        "Kullanıcı silinemedi."
+      );
+
+    }
+
   }
 
-  return (
-    <>
 
-      <h1 className="page-title">
-        Yönetici
-      </h1>
+  return(
 
-      <p className="page-description">
-        Kullanıcıları ve erişimleri yönet.
-      </p>
+    <div>
 
-      <form
-        className="form-card"
-        onSubmit={addUser}
-      >
+      <h2 className="section-title">
+        Kullanıcı Yönetimi
+      </h2>
 
-        <div className="form-title">
-          Yeni Kullanıcı Oluştur
-        </div>
+
+      <div className="card">
 
         <div className="form-grid">
 
           <div className="field">
+
             <label>
               Kullanıcı Adı
             </label>
 
             <input
-              value={username}
               autoCapitalize="none"
-              onChange={e =>
-                setUsername(e.target.value)
+              placeholder="Yeni kullanıcı"
+              value={username}
+              onChange={
+                e=>setUsername(e.target.value)
               }
-              placeholder="Örn. personel"
             />
+
           </div>
 
-          <div
-            className="field"
-            style={{
-              gridColumn:"span 2"
-            }}
-          >
+
+          <div className="field">
+
             <label>
               Şifre
             </label>
 
             <input
-              type="password"
-              value={password}
-              onChange={e =>
-                setPassword(e.target.value)
-              }
               placeholder="Şifre"
+              value={password}
+              onChange={
+                e=>setPassword(e.target.value)
+              }
             />
+
           </div>
 
         </div>
 
+
         <button
-          className="primary-button"
-          type="submit"
+          className="primary-btn"
+          onClick={create}
         >
-          + Kullanıcı Oluştur
+
+          <Icon
+            name="user-plus"
+            size={15}
+          />
+
+          Kullanıcı Oluştur
+
         </button>
 
-      </form>
+      </div>
 
-      <div className="user-list">
 
-        {Object.entries(
-          data.users || {}
-        ).map(
-          ([name, info]) => (
+      <div>
 
-          <div
-            className="user-card"
-            key={name}
-          >
+        {Object.entries(users).map(
+          ([name,user])=>(
 
-            <div>
+            <div
+              className="user-row"
+              key={name}
+            >
 
-              <div className="user-name">
-                {name}
+              <div>
+
+                <div className="user-name">
+                  {name}
+                </div>
+
+                <div className="user-role">
+                  {user.role==="admin"
+                    ? "Yönetici"
+                    : "Kullanıcı"}
+                </div>
+
               </div>
 
-              <div className="user-role">
-                {info.role === "admin"
-                  ? "Yönetici"
-                  : "Kullanıcı"}
-              </div>
+
+              {user.role!=="admin" && (
+
+                <button
+                  className="danger-btn"
+                  onClick={()=>
+                    deleteUser(name)
+                  }
+                >
+
+                  <Icon
+                    name="trash-2"
+                    size={16}
+                  />
+
+                </button>
+
+              )}
 
             </div>
 
-            {info.role !== "admin" && (
-
-              <button
-                className="delete-button"
-                onClick={() =>
-                  deleteUser(name)
-                }
-              >
-                ×
-              </button>
-
-            )}
-
-          </div>
-
-        ))}
+          )
+        )}
 
       </div>
+
 
       <div
         className="card"
         style={{
-          marginTop:14,
-          background:"#fff9eb",
-          borderColor:"#e8ddb9"
+          marginTop:12,
+          background:"#f1efe9"
         }}
       >
 
-        <div style={{
-          fontSize:11,
-          color:"#75662e",
-          lineHeight:1.6
-        }}>
-          <strong>Veri güvenliği:</strong>
-          <br/>
-          Kullanıcı ve işletme kayıtları
-          Firestore üzerinde tutulur.
-          Sayfayı yenilediğinde veriler
-          tekrar Firebase'den yüklenir.
+        <div
+          style={{
+            fontSize:11,
+            fontWeight:800,
+            marginBottom:5
+          }}
+        >
+          Veri sistemi
+        </div>
+
+        <div
+          style={{
+            fontSize:10,
+            color:"#6b6862",
+            lineHeight:1.5
+          }}
+        >
+          Kullanıcılar artık alış veya satış
+          kaydıyla aynı belgeye yazılmıyor.
+          Bu nedenle bir kayıt yapılırken
+          kullanıcı listesinin üzerine yazılması
+          engellenmiş oluyor.
         </div>
 
       </div>
 
-    </>
+    </div>
+
   );
+
 }
 
-/* ==========================================================
-   REACT BAŞLAT
-========================================================== */
+
+/* =========================================================
+   BAŞLAT
+========================================================= */
 
 ReactDOM.createRoot(
   document.getElementById("root")
 ).render(
-  <App />
+  <App/>
 );
+
 </script>
 
 </body>
